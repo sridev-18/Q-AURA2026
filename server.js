@@ -289,6 +289,7 @@ app.post('/api/auth/login', (req, res) => {
     status: 'ok',
     message: 'Authentication successful',
     token,
+    role,
     user: { username, role, name: displayName }
   });
 });
