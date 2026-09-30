@@ -1805,8 +1805,11 @@
 
         <!-- TECHNICAL EVENT SELECTION (SPACIOUS OPTIONS) -->
         <div class="sub-section-title">
-          <i class="fas fa-terminal"></i> <span>02. SELECT TECHNICAL EVENT (CHOOSE 1)</span>
+          <i class="fas fa-terminal"></i> <span>02. SELECT TECHNICAL EVENT (OPTIONAL / CHOOSE 1)</span>
         </div>
+        <p style="color:var(--text-muted);font-size:0.83rem;margin:-10px 0 16px 0;font-family:var(--font-mono);">
+          ℹ️ Select 1 Technical Event, or choose "None" if you are only attending a Non-Technical event.
+        </p>
 
         <div class="cyber-selector-grid" id="techGrid">
           <label class="cyber-event-option" onclick="selectCyberEvent(this, 'tech')">
@@ -1848,8 +1851,17 @@
             </div>
             <span class="ev-timing-tag" style="border-color:var(--neon-orange);color:var(--neon-orange);">5 Hours (10:00 AM – 3:00 PM)</span>
           </label>
+
+          <label class="cyber-event-option" onclick="selectCyberEvent(this, 'tech')">
+            <input type="radio" name="tech" value="None"/>
+            <div class="cyber-radio-indicator"></div>
+            <div class="ev-meta-text">
+              <h4>None / Skip Technical Event</h4>
+              <p>Participating in Non-Technical Event only</p>
+            </div>
+            <span class="ev-timing-tag" style="border-color:rgba(255,255,255,0.25);color:var(--text-muted);">Optional</span>
+          </label>
         </div>
-        <span class="err-text" id="err-tech" style="margin-top:6px;">Please select one technical event.</span>
 
         <!-- HACKATHON STRIKE TEAM PANEL -->
         <div id="hackathon-team-panel">
@@ -1904,8 +1916,11 @@
 
         <!-- NON-TECHNICAL EVENT SELECTION -->
         <div class="sub-section-title">
-          <i class="fas fa-palette"></i> <span>03. SELECT NON-TECHNICAL EVENT (CHOOSE 1)</span>
+          <i class="fas fa-palette"></i> <span>03. SELECT NON-TECHNICAL EVENT (OPTIONAL / CHOOSE 1)</span>
         </div>
+        <p style="color:var(--text-muted);font-size:0.83rem;margin:-10px 0 16px 0;font-family:var(--font-mono);">
+          ℹ️ Select 1 Non-Technical Event, or choose "None" if you are only attending a Technical event.
+        </p>
 
         <div class="cyber-selector-grid" id="nonTechGrid">
           <label class="cyber-event-option" onclick="selectCyberEvent(this, 'nontech')">
@@ -1937,8 +1952,20 @@
             </div>
             <span class="ev-timing-tag">2:00 PM – 3:00 PM</span>
           </label>
+
+          <label class="cyber-event-option" onclick="selectCyberEvent(this, 'nontech')">
+            <input type="radio" name="nontech" value="None"/>
+            <div class="cyber-radio-indicator"></div>
+            <div class="ev-meta-text">
+              <h4>None / Skip Non-Technical Event</h4>
+              <p>Participating in Technical Event only</p>
+            </div>
+            <span class="ev-timing-tag" style="border-color:rgba(255,255,255,0.25);color:var(--text-muted);">Optional</span>
+          </label>
         </div>
-        <span class="err-text" id="err-nontech" style="margin-top:6px;">Please select one non-technical event.</span>
+        <span class="err-text" id="err-events" style="margin-top:10px;font-size:0.9rem;padding:8px 12px;background:rgba(255,0,85,0.12);border-left:3px solid var(--neon-pink);border-radius:4px;">
+          ⚠️ Please select at least ONE event (Technical or Non-Technical) to register.
+        </span>
 
         <!-- PAYMENT VERIFICATION -->
         <div class="payment-hud-block">
@@ -2656,15 +2683,30 @@
 
     // ─── EVENT SELECTOR LOGIC ───────────────────────────────────────
     function selectCyberEvent(element, group) {
+      const isAlreadySelected = element.classList.contains('selected');
       const selectorId = group === 'tech' ? '#techGrid' : '#nonTechGrid';
+
+      if (isAlreadySelected) {
+        element.classList.remove('selected');
+        const radio = element.querySelector('input[type="radio"]');
+        if (radio) radio.checked = false;
+        if (group === 'tech') {
+          const hackPanel = document.getElementById('hackathon-team-panel');
+          if (hackPanel) hackPanel.classList.remove('show');
+          clearHackErrors();
+        }
+        return;
+      }
+
       document.querySelectorAll(selectorId + ' .cyber-event-option').forEach(opt => {
         opt.classList.remove('selected');
       });
       element.classList.add('selected');
-      element.querySelector('input[type="radio"]').checked = true;
+      const radio = element.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
 
       if (group === 'tech') {
-        const val = element.querySelector('input[type="radio"]').value;
+        const val = radio.value;
         const hackPanel = document.getElementById('hackathon-team-panel');
         if (val === 'Hackathon') {
           hackPanel.classList.add('show');
@@ -2672,10 +2714,10 @@
           hackPanel.classList.remove('show');
           clearHackErrors();
         }
-        hideError('err-tech');
-      } else {
-        hideError('err-nontech');
       }
+      hideError('err-events');
+      hideError('err-tech');
+      hideError('err-nontech');
     }
 
     function clearHackErrors() {
@@ -2759,12 +2801,23 @@
         if (!isValidEmail(getVal('email')))    { showError('err-email',     'email');       isValid = false; } else { hideError('err-email',     'email'); }
         if (!getVal('college'))                { showError('err-college',   'college');     isValid = false; } else { hideError('err-college',   'college'); }
 
-        // Technical event
+        // Technical & Non-Technical event selection
         const techChoice = document.querySelector('input[name="tech"]:checked');
-        if (!techChoice) { showError('err-tech'); isValid = false; } else { hideError('err-tech'); }
+        const nonTechChoice = document.querySelector('input[name="nontech"]:checked');
+
+        const techVal = (techChoice && techChoice.value !== 'None') ? techChoice.value : 'None';
+        const nonTechVal = (nonTechChoice && nonTechChoice.value !== 'None') ? nonTechChoice.value : 'None';
+
+        // Student must choose AT LEAST ONE valid event
+        if (techVal === 'None' && nonTechVal === 'None') {
+          showError('err-events');
+          isValid = false;
+        } else {
+          hideError('err-events');
+        }
 
         // Hackathon-specific fields
-        const isHack = techChoice && techChoice.value === 'Hackathon';
+        const isHack = techVal === 'Hackathon';
         if (isHack) {
           if (!getVal('teamName'))                  { showError('err-teamName',    'teamName');    isValid = false; } else { hideError('err-teamName',    'teamName'); }
           if (!getVal('leaderName'))                { showError('err-leaderName',  'leaderName');  isValid = false; } else { hideError('err-leaderName',  'leaderName'); }
@@ -2773,10 +2826,6 @@
           if (!getVal('tm2'))                       { showError('err-tm2', 'tm2');                 isValid = false; } else { hideError('err-tm2', 'tm2'); }
           if (!getVal('tm3'))                       { showError('err-tm3', 'tm3');                 isValid = false; } else { hideError('err-tm3', 'tm3'); }
         }
-
-        // Non-technical event
-        const nonTechChoice = document.querySelector('input[name="nontech"]:checked');
-        if (!nonTechChoice) { showError('err-nontech'); isValid = false; } else { hideError('err-nontech'); }
 
         // Payment proof
         if (!base64PaymentProof) {
@@ -2795,7 +2844,7 @@
           }
           const firstErr = document.querySelector('.err-text.show');
           if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          triggerToast('⚠️ Please fix the highlighted errors.', 'error');
+          triggerToast('⚠️ Please select at least one event and fix the highlighted errors.', 'error');
           return;
         }
 
@@ -2809,8 +2858,8 @@
           mobile:            getVal('mobile'),
           email:             getVal('email'),
           college:           getVal('college'),
-          techEvent:         techChoice.value,
-          nonTechEvent:      nonTechChoice.value,
+          techEvent:         techVal,
+          nonTechEvent:      nonTechVal,
           teamName:          isHack ? getVal('teamName')    : '',
           leaderName:        isHack ? getVal('leaderName')  : '',
           leaderPhone:       isHack ? getVal('leaderPhone') : '',

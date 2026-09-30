@@ -89,8 +89,8 @@ function createQAURA2026GoogleForm() {
   // SECTION 2: TECHNICAL ARENA SELECTION
   // ═════════════════════════════════════════════════════════════
   const techSection = form.addPageBreakItem();
-  techSection.setTitle("Track 1: Technical Arena Selection");
-  techSection.setHelpText("Select exactly ONE technical event. If you choose 'Hackathon', you will enter your team details.");
+  techSection.setTitle("Track 1: Technical Arena Selection (Optional)");
+  techSection.setHelpText("Select 1 technical event, or choose 'None' if participating only in a non-technical event. (At least 1 event total is required).");
 
   const techEventItem = form.addMultipleChoiceItem();
   techEventItem.setTitle("Select your Technical Event");
@@ -103,15 +103,16 @@ function createQAURA2026GoogleForm() {
 
   // Section 4: Non-Technical Arena
   const nonTechSection = form.addPageBreakItem();
-  nonTechSection.setTitle("Track 2: Non-Technical Arena Selection");
-  nonTechSection.setHelpText("Select exactly ONE non-technical event (Runs afternoon 1:30 PM onwards).");
+  nonTechSection.setTitle("Track 2: Non-Technical Arena Selection (Optional)");
+  nonTechSection.setHelpText("Select 1 non-technical event, or choose 'None' if participating only in a technical event. (At least 1 event total is required).");
 
   // Configure Technical Event Choices with Page Navigation
   techEventItem.setChoices([
     techEventItem.createChoice("Cyber Forge [Hands-on Cybersecurity Workshop] (₹250)", nonTechSection),
     techEventItem.createChoice("Cloud Craft [AWS Cloud Infrastructure Workshop] (₹250)", nonTechSection),
     techEventItem.createChoice("CTF Challenge [Capture The Flag Live Hacking Arena] (₹250)", nonTechSection),
-    techEventItem.createChoice("Hackathon [5 Hours Innovation Sprint - ₹300 / Team]", hackathonSection)
+    techEventItem.createChoice("Hackathon [5 Hours Innovation Sprint - ₹300 / Team]", hackathonSection),
+    techEventItem.createChoice("None [Skip Technical Arena - Participating in Non-Technical Event only]", nonTechSection)
   ]);
 
   // Hackathon Fields
@@ -152,7 +153,8 @@ function createQAURA2026GoogleForm() {
   nonTechEventItem.setChoiceValues([
     "Prompt Generating [AI Creative Engineering Challenge] (1:30 PM - 3:00 PM)",
     "Click N Chill [Campus Creative Photography Challenge] (1:30 PM - 3:00 PM)",
-    "Quiz Competition [Fast-Paced Logic & General Tech Trivia] (2:00 PM - 3:00 PM)"
+    "Quiz Competition [Fast-Paced Logic & General Tech Trivia] (2:00 PM - 3:00 PM)",
+    "None [Skip Non-Technical Arena - Participating in Technical Event only]"
   ]);
 
   // ═════════════════════════════════════════════════════════════
