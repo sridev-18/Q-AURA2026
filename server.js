@@ -6,6 +6,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const os = require('os');
 const crypto = require('crypto');
 const db = require('./db');
@@ -16,10 +17,71 @@ const PORT = process.env.PORT || 5000;
 
 // ── AUTHENTICATION & SECURITY CONFIGURATION ────────────────────────
 const AUTH_SECRET = process.env.AUTH_SECRET || 'qaura2026_super_secure_key_#8892';
-const ADMIN_USER  = process.env.ADMIN_USERNAME || 'admin';
-const ADMIN_PASS  = process.env.ADMIN_PASSWORD || 'admin@qaura2026';
-const DESK_USER   = process.env.DESK_USERNAME  || 'desk';
-const DESK_PASS   = process.env.DESK_PASSWORD  || 'verify@qaura2026';
+const AUTH_FILE   = path.join(__dirname, 'auth_settings.json');
+
+function loadLocalAuthCache() {
+  try {
+    if (fs.existsSync(AUTH_FILE)) {
+      const data = JSON.parse(fs.readFileSync(AUTH_FILE, 'utf8'));
+      return {
+        admin: data.admin || process.env.ADMIN_PASSWORD || 'admin@qaura2026',
+        desk: data.desk || process.env.DESK_PASSWORD || 'verify@qaura2026'
+      };
+    }
+  } catch(e) {}
+  return {
+    admin: process.env.ADMIN_PASSWORD || 'admin@qaura2026',
+    desk: process.env.DESK_PASSWORD || 'verify@qaura2026'
+  };
+}
+
+function saveLocalAuthCache(data) {
+  try {
+    fs.writeFileSync(AUTH_FILE, JSON.stringify(data, null, 2), 'utf8');
+  } catch(e) {
+    console.warn('Failed to save local auth cache file:', e.message);
+  }
+}
+
+async function getCredentialForUser(username) {
+  const normUser = (username || '').toLowerCase();
+  // 1. Try DB first
+  try {
+    const dbUser = await db.getAuthUser(normUser);
+    if (dbUser && dbUser.password) {
+      return { username: dbUser.username, password: dbUser.password, role: dbUser.role };
+    }
+  } catch(e) {}
+
+  // 2. Fallback to local cache file
+  const localCache = loadLocalAuthCache();
+  if (normUser === 'admin') {
+    return { username: 'admin', password: localCache.admin || 'admin@qaura2026', role: 'admin' };
+  }
+  if (normUser === 'desk' || normUser === 'verify') {
+    return { username: 'desk', password: localCache.desk || 'verify@qaura2026', role: 'desk' };
+  }
+  return null;
+}
+
+async function setCredentialForUser(username, newPassword) {
+  const normUser = (username || '').toLowerCase();
+  const target = (normUser === 'verify') ? 'desk' : normUser;
+
+  // 1. Update file cache
+  const cache = loadLocalAuthCache();
+  if (target === 'admin') cache.admin = newPassword;
+  if (target === 'desk') cache.desk = newPassword;
+  saveLocalAuthCache(cache);
+
+  // 2. Update PostgreSQL DB
+  try {
+    await db.updateAuthPassword(target, newPassword);
+  } catch(e) {
+    console.warn('PostgreSQL updateAuthPassword notice:', e.message);
+  }
+  return true;
+}
 
 function generateToken(payload) {
   const data = Buffer.from(JSON.stringify(payload)).toString('base64url');
@@ -256,42 +318,104 @@ app.post('/api/register', async (req, res) => {
 });
 
 // ── AUTHENTICATION ROUTES ──────────────────────────────────────────
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
   const { username, password, portal } = req.body || {};
   if (!username || !password) {
     return res.status(400).json({ status: 'error', message: 'Username and password are required' });
   }
 
-  let role = null;
-  let displayName = '';
+  const normUser = username.trim().toLowerCase();
+  const cred = await getCredentialForUser(normUser);
 
-  // 1. Administrator Clearance
-  if (username === ADMIN_USER && password === ADMIN_PASS) {
-    role = 'admin';
-    displayName = 'Symposium Administrator';
-  }
-  // 2. Verification Desk Clearance
-  else if ((username === DESK_USER || username === 'verify') && password === DESK_PASS) {
-    if (portal === 'admin') {
-      return res.status(403).json({ status: 'forbidden', message: 'Desk clearance cannot access Admin Panel. Administrator credentials required.' });
-    }
-    role = 'desk';
-    displayName = 'Verification Desk Agent';
-  } else {
+  if (!cred || cred.password !== password) {
     return res.status(401).json({ status: 'error', message: 'Invalid operative username or passphrase.' });
   }
 
+  if (portal === 'admin' && cred.role !== 'admin') {
+    return res.status(403).json({ status: 'forbidden', message: 'Desk clearance cannot access Admin Panel. Administrator credentials required.' });
+  }
+
+  const role = cred.role;
+  const displayName = role === 'admin' ? 'Symposium Administrator' : 'Verification Desk Agent';
+
   // 24 hours validity
   const exp = Date.now() + 24 * 60 * 60 * 1000;
-  const token = generateToken({ username, role, exp });
+  const token = generateToken({ username: cred.username, role, exp });
 
   res.json({
     status: 'ok',
     message: 'Authentication successful',
     token,
     role,
-    user: { username, role, name: displayName }
+    user: { username: cred.username, role, name: displayName }
   });
+});
+
+// ── CHANGE CREDENTIALS (ADMIN EXCLUSIVE) ───────────────────────────
+app.post('/api/auth/change-password', requireAuth(['admin']), async (req, res) => {
+  try {
+    const { targetUser, currentAdminPassword, newPassword } = req.body || {};
+
+    if (!targetUser || !['admin', 'desk'].includes(targetUser.toLowerCase())) {
+      return res.status(400).json({ status: 'error', message: 'Target portal must be "admin" or "desk".' });
+    }
+
+    if (!newPassword || typeof newPassword !== 'string' || newPassword.trim().length < 4) {
+      return res.status(400).json({ status: 'error', message: 'New passphrase must be at least 4 characters long.' });
+    }
+
+    const normTarget = targetUser.toLowerCase();
+
+    // Verify current admin password for confirmation
+    if (currentAdminPassword) {
+      const adminCred = await getCredentialForUser('admin');
+      if (adminCred && adminCred.password !== currentAdminPassword) {
+        return res.status(401).json({ status: 'error', message: 'Current Administrator passphrase is incorrect.' });
+      }
+    }
+
+    await setCredentialForUser(normTarget, newPassword.trim());
+
+    res.json({
+      status: 'ok',
+      message: `Passphrase for ${normTarget === 'admin' ? 'Administrator' : 'Verification Desk'} successfully updated!`,
+      targetUser: normTarget,
+      updatedAt: new Date().toISOString()
+    });
+  } catch (err) {
+    console.error('Password change error:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to update passphrase: ' + err.message });
+  }
+});
+
+// ── GET CREDENTIALS INFO (ADMIN EXCLUSIVE) ──────────────────────────
+app.get('/api/auth/credentials-info', requireAuth(['admin']), async (req, res) => {
+  try {
+    const adminCred = await getCredentialForUser('admin');
+    const deskCred = await getCredentialForUser('desk');
+
+    res.json({
+      status: 'ok',
+      accounts: [
+        {
+          portal: 'admin',
+          username: 'admin',
+          role: 'admin',
+          label: 'Admin Command Console',
+          passwordLength: adminCred ? adminCred.password.length : 0
+        },
+        {
+          portal: 'desk',
+          username: 'desk',
+          role: 'desk',
+          label: 'Verification Desk Scanner',
+          passwordLength: deskCred ? deskCred.password.length : 0
+        }
+      ]
+    });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
 });
 
 app.post('/api/auth/verify', (req, res) => {

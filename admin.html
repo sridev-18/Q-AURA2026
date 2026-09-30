@@ -752,6 +752,9 @@
       </button>
       <button class="cyber-btn cb-green" onclick="exportDataCSV()"><i class="fas fa-file-excel"></i> CSV</button>
       <button class="cyber-btn cb-gold" onclick="exportVerifiedOnly()"><i class="fas fa-check-double"></i> VERIFIED</button>
+      <button class="cyber-btn cb-outline" style="border-color:var(--neon-gold);color:var(--neon-gold);background:rgba(255,215,0,0.08);" onclick="openPasswordModal()" title="Change Admin or Verification Desk Passwords">
+        <i class="fas fa-key"></i> PASSWORDS
+      </button>
       <button class="cyber-btn cb-outline" style="border-color:var(--neon-pink);color:var(--neon-pink);padding:6px 12px;" onclick="logoutAdmin()" title="Log out of Admin Dashboard">
         <i class="fas fa-sign-out-alt"></i> LOGOUT
       </button>
@@ -874,6 +877,100 @@
         <button class="cyber-btn cb-green" id="btnDownloadProof"><i class="fas fa-download"></i> PROOF IMAGE</button>
         <button class="cyber-btn cb-outline" onclick="closeOperativeModal()">DISMISS</button>
       </div>
+    </div>
+  </div>
+
+  <!-- PASSWORD MANAGEMENT MODAL (ADMIN ONLY) -->
+  <div class="modal-backdrop" id="passwordModal">
+    <div class="modal-hud-card hud-panel" style="max-width:500px;border-color:var(--neon-gold);box-shadow:0 0 45px rgba(255,215,0,0.22);">
+      <div class="modal-header-row" style="border-bottom-color:rgba(255,215,0,0.3);">
+        <div>
+          <h2 style="color:var(--neon-gold);display:flex;align-items:center;gap:8px;font-size:1.15rem;">
+            <i class="fas fa-key"></i> SECURITY CLEARANCE VAULT
+          </h2>
+          <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);margin-top:3px;">
+            UPDATE ADMIN OR ON-DESK VERIFICATION PASSPHRASES
+          </div>
+        </div>
+        <button class="modal-close-x" onclick="closePasswordModal()" style="color:var(--neon-gold);">&times;</button>
+      </div>
+
+      <!-- ROLE SELECTOR TABS -->
+      <div style="display:flex;gap:8px;margin-bottom:18px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:12px;">
+        <button type="button" id="tabPwAdmin" class="cyber-btn cb-gold" style="flex:1;justify-content:center;font-size:0.8rem;" onclick="switchPwTab('admin')">
+          <i class="fas fa-shield-alt"></i> ADMIN PASSPHRASE
+        </button>
+        <button type="button" id="tabPwDesk" class="cyber-btn cb-outline" style="flex:1;justify-content:center;font-size:0.8rem;" onclick="switchPwTab('desk')">
+          <i class="fas fa-qrcode"></i> VERIFY DESK PASS
+        </button>
+      </div>
+
+      <!-- Feedback Notification Banner -->
+      <div id="pwFeedback" style="display:none;padding:10px 14px;border-radius:6px;font-family:var(--font-mono);font-size:0.82rem;margin-bottom:16px;"></div>
+
+      <!-- FORM 1: ADMIN PASSWORD CHANGE -->
+      <form id="formAdminPw" onsubmit="submitChangeAdminPw(event)">
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-family:var(--font-mono);font-size:0.75rem;color:var(--neon-gold);margin-bottom:6px;">CURRENT ADMIN PASSPHRASE</label>
+          <div style="position:relative;">
+            <input type="password" id="curAdminPass" class="search-input" style="width:100%;padding:10px 38px 10px 12px;font-size:0.9rem;" placeholder="Enter current admin passphrase" required/>
+            <button type="button" onclick="togglePassField('curAdminPass', this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;"><i class="fas fa-eye"></i></button>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-family:var(--font-mono);font-size:0.75rem;color:var(--neon-gold);margin-bottom:6px;">NEW ADMIN PASSPHRASE</label>
+          <div style="position:relative;">
+            <input type="password" id="newAdminPass" class="search-input" style="width:100%;padding:10px 38px 10px 12px;font-size:0.9rem;" placeholder="Minimum 4 characters" required minlength="4"/>
+            <button type="button" onclick="togglePassField('newAdminPass', this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;"><i class="fas fa-eye"></i></button>
+          </div>
+        </div>
+
+        <div style="margin-bottom:18px;">
+          <label style="display:block;font-family:var(--font-mono);font-size:0.75rem;color:var(--neon-gold);margin-bottom:6px;">CONFIRM NEW ADMIN PASSPHRASE</label>
+          <div style="position:relative;">
+            <input type="password" id="confirmAdminPass" class="search-input" style="width:100%;padding:10px 38px 10px 12px;font-size:0.9rem;" placeholder="Repeat new admin passphrase" required minlength="4"/>
+            <button type="button" onclick="togglePassField('confirmAdminPass', this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;"><i class="fas fa-eye"></i></button>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button type="button" class="cyber-btn cb-outline" onclick="closePasswordModal()">DISMISS</button>
+          <button type="submit" id="btnSaveAdminPw" class="cyber-btn cb-gold"><i class="fas fa-save"></i> SAVE ADMIN PASSPHRASE</button>
+        </div>
+      </form>
+
+      <!-- FORM 2: DESK PASSWORD CHANGE -->
+      <form id="formDeskPw" style="display:none;" onsubmit="submitChangeDeskPw(event)">
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-family:var(--font-mono);font-size:0.75rem;color:var(--neon-green);margin-bottom:6px;">ADMIN PASSPHRASE (AUTHORIZATION)</label>
+          <div style="position:relative;">
+            <input type="password" id="deskAuthAdminPass" class="search-input" style="width:100%;padding:10px 38px 10px 12px;font-size:0.9rem;" placeholder="Enter admin passphrase for approval" required/>
+            <button type="button" onclick="togglePassField('deskAuthAdminPass', this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;"><i class="fas fa-eye"></i></button>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-family:var(--font-mono);font-size:0.75rem;color:var(--neon-green);margin-bottom:6px;">NEW VERIFICATION DESK PASSPHRASE</label>
+          <div style="position:relative;">
+            <input type="password" id="newDeskPass" class="search-input" style="width:100%;padding:10px 38px 10px 12px;font-size:0.9rem;" placeholder="Minimum 4 characters" required minlength="4"/>
+            <button type="button" onclick="togglePassField('newDeskPass', this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;"><i class="fas fa-eye"></i></button>
+          </div>
+        </div>
+
+        <div style="margin-bottom:18px;">
+          <label style="display:block;font-family:var(--font-mono);font-size:0.75rem;color:var(--neon-green);margin-bottom:6px;">CONFIRM NEW VERIFICATION DESK PASSPHRASE</label>
+          <div style="position:relative;">
+            <input type="password" id="confirmDeskPass" class="search-input" style="width:100%;padding:10px 38px 10px 12px;font-size:0.9rem;" placeholder="Repeat new desk passphrase" required minlength="4"/>
+            <button type="button" onclick="togglePassField('confirmDeskPass', this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;"><i class="fas fa-eye"></i></button>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button type="button" class="cyber-btn cb-outline" onclick="closePasswordModal()">DISMISS</button>
+          <button type="submit" id="btnSaveDeskPw" class="cyber-btn cb-green"><i class="fas fa-save"></i> SAVE DESK PASSPHRASE</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -1534,6 +1631,186 @@
     // Modal background close
     document.getElementById('operativeModal').addEventListener('click', function(e) {
       if (e.target === this) closeOperativeModal();
+    });
+
+    // ── PASSWORD MANAGEMENT HANDLERS ─────────────────────────────────
+    function openPasswordModal() {
+      const modal = document.getElementById('passwordModal');
+      if (modal) {
+        modal.classList.add('show');
+        switchPwTab('admin');
+        hidePwFeedback();
+      }
+    }
+
+    function closePasswordModal() {
+      const modal = document.getElementById('passwordModal');
+      if (modal) modal.classList.remove('show');
+    }
+
+    function switchPwTab(tab) {
+      const formAdmin = document.getElementById('formAdminPw');
+      const formDesk = document.getElementById('formDeskPw');
+      const tabAdmin = document.getElementById('tabPwAdmin');
+      const tabDesk = document.getElementById('tabPwDesk');
+      hidePwFeedback();
+
+      if (tab === 'admin') {
+        formAdmin.style.display = 'block';
+        formDesk.style.display = 'none';
+        tabAdmin.className = 'cyber-btn cb-gold';
+        tabDesk.className = 'cyber-btn cb-outline';
+      } else {
+        formAdmin.style.display = 'none';
+        formDesk.style.display = 'block';
+        tabDesk.className = 'cyber-btn cb-green';
+        tabAdmin.className = 'cyber-btn cb-outline';
+      }
+    }
+
+    function togglePassField(fieldId, btn) {
+      const inp = document.getElementById(fieldId);
+      if (!inp) return;
+      const icon = btn.querySelector('i');
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        if (icon) icon.className = 'fas fa-eye-slash';
+      } else {
+        inp.type = 'password';
+        if (icon) icon.className = 'fas fa-eye';
+      }
+    }
+
+    function showPwFeedback(msg, isSuccess = false) {
+      const box = document.getElementById('pwFeedback');
+      if (!box) return;
+      box.style.display = 'block';
+      box.textContent = msg;
+      if (isSuccess) {
+        box.style.background = 'rgba(0, 255, 102, 0.12)';
+        box.style.border = '1px solid var(--neon-green)';
+        box.style.color = 'var(--neon-green)';
+      } else {
+        box.style.background = 'rgba(255, 0, 85, 0.15)';
+        box.style.border = '1px solid var(--neon-pink)';
+        box.style.color = '#ff6b93';
+      }
+    }
+
+    function hidePwFeedback() {
+      const box = document.getElementById('pwFeedback');
+      if (box) box.style.display = 'none';
+    }
+
+    async function submitChangeAdminPw(e) {
+      e.preventDefault();
+      const curPass = document.getElementById('curAdminPass').value;
+      const newPass = document.getElementById('newAdminPass').value;
+      const confPass = document.getElementById('confirmAdminPass').value;
+      const btn = document.getElementById('btnSaveAdminPw');
+
+      if (newPass !== confPass) {
+        showPwFeedback('New passphrase and confirmation do not match.', false);
+        return;
+      }
+      if (newPass.length < 4) {
+        showPwFeedback('New passphrase must be at least 4 characters long.', false);
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> UPDATING...';
+      hidePwFeedback();
+
+      try {
+        const apiBase = getApiBase();
+        const endpoint = apiBase ? `${apiBase}/api/auth/change-password` : '/api/auth/change-password';
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + (localStorage.getItem('qaura_auth_token') || '')
+          },
+          body: JSON.stringify({
+            targetUser: 'admin',
+            currentAdminPassword: curPass,
+            newPassword: newPass
+          })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.status === 'ok') {
+          showPwFeedback('✓ Administrator passphrase updated successfully!', true);
+          adminNotify('✓ Administrator passphrase updated successfully!', 'success');
+          document.getElementById('formAdminPw').reset();
+          setTimeout(() => closePasswordModal(), 1800);
+        } else {
+          showPwFeedback(data.message || 'Failed to update passphrase', false);
+        }
+      } catch (err) {
+        showPwFeedback('Network or server error: ' + err.message, false);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save"></i> SAVE ADMIN PASSPHRASE';
+      }
+    }
+
+    async function submitChangeDeskPw(e) {
+      e.preventDefault();
+      const adminPass = document.getElementById('deskAuthAdminPass').value;
+      const newPass = document.getElementById('newDeskPass').value;
+      const confPass = document.getElementById('confirmDeskPass').value;
+      const btn = document.getElementById('btnSaveDeskPw');
+
+      if (newPass !== confPass) {
+        showPwFeedback('New desk passphrase and confirmation do not match.', false);
+        return;
+      }
+      if (newPass.length < 4) {
+        showPwFeedback('New desk passphrase must be at least 4 characters long.', false);
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> UPDATING...';
+      hidePwFeedback();
+
+      try {
+        const apiBase = getApiBase();
+        const endpoint = apiBase ? `${apiBase}/api/auth/change-password` : '/api/auth/change-password';
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + (localStorage.getItem('qaura_auth_token') || '')
+          },
+          body: JSON.stringify({
+            targetUser: 'desk',
+            currentAdminPassword: adminPass,
+            newPassword: newPass
+          })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.status === 'ok') {
+          showPwFeedback('✓ Verification desk passphrase updated successfully!', true);
+          adminNotify('✓ Verification desk passphrase updated successfully!', 'success');
+          document.getElementById('formDeskPw').reset();
+          setTimeout(() => closePasswordModal(), 1800);
+        } else {
+          showPwFeedback(data.message || 'Failed to update passphrase', false);
+        }
+      } catch (err) {
+        showPwFeedback('Network or server error: ' + err.message, false);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save"></i> SAVE DESK PASSPHRASE';
+      }
+    }
+
+    // Password modal backdrop close
+    document.getElementById('passwordModal').addEventListener('click', function(e) {
+      if (e.target === this) closePasswordModal();
     });
   </script>
 </body>

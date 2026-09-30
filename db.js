@@ -57,8 +57,21 @@ async function initDb() {
 
       CREATE INDEX IF NOT EXISTS idx_registrations_reg_id ON registrations (reg_id);
       CREATE INDEX IF NOT EXISTS idx_registrations_mobile ON registrations (mobile);
+
+      CREATE TABLE IF NOT EXISTS portal_auth (
+        username VARCHAR(50) PRIMARY KEY,
+        password TEXT NOT NULL,
+        role VARCHAR(20) NOT NULL,
+        updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+      );
+
+      INSERT INTO portal_auth (username, password, role)
+      VALUES 
+        ('admin', 'admin@qaura2026', 'admin'),
+        ('desk', 'verify@qaura2026', 'desk')
+      ON CONFLICT (username) DO NOTHING;
     `);
-    console.log('✓ PostgreSQL: Database schema & indexes verified in qaura2026_db');
+    console.log('✓ PostgreSQL: Database schema & portal credentials verified in qaura2026_db');
   } finally {
     client.release();
   }
@@ -185,6 +198,35 @@ async function getMetrics() {
   };
 }
 
+// ── AUTHENTICATION CREDENTIAL MANAGEMENT ───────────────────────────
+async function getAuthUser(username) {
+  try {
+    const res = await pool.query('SELECT username, password, role, updated_at AS "updatedAt" FROM portal_auth WHERE LOWER(username) = LOWER($1);', [username]);
+    return res.rows[0] || null;
+  } catch (err) {
+    console.warn('DB getAuthUser notice:', err.message);
+    return null;
+  }
+}
+
+async function updateAuthPassword(username, newPassword) {
+  try {
+    const normUser = (username || '').toLowerCase();
+    const role = normUser === 'admin' ? 'admin' : 'desk';
+    const res = await pool.query(`
+      INSERT INTO portal_auth (username, password, role, updated_at)
+      VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
+      ON CONFLICT (username) DO UPDATE
+      SET password = EXCLUDED.password, updated_at = CURRENT_TIMESTAMP
+      RETURNING username, role, updated_at AS "updatedAt";
+    `, [normUser, newPassword, role]);
+    return res.rows[0] || null;
+  } catch (err) {
+    console.warn('DB updateAuthPassword notice:', err.message);
+    return null;
+  }
+}
+
 module.exports = {
   pool,
   initDb,
@@ -192,5 +234,7 @@ module.exports = {
   getRegistrationById,
   getAllRegistrations,
   updateStatus,
-  getMetrics
+  getMetrics,
+  getAuthUser,
+  updateAuthPassword
 };
