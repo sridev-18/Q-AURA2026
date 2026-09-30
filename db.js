@@ -5,15 +5,25 @@
 
 const { Pool } = require('pg');
 
+const poolConfig = process.env.DATABASE_URL
+  ? {
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.DATABASE_URL.includes('localhost') ? false : { rejectUnauthorized: false }
+    }
+  : {
+      host: process.env.PG_HOST || 'localhost',
+      port: parseInt(process.env.PG_PORT, 10) || 5432,
+      database: process.env.PG_DATABASE || 'qaura2026_db',
+      user: process.env.PG_USER || 'postgres',
+      password: process.env.PG_PASSWORD || '',
+      ssl: process.env.PG_SSL === 'true' ? { rejectUnauthorized: false } : false
+    };
+
 const pool = new Pool({
-  host: process.env.PG_HOST || 'localhost',
-  port: parseInt(process.env.PG_PORT, 10) || 5432,
-  database: process.env.PG_DATABASE || 'qaura2026_db',
-  user: process.env.PG_USER || 'postgres',
-  password: process.env.PG_PASSWORD || '',
+  ...poolConfig,
   max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000
+  connectionTimeoutMillis: 10000
 });
 
 // Initialize database schema

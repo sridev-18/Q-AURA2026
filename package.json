@@ -1,13 +1,24 @@
 {
   "name": "qaura2026",
   "version": "1.0.0",
-  "description": "| File | Purpose | |---|---| | `index.html` | Student registration portal | | `admin.html` | Admin dashboard (stats, table, CSV export) | | `code.gs` | Google Apps Script — writes to Google Sheets | | `assets/logo.png` | RGU logo | | `assets/poster.jpg` | Q-AURA event poster |",
-  "main": "config.js",
+  "description": "Q-AURA 2026 Official Registration & On-Desk Verification Ecosystem",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "qaura2026",
+    "symposium",
+    "registration",
+    "verification",
+    "postgresql",
+    "express"
+  ],
+  "author": "sridev-18",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
