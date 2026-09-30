@@ -271,9 +271,101 @@
       color: #050b14;
       font-weight: bold;
     }
+
+    /* INLINE AUTH GATE OVERLAY */
+    .auth-gate-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(4, 7, 13, 0.96);
+      backdrop-filter: blur(16px);
+      z-index: 999999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .auth-gate-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .auth-gate-card {
+      background: rgba(13, 19, 32, 0.95);
+      border: 1.5px solid var(--neon-green);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 420px;
+      padding: 30px 24px;
+      box-shadow: 0 0 35px rgba(0, 255, 102, 0.25);
+    }
+    .auth-gate-err {
+      display: none;
+      padding: 8px 12px;
+      background: rgba(255, 0, 85, 0.15);
+      border: 1px solid var(--neon-pink);
+      border-radius: 6px;
+      color: #ff6b93;
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      margin-bottom: 14px;
+      align-items: center;
+      gap: 6px;
+    }
+    .auth-gate-err.show { display: flex; }
   </style>
 </head>
 <body>
+
+  <!-- INLINE VERIFY AUTHENTICATION GATEWAY -->
+  <div id="verifyAuthOverlay" class="auth-gate-overlay">
+    <div class="auth-gate-card">
+      <div style="text-align:center;margin-bottom:18px;">
+        <img src="assets/logo.png" alt="Rathinam Logo" style="height:55px;filter:drop-shadow(0 0 12px rgba(0,255,102,0.4));margin-bottom:10px;"/>
+        <h2 style="font-family:var(--font-cyber);color:#fff;font-size:1.25rem;letter-spacing:1.5px;">ON-DESK <span style="color:var(--neon-green);">CLEARANCE</span></h2>
+        <p style="font-family:var(--font-mono);color:var(--text-muted);font-size:0.75rem;margin-top:4px;">ENTER VOLUNTEER OR ADMIN CREDENTIALS TO UNLOCK</p>
+      </div>
+
+      <div id="verifyAuthError" class="auth-gate-err">
+        <i class="fas fa-exclamation-triangle"></i> <span id="verifyAuthErrMsg">Invalid username or passphrase</span>
+      </div>
+
+      <form id="verifyAuthForm" onsubmit="handleDirectDeskLogin(event)">
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-family:var(--font-mono);font-size:0.78rem;color:var(--neon-green);margin-bottom:6px;">CLEARANCE USERNAME</label>
+          <div style="position:relative;">
+            <i class="fas fa-user-check" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);"></i>
+            <input type="text" id="deskUserInp" class="verify-input" style="width:100%;padding:12px 14px 12px 36px;font-size:0.9rem;" value="desk" required autocomplete="username"/>
+          </div>
+        </div>
+
+        <div style="margin-bottom:18px;">
+          <label style="display:block;font-family:var(--font-mono);font-size:0.78rem;color:var(--neon-green);margin-bottom:6px;">CLEARANCE PASSPHRASE</label>
+          <div style="position:relative;">
+            <i class="fas fa-key" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);"></i>
+            <input type="password" id="deskPassInp" class="verify-input" style="width:100%;padding:12px 38px 12px 36px;font-size:0.9rem;" placeholder="••••••••" required autocomplete="current-password" autofocus/>
+            <button type="button" onclick="toggleDeskPassVis()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;padding:4px;">
+              <i class="fas fa-eye" id="deskPassEye"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="btnDeskAuth" class="btn-verify" style="width:100%;padding:13px;font-size:0.88rem;letter-spacing:1.5px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--neon-green);color:#05140a;">
+          <i class="fas fa-unlock-alt"></i> <span id="btnDeskAuthTxt">AUTHENTICATE &amp; UNLOCK</span>
+        </button>
+      </form>
+
+      <div style="margin-top:16px;padding:8px 10px;background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.15);border-radius:6px;font-family:var(--font-mono);font-size:0.73rem;color:#94a3b8;text-align:center;">
+        Desk: <strong>desk</strong> &bull; <strong>verify@qaura2026</strong><br/>
+        (Admin credentials also accepted)
+      </div>
+      
+      <div style="margin-top:14px;text-align:center;font-size:0.78rem;font-family:var(--font-mono);">
+        <a href="admin.html" style="color:var(--cyan);text-decoration:none;margin-right:14px;">Switch to Admin Panel ➔</a>
+        <a href="index.html" style="color:var(--neon-green);text-decoration:none;">Student Portal ➔</a>
+      </div>
+    </div>
+  </div>
 
   <!-- DESK OPERATIONS NAV -->
   <div class="top-nav">
@@ -332,30 +424,128 @@
   </div>
 
   <script>
-    // ── AUTHENTICATION GUARD ─────────────────────────────────────────
-    const AUTH_TOKEN = localStorage.getItem('qaura_auth_token');
-    const AUTH_ROLE  = localStorage.getItem('qaura_auth_role');
-    const AUTH_USER  = localStorage.getItem('qaura_auth_user');
-
-    if (!AUTH_TOKEN || (AUTH_ROLE !== 'desk' && AUTH_ROLE !== 'admin')) {
-      window.location.replace('login.html?portal=desk&redirect=verify.html');
+    // ── AUTHENTICATION & DIRECT IN-PLACE LOGIN GUARD ─────────────────
+    function isLoggedInDesk() {
+      const token = localStorage.getItem('qaura_auth_token');
+      const role  = localStorage.getItem('qaura_auth_role');
+      return !!(token && (role === 'desk' || role === 'admin'));
     }
 
-    try {
-      if (AUTH_USER) {
-        const u = JSON.parse(AUTH_USER);
-        window.addEventListener('DOMContentLoaded', () => {
+    function checkDeskAuth() {
+      const overlay = document.getElementById('verifyAuthOverlay');
+      if (isLoggedInDesk()) {
+        if (overlay) overlay.classList.add('hidden');
+        try {
+          const u = JSON.parse(localStorage.getItem('qaura_auth_user') || '{}');
           const el = document.getElementById('deskUserDisplay');
           if (el) el.textContent = (u.username || 'AGENT').toUpperCase();
-        });
+        } catch(e) {}
+        return true;
+      } else {
+        if (overlay) {
+          overlay.classList.remove('hidden');
+          setTimeout(() => {
+            const passInp = document.getElementById('deskPassInp');
+            if (passInp) passInp.focus();
+          }, 100);
+        }
+        return false;
       }
-    } catch(e) {}
+    }
+
+    function toggleDeskPassVis() {
+      const inp = document.getElementById('deskPassInp');
+      const eye = document.getElementById('deskPassEye');
+      if (!inp || !eye) return;
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        eye.className = 'fas fa-eye-slash';
+      } else {
+        inp.type = 'password';
+        eye.className = 'fas fa-eye';
+      }
+    }
+
+    async function handleDirectDeskLogin(e) {
+      e.preventDefault();
+      const userInp = document.getElementById('deskUserInp');
+      const passInp = document.getElementById('deskPassInp');
+      const errBox = document.getElementById('verifyAuthError');
+      const errMsg = document.getElementById('verifyAuthErrMsg');
+      const btn = document.getElementById('btnDeskAuth');
+      const btnTxt = document.getElementById('btnDeskAuthTxt');
+
+      if (errBox) errBox.classList.remove('show');
+      if (btn) btn.disabled = true;
+      if (btnTxt) btnTxt.textContent = 'AUTHENTICATING...';
+
+      const username = (userInp ? userInp.value.trim() : '') || 'desk';
+      const password = passInp ? passInp.value : '';
+
+      try {
+        const apiBase = (typeof QAURA_CONFIG !== 'undefined' && QAURA_CONFIG.API_BASE_URL) ? QAURA_CONFIG.API_BASE_URL : '';
+        const endpoint = apiBase ? `${apiBase}/api/auth/login` : '/api/auth/login';
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.status === 'ok' && data.token) {
+          if (data.role !== 'desk' && data.role !== 'admin') {
+            throw new Error('Access denied: Desk or Administrator credentials required.');
+          }
+          localStorage.setItem('qaura_auth_token', data.token);
+          localStorage.setItem('qaura_auth_role', data.role);
+          localStorage.setItem('qaura_auth_user', JSON.stringify(data.user || { username, role: data.role }));
+
+          const el = document.getElementById('deskUserDisplay');
+          if (el) el.textContent = (data.user && data.user.username ? data.user.username : username).toUpperCase();
+
+          const overlay = document.getElementById('verifyAuthOverlay');
+          if (overlay) overlay.classList.add('hidden');
+
+          if (passInp) passInp.value = '';
+
+          // If query parameter was present, trigger lookup
+          const urlParams = new URLSearchParams(window.location.search);
+          const queryId = urlParams.get('id') || urlParams.get('regId');
+          if (queryId) {
+            document.getElementById('passIdInput').value = queryId;
+            executeLookup();
+          }
+        } else {
+          throw new Error(data.message || 'Invalid clearance credentials');
+        }
+      } catch (err) {
+        if (errBox && errMsg) {
+          errMsg.textContent = err.message || 'Authentication failed';
+          errBox.classList.add('show');
+        }
+        if (passInp) {
+          passInp.value = '';
+          passInp.focus();
+        }
+      } finally {
+        if (btn) btn.disabled = false;
+        if (btnTxt) btnTxt.textContent = 'AUTHENTICATE & UNLOCK';
+      }
+    }
 
     function logoutDesk() {
       localStorage.removeItem('qaura_auth_token');
       localStorage.removeItem('qaura_auth_role');
       localStorage.removeItem('qaura_auth_user');
-      window.location.href = 'login.html?portal=desk';
+      const overlay = document.getElementById('verifyAuthOverlay');
+      if (overlay) {
+        overlay.classList.remove('hidden');
+        const passInp = document.getElementById('deskPassInp');
+        if (passInp) {
+          passInp.value = '';
+          passInp.focus();
+        }
+      }
     }
 
     // Initialize logo from base64 if present
@@ -365,15 +555,20 @@
 
     // Auto-check URL parameters (e.g. verify.html?id=QAURA-2026-XXXX)
     window.addEventListener('DOMContentLoaded', () => {
+      checkDeskAuth();
       const urlParams = new URLSearchParams(window.location.search);
       const queryId = urlParams.get('id') || urlParams.get('regId');
-      if (queryId) {
+      if (queryId && isLoggedInDesk()) {
         document.getElementById('passIdInput').value = queryId;
         executeLookup();
       }
     });
 
     async function executeLookup() {
+      if (!isLoggedInDesk()) {
+        checkDeskAuth();
+        return;
+      }
       const term = document.getElementById('passIdInput').value.trim();
       if (!term) return;
 

@@ -632,11 +632,102 @@
     #adminToast.show { transform: translateY(0); opacity: 1; }
     #adminToast.success { border-color: var(--neon-green); color: var(--neon-green); }
     #adminToast.error { border-color: var(--neon-pink); color: var(--neon-pink); }
+
+    /* INLINE AUTH GATE OVERLAY */
+    .auth-gate-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(4, 7, 13, 0.96);
+      backdrop-filter: blur(16px);
+      z-index: 999999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .auth-gate-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .auth-gate-card {
+      background: rgba(13, 19, 32, 0.95);
+      border: 1.5px solid var(--cyan);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 420px;
+      padding: 30px 24px;
+      box-shadow: 0 0 35px rgba(0, 240, 255, 0.25);
+    }
+    .auth-gate-err {
+      display: none;
+      padding: 8px 12px;
+      background: rgba(255, 0, 85, 0.15);
+      border: 1px solid var(--neon-pink);
+      border-radius: 6px;
+      color: #ff6b93;
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      margin-bottom: 14px;
+      align-items: center;
+      gap: 6px;
+    }
+    .auth-gate-err.show { display: flex; }
   </style>
 </head>
 
 <body>
   <div class="cyber-grid-overlay"></div>
+
+  <!-- INLINE ADMIN AUTHENTICATION GATEWAY -->
+  <div id="adminAuthOverlay" class="auth-gate-overlay">
+    <div class="auth-gate-card">
+      <div style="text-align:center;margin-bottom:18px;">
+        <img src="assets/logo.png" alt="Rathinam Logo" style="height:55px;filter:drop-shadow(0 0 12px rgba(0,240,255,0.4));margin-bottom:10px;"/>
+        <h2 style="font-family:var(--font-cyber);color:#fff;font-size:1.25rem;letter-spacing:1.5px;">ADMIN <span style="color:var(--cyan);">COMMAND ACCESS</span></h2>
+        <p style="font-family:var(--font-mono);color:var(--text-muted);font-size:0.75rem;margin-top:4px;">ENTER CLEARANCE CREDENTIALS TO UNLOCK DASHBOARD</p>
+      </div>
+
+      <div id="adminAuthError" class="auth-gate-err">
+        <i class="fas fa-exclamation-triangle"></i> <span id="adminAuthErrMsg">Invalid username or passphrase</span>
+      </div>
+
+      <form id="adminAuthForm" onsubmit="handleDirectAdminLogin(event)">
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-family:var(--font-mono);font-size:0.78rem;color:var(--cyan);margin-bottom:6px;">ADMIN USERNAME</label>
+          <div style="position:relative;">
+            <i class="fas fa-user-shield" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);"></i>
+            <input type="text" id="adminUserInp" class="search-input" style="width:100%;padding:12px 14px 12px 36px;font-size:0.9rem;" value="admin" required autocomplete="username"/>
+          </div>
+        </div>
+
+        <div style="margin-bottom:18px;">
+          <label style="display:block;font-family:var(--font-mono);font-size:0.78rem;color:var(--cyan);margin-bottom:6px;">ADMIN PASSPHRASE</label>
+          <div style="position:relative;">
+            <i class="fas fa-key" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);"></i>
+            <input type="password" id="adminPassInp" class="search-input" style="width:100%;padding:12px 38px 12px 36px;font-size:0.9rem;" placeholder="••••••••" required autocomplete="current-password" autofocus/>
+            <button type="button" onclick="toggleAdminPassVis()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;padding:4px;">
+              <i class="fas fa-eye" id="adminPassEye"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="btnAdminAuth" class="cyber-btn cb-primary" style="width:100%;padding:13px;font-size:0.88rem;letter-spacing:1.5px;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <i class="fas fa-unlock-alt"></i> <span id="btnAdminAuthTxt">AUTHENTICATE &amp; UNLOCK</span>
+        </button>
+      </form>
+
+      <div style="margin-top:16px;padding:8px 10px;background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.15);border-radius:6px;font-family:var(--font-mono);font-size:0.73rem;color:#94a3b8;text-align:center;">
+        Default Credentials: <strong>admin</strong> &bull; <strong>admin@qaura2026</strong>
+      </div>
+      
+      <div style="margin-top:14px;text-align:center;font-size:0.78rem;font-family:var(--font-mono);">
+        <a href="verify.html" style="color:var(--neon-green);text-decoration:none;margin-right:14px;">Switch to Verification Desk ➔</a>
+        <a href="index.html" style="color:var(--cyan);text-decoration:none;">Student Portal ➔</a>
+      </div>
+    </div>
+  </div>
 
   <!-- HEADER -->
   <header>
@@ -797,30 +888,123 @@
   <!-- CONFIG & SCRIPTS -->
   <script src="config.js"></script>
   <script>
-    // ── AUTHENTICATION GUARD ─────────────────────────────────────────
-    const AUTH_TOKEN = localStorage.getItem('qaura_auth_token');
-    const AUTH_ROLE  = localStorage.getItem('qaura_auth_role');
-    const AUTH_USER  = localStorage.getItem('qaura_auth_user');
-
-    if (!AUTH_TOKEN || AUTH_ROLE !== 'admin') {
-      window.location.replace('login.html?portal=admin&redirect=admin.html');
+    // ── AUTHENTICATION & DIRECT IN-PLACE LOGIN GUARD ─────────────────
+    function isLoggedInAdmin() {
+      const token = localStorage.getItem('qaura_auth_token');
+      const role  = localStorage.getItem('qaura_auth_role');
+      return !!(token && role === 'admin');
     }
 
-    try {
-      if (AUTH_USER) {
-        const u = JSON.parse(AUTH_USER);
-        window.addEventListener('DOMContentLoaded', () => {
+    function checkAdminAuth() {
+      const overlay = document.getElementById('adminAuthOverlay');
+      if (isLoggedInAdmin()) {
+        if (overlay) overlay.classList.add('hidden');
+        try {
+          const u = JSON.parse(localStorage.getItem('qaura_auth_user') || '{}');
           const el = document.getElementById('adminUsernameDisplay');
           if (el) el.textContent = (u.username || 'ADMIN').toUpperCase();
-        });
+        } catch(e) {}
+        return true;
+      } else {
+        if (overlay) {
+          overlay.classList.remove('hidden');
+          setTimeout(() => {
+            const passInp = document.getElementById('adminPassInp');
+            if (passInp) passInp.focus();
+          }, 100);
+        }
+        return false;
       }
-    } catch(e) {}
+    }
+
+    function toggleAdminPassVis() {
+      const inp = document.getElementById('adminPassInp');
+      const eye = document.getElementById('adminPassEye');
+      if (!inp || !eye) return;
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        eye.className = 'fas fa-eye-slash';
+      } else {
+        inp.type = 'password';
+        eye.className = 'fas fa-eye';
+      }
+    }
+
+    async function handleDirectAdminLogin(e) {
+      e.preventDefault();
+      const userInp = document.getElementById('adminUserInp');
+      const passInp = document.getElementById('adminPassInp');
+      const errBox = document.getElementById('adminAuthError');
+      const errMsg = document.getElementById('adminAuthErrMsg');
+      const btn = document.getElementById('btnAdminAuth');
+      const btnTxt = document.getElementById('btnAdminAuthTxt');
+
+      if (errBox) errBox.classList.remove('show');
+      if (btn) btn.disabled = true;
+      if (btnTxt) btnTxt.textContent = 'AUTHENTICATING...';
+
+      const username = (userInp ? userInp.value.trim() : '') || 'admin';
+      const password = passInp ? passInp.value : '';
+
+      try {
+        const apiBase = getApiBase();
+        const endpoint = apiBase ? `${apiBase}/api/auth/login` : '/api/auth/login';
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.status === 'ok' && data.token) {
+          if (data.role !== 'admin') {
+            throw new Error('Access denied: Administrator clearance required for this console.');
+          }
+          localStorage.setItem('qaura_auth_token', data.token);
+          localStorage.setItem('qaura_auth_role', data.role);
+          localStorage.setItem('qaura_auth_user', JSON.stringify(data.user || { username, role: data.role }));
+
+          const el = document.getElementById('adminUsernameDisplay');
+          if (el) el.textContent = (data.user && data.user.username ? data.user.username : username).toUpperCase();
+
+          const overlay = document.getElementById('adminAuthOverlay');
+          if (overlay) overlay.classList.add('hidden');
+
+          if (passInp) passInp.value = '';
+          adminNotify('✓ CLEARANCE GRANTED: Admin Command Online', 'success');
+          initData();
+        } else {
+          throw new Error(data.message || 'Invalid administrator credentials');
+        }
+      } catch (err) {
+        if (errBox && errMsg) {
+          errMsg.textContent = err.message || 'Authentication failed';
+          errBox.classList.add('show');
+        }
+        if (passInp) {
+          passInp.value = '';
+          passInp.focus();
+        }
+      } finally {
+        if (btn) btn.disabled = false;
+        if (btnTxt) btnTxt.textContent = 'AUTHENTICATE & UNLOCK';
+      }
+    }
 
     function logoutAdmin() {
       localStorage.removeItem('qaura_auth_token');
       localStorage.removeItem('qaura_auth_role');
       localStorage.removeItem('qaura_auth_user');
-      window.location.href = 'login.html?portal=admin';
+      const overlay = document.getElementById('adminAuthOverlay');
+      if (overlay) {
+        overlay.classList.remove('hidden');
+        const passInp = document.getElementById('adminPassInp');
+        if (passInp) {
+          passInp.value = '';
+          passInp.focus();
+        }
+      }
+      adminNotify('Admin session locked.', 'info');
     }
 
     const STORAGE_KEY = 'qaura2026_registrations';
@@ -856,6 +1040,7 @@
     let lastDataCache = '';
 
     async function initData() {
+      if (!isLoggedInAdmin()) return;
       // 1. Try PostgreSQL API first
       try {
         const apiBase = getApiBase();
@@ -930,17 +1115,24 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      checkAdminAuth();
       const saved = localStorage.getItem(URL_KEY) || '';
       if (saved && document.getElementById('sheetSyncUrl')) document.getElementById('sheetSyncUrl').value = saved;
-      initData();
+      if (isLoggedInAdmin()) {
+        initData();
+      }
 
       // Auto-poll PostgreSQL every 3 seconds for instant real-time live sync
-      setInterval(initData, 3000);
+      setInterval(() => {
+        if (isLoggedInAdmin()) initData();
+      }, 3000);
 
       // Auto-refresh when tab gains focus or visibility
-      window.addEventListener('focus', initData);
+      window.addEventListener('focus', () => {
+        if (isLoggedInAdmin()) initData();
+      });
       document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) initData();
+        if (!document.hidden && isLoggedInAdmin()) initData();
       });
     });
 
