@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Q-AURA 2026 | Operative Pass Verification Portal</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;900&family=Rajdhani:wght@600;700&family=Share+Tech+Mono&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Local QR code & Base64 Logo -->
+  <script src="assets/qrcode.min.js"></script>
+  <script src="assets/logo_base64.js"></script>
+  <script src="config.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg-dark: #07090e;
+      --bg-surface: #0e121b;
+      --cyan: #00f0ff;
+      --neon-green: #00ff66;
+      --neon-orange: #ff7700;
+      --neon-pink: #ff0055;
+      --neon-gold: #ffd700;
+      --text-main: #f0f4fc;
+      --text-muted: #8b9bb4;
+      --font-cyber: 'Orbitron', monospace;
+      --font-mono: 'Share Tech Mono', monospace;
+      --font-sans: 'Space Grotesk', sans-serif;
+    }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px;
+    }
+    .header-box {
+      max-width: 650px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 14px 20px;
+      text-align: center;
+      border-bottom: 3px solid var(--cyan);
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.25);
+      margin-bottom: 16px;
+    }
+    .header-box img {
+      max-height: 65px;
+      max-width: 100%;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto 6px;
+    }
+    .header-box .sub {
+      font-family: var(--font-cyber);
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: 1px;
+    }
+    .search-box-card {
+      max-width: 650px;
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+    .input-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .verify-input {
+      flex: 1;
+      background: rgba(6, 9, 14, 0.9);
+      border: 1.5px solid rgba(0, 240, 255, 0.3);
+      border-radius: 6px;
+      padding: 12px 14px;
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      outline: none;
+      text-transform: uppercase;
+    }
+    .verify-input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+    }
+    .btn-verify {
+      background: var(--cyan);
+      color: #050b14;
+      font-family: var(--font-cyber);
+      font-weight: 900;
+      font-size: 0.85rem;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-verify:hover {
+      background: #fff;
+      box-shadow: 0 0 20px var(--cyan);
+    }
+    .result-card {
+      max-width: 650px;
+      width: 100%;
+      display: none;
+      background: var(--bg-surface);
+      border: 2px solid var(--neon-green);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(0, 255, 102, 0.2);
+      animation: popIn 0.3s ease both;
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .badge-bar {
+      background: rgba(0, 255, 102, 0.12);
+      border-bottom: 1.5px solid var(--neon-green);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .status-tag {
+      font-family: var(--font-cyber);
+      font-size: 0.85rem;
+      font-weight: 900;
+      color: var(--neon-green);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .id-tag {
+      font-family: var(--font-mono);
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #fff;
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid var(--cyan);
+      padding: 4px 14px;
+      border-radius: 6px;
+      letter-spacing: 1px;
+    }
+    .details-body {
+      padding: 20px;
+    }
+    .sec-title {
+      font-family: var(--font-cyber);
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      color: var(--cyan);
+      text-transform: uppercase;
+      margin: 14px 0 8px;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+      padding-bottom: 4px;
+    }
+    .sec-title:first-child { margin-top: 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .cell {
+      background: rgba(14, 20, 32, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 8px 12px;
+    }
+    .cell.full { grid-column: 1 / -1; }
+    .k {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .v, .val {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+      margin-top: 2px;
+      word-break: break-word;
+    }
+    .proof-img {
+      max-width: 100%;
+      max-height: 250px;
+      border-radius: 6px;
+      border: 1px solid var(--neon-green);
+      display: block;
+      margin: 10px auto 0;
+    }
+    .action-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .btn-action {
+      flex: 1;
+      padding: 10px;
+      border-radius: 6px;
+      font-family: var(--font-cyber);
+      font-weight: 900;
+      font-size: 0.8rem;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-approve { background: var(--neon-green); color: #05140a; }
+    .btn-reject { background: var(--neon-pink); color: #fff; }
+    .not-found-card {
+      max-width: 650px;
+      width: 100%;
+      display: none;
+      background: var(--bg-surface);
+      border: 1.5px solid var(--neon-pink);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+    /* Cyber Nav */
+    .top-nav {
+      max-width: 650px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .nav-btn {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--cyan);
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      padding: 6px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover {
+      background: rgba(0, 240, 255, 0.2);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+    }
+    .nav-btn.active {
+      background: var(--cyan);
+      color: #050b14;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- DESK OPERATIONS NAV -->
+  <div class="top-nav">
+    <div style="font-family:var(--font-cyber);font-size:0.85rem;color:var(--cyan);letter-spacing:1px;display:flex;align-items:center;gap:7px;">
+      <i class="fas fa-qrcode"></i> VERIFICATION DESK
+    </div>
+    <a href="admin.html" class="nav-btn" style="background:rgba(0, 255, 102, 0.12);border-color:var(--neon-green);color:var(--neon-green);font-weight:700;">
+      <i class="fas fa-shield-alt"></i> REDIRECT TO ADMIN PANEL ➔
+    </a>
+  </div>
+
+  <!-- HEADER -->
+  <div class="header-box">
+    <img src="assets/logo.png" id="instLogo" alt="Rathinam Global University"/>
+    <div class="sub">SCHOOL OF QUANTUM SCIENCE AND COMPUTING AI &bull; Q-AURA 2026</div>
+  </div>
+
+  <!-- LOOKUP FORM -->
+  <div class="search-box-card">
+    <div style="font-family:var(--font-cyber);font-size:0.85rem;color:var(--cyan);letter-spacing:1px;">
+      <i class="fas fa-qrcode"></i> OPERATIVE PASS VERIFICATION
+    </div>
+    <p style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">
+      Enter or scan the Registration ID (e.g. <code>QAURA-2026-4821</code>) or 10-digit mobile number to verify against live database:
+    </p>
+    <div class="input-row">
+      <input type="text" id="passIdInput" class="verify-input" placeholder="e.g. QAURA-2026-XXXX or Mobile" onkeydown="if(event.key==='Enter') executeLookup()"/>
+      <button class="btn-verify" onclick="executeLookup()"><i class="fas fa-search"></i> VERIFY</button>
+    </div>
+  </div>
+
+  <!-- VERIFICATION RESULT CARD -->
+  <div class="result-card" id="resultCard">
+    <div class="badge-bar">
+      <div class="status-tag" id="statusBadge"><i class="fas fa-check-circle"></i> VERIFIED REGISTRATION</div>
+      <div class="id-tag" id="resRegId">QAURA-2026-0000</div>
+    </div>
+    <div class="details-body" id="detailsContent"></div>
+  </div>
+
+  <!-- NOT FOUND CARD -->
+  <div class="not-found-card" id="notFoundCard">
+    <div style="font-size:2.5rem;color:var(--neon-pink);margin-bottom:10px;"><i class="fas fa-exclamation-triangle"></i></div>
+    <h3 style="font-family:var(--font-cyber);color:#fff;margin-bottom:6px;">REGISTRATION NOT FOUND</h3>
+    <p style="font-size:0.86rem;color:var(--text-muted);">
+      No record matching <strong id="searchedTerm" style="color:var(--neon-gold);"></strong> exists in local cache or Google Sheets registry.
+    </p>
+  </div>
+
+  <script>
+    // Initialize logo from base64 if present
+    if (window.collegeLogoBase64) {
+      document.getElementById('instLogo').src = window.collegeLogoBase64;
+    }
+
+    // Auto-check URL parameters (e.g. verify.html?id=QAURA-2026-XXXX)
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryId = urlParams.get('id') || urlParams.get('regId');
+      if (queryId) {
+        document.getElementById('passIdInput').value = queryId;
+        executeLookup();
+      }
+    });
+
+    async function executeLookup() {
+      const term = document.getElementById('passIdInput').value.trim();
+      if (!term) return;
+
+      document.getElementById('resultCard').style.display = 'none';
+      document.getElementById('notFoundCard').style.display = 'none';
+
+      const normTerm = term.toUpperCase().replace(/\s+/g, '');
+
+      // 1. Try PostgreSQL Database lookup first
+      const apiBase = (typeof QAURA_CONFIG !== 'undefined' && QAURA_CONFIG.API_BASE_URL)
+        ? QAURA_CONFIG.API_BASE_URL
+        : '';
+      const pgUrl = apiBase ? `${apiBase}/api/verify/${encodeURIComponent(term)}` : `/api/verify/${encodeURIComponent(term)}`;
+
+      let match = null;
+      try {
+        const res = await fetch(pgUrl, { cache: 'no-store' });
+        if (res.ok) {
+          const json = await res.json();
+          if (json && json.status === 'ok' && json.registration) {
+            const r = json.registration;
+            match = {
+              regId: r.reg_id || r.regId,
+              firstName: r.first_name || r.firstName,
+              lastName: r.last_name || r.lastName,
+              mobile: r.mobile,
+              email: r.email,
+              college: r.college,
+              techEvent: r.tech_event || r.techEvent,
+              nonTechEvent: r.non_tech_event || r.nonTechEvent,
+              fee: r.fee,
+              teamName: r.team_name || r.teamName,
+              leaderName: r.leader_name || r.leaderName,
+              leaderPhone: r.leader_phone || r.leaderPhone,
+              leaderEmail: r.leader_email || r.leaderEmail,
+              tm2: r.tm2,
+              tm3: r.tm3,
+              tm4: r.tm4,
+              paymentScreenshot: r.payment_screenshot || r.paymentScreenshot,
+              status: r.status || 'Verified (PostgreSQL DB)'
+            };
+          }
+        }
+      } catch (e) {
+        console.warn('PostgreSQL verify endpoint notice:', e);
+      }
+
+      // 2. Check local storage
+      if (!match) {
+        const local = JSON.parse(localStorage.getItem('qaura2026_registrations') || '[]');
+        match = local.find(r => 
+          (r.regId && r.regId.toUpperCase().replace(/\s+/g, '') === normTerm) ||
+          (r.mobile && r.mobile.toString().trim() === term)
+        );
+      }
+
+      // 3. Fallback to remote Google Sheets endpoint
+      if (!match && typeof QAURA_CONFIG !== 'undefined' && QAURA_CONFIG.APPS_SCRIPT_URL) {
+        try {
+          const res = await fetch(QAURA_CONFIG.APPS_SCRIPT_URL + '?format=json&id=' + encodeURIComponent(term));
+          const json = await res.json();
+          if (json && json.status === 'ok') {
+            if (json.registration) {
+              match = {
+                regId: json.registration['Reg ID'],
+                firstName: json.registration['First Name'],
+                lastName: json.registration['Last Name'],
+                mobile: json.registration['Mobile'],
+                email: json.registration['Email'],
+                college: json.registration['College'],
+                techEvent: json.registration['Technical Event'],
+                nonTechEvent: json.registration['Non-Technical Event'],
+                fee: json.registration['Fee'],
+                teamName: json.registration['Team Name'],
+                leaderName: json.registration['Leader Name'],
+                leaderPhone: json.registration['Leader Phone'],
+                tm2: json.registration['Teammate 2'],
+                tm3: json.registration['Teammate 3'],
+                tm4: json.registration['Teammate 4'],
+                status: 'Verified (Remote DB)'
+              };
+            }
+          }
+        } catch (e) {
+          console.warn('Remote lookup failed, relying on local cache:', e);
+        }
+      }
+
+      if (match) {
+        displayRecord(match);
+      } else {
+        document.getElementById('searchedTerm').textContent = term;
+        document.getElementById('notFoundCard').style.display = 'block';
+      }
+    }
+
+    function displayRecord(r) {
+      document.getElementById('resRegId').textContent = r.regId || 'REGISTERED';
+      const isHack = r.techEvent && r.techEvent.indexOf('Hackathon') !== -1;
+
+      let html = `
+        <div class="sec-title">👤 PARTICIPANT CREDENTIALS</div>
+        <div class="grid">
+          <div class="cell full"><div class="k">Full Name</div><div class="val">${r.firstName || ''} ${r.lastName || ''}</div></div>
+          <div class="cell"><div class="k">Mobile Number</div><div class="val">${r.mobile || '—'}</div></div>
+          <div class="cell"><div class="k">Fee Status</div><div class="val" style="color:var(--neon-gold);">${r.fee || '₹250'}</div></div>
+          <div class="cell full"><div class="k">Email Address</div><div class="val">${r.email || '—'}</div></div>
+          <div class="cell full"><div class="k">Institution / College</div><div class="val">${r.college || '—'}</div></div>
+        </div>
+
+        <div class="sec-title">🎯 ARENA ALLOCATION</div>
+        <div class="grid">
+          <div class="cell"><div class="k">Technical Arena</div><div class="val" style="color:var(--cyan);">${r.techEvent || '—'}</div></div>
+          <div class="cell"><div class="k">Non-Technical Arena</div><div class="val" style="color:var(--neon-green);">${r.nonTechEvent || '—'}</div></div>
+        </div>
+      `;
+
+      if (isHack) {
+        html += `
+          <div class="sec-title">🔥 HACKATHON STRIKE TEAM (3 MEMBERS | 5 HOURS)</div>
+          <div class="grid">
+            <div class="cell full"><div class="k">Team Call-Sign</div><div class="val" style="color:var(--neon-orange);">${r.teamName || '—'}</div></div>
+            <div class="cell"><div class="k">Team Leader</div><div class="val">${r.leaderName || '—'}</div></div>
+            <div class="cell"><div class="k">Leader Phone</div><div class="val">${r.leaderPhone || '—'}</div></div>
+            <div class="cell full"><div class="k">Team Operatives (3 Members)</div><div class="val">${[r.leaderName + ' (Leader)', r.tm2, r.tm3].filter(Boolean).join(' • ') || '—'}</div></div>
+            <div class="cell full"><div class="k">Hackathon Timing</div><div class="val" style="color:var(--neon-gold);">10:00 AM – 03:00 PM (5 Hours)</div></div>
+          </div>
+        `;
+      }
+
+      if (r.paymentScreenshot && r.paymentScreenshot.startsWith('data:image')) {
+        html += `
+          <div class="sec-title">💳 PAYMENT SCREENSHOT ATTACHMENT</div>
+          <img src="${r.paymentScreenshot}" class="proof-img" alt="Payment Proof"/>
+        `;
+      }
+
+      html += `
+        <div class="action-row">
+          <button class="btn-action btn-approve" onclick="markOperative('${r.regId}', 'Verified')">✓ MARK VERIFIED &amp; PRESENT</button>
+          <button class="btn-action btn-reject" onclick="markOperative('${r.regId}', 'Flagged / Issue')">⚠️ FLAG / INCOMPLETE</button>
+        </div>
+        <div style="margin-top:10px;">
+          <a href="admin.html" class="nav-btn" style="width:100%;justify-content:center;padding:9px;color:var(--cyan);border-color:rgba(0,240,255,0.4);"><i class="fas fa-shield-alt"></i> OPEN IN ADMIN COMMAND PANEL ➔</a>
+        </div>
+      `;
+
+      document.getElementById('detailsContent').innerHTML = html;
+      document.getElementById('resultCard').style.display = 'block';
+    }
+
+    async function markOperative(regId, newStatus) {
+      // 1. Update in PostgreSQL
+      try {
+        const apiBase = (typeof QAURA_CONFIG !== 'undefined' && QAURA_CONFIG.API_BASE_URL)
+          ? QAURA_CONFIG.API_BASE_URL
+          : '';
+        const endpoint = apiBase ? `${apiBase}/api/registrations/${encodeURIComponent(regId)}/status` : `/api/registrations/${encodeURIComponent(regId)}/status`;
+        await fetch(endpoint, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+      } catch (err) {
+        console.warn('PostgreSQL update error:', err);
+      }
+
+      // 2. Update in localStorage
+      const local = JSON.parse(localStorage.getItem('qaura2026_registrations') || '[]');
+      const idx = local.findIndex(x => x.regId === regId);
+      if (idx !== -1) {
+        local[idx].status = newStatus;
+        localStorage.setItem('qaura2026_registrations', JSON.stringify(local));
+      }
+
+      alert('Status updated to: ' + newStatus);
+      location.reload();
+    }
+  </script>
+</body>
+</html>

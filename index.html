@@ -1,0 +1,3424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Q-AURA 2026 | National Level Tech Fest | Rathinam Global University</title>
+  <meta name="description" content="Q-AURA 2026 - National Level Tech Fest organized by School of Quantum Science and Computing AI, Rathinam Global University."/>
+
+  <!-- Google Fonts matching xploitxctf.me -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Standalone offline QR Code generator -->
+  <script src="assets/qrcode.min.js"></script>
+  <!-- Pre-loaded College Logo Base64 (Instant, Offline) -->
+  <script src="assets/logo_base64.js"></script>
+  <!-- Remote Database Configuration -->
+  <script src="config.js"></script>
+
+  <style>
+    /* ─── RESET & CYBER CORE (xploitxctf.me inspired) ──────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --bg-dark: #07090e;
+      --bg-surface: #0e121b;
+      --bg-card: rgba(16, 21, 32, 0.85);
+      
+      --cyan: #00f0ff;
+      --neon-green: #00ff66;
+      --neon-purple: #9d4edd;
+      --neon-gold: #ffd700;
+      --neon-orange: #ff7700;
+      --neon-pink: #ff0055;
+      
+      --border-glow: rgba(0, 240, 255, 0.25);
+      --border-purple: rgba(157, 78, 221, 0.35);
+      --border-gold: rgba(255, 215, 0, 0.35);
+      
+      --text-main: #f0f4fc;
+      --text-muted: #8b9bb4;
+      --text-dim: #5a6880;
+      
+      --font-cyber: 'Orbitron', monospace;
+      --font-tech: 'Rajdhani', sans-serif;
+      --font-mono: 'Share Tech Mono', monospace;
+      --font-sans: 'Space Grotesk', system-ui, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ─── CYBER GRID & PARTICLE CANVAS ────────────────────────────── */
+    #cyber-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.45;
+    }
+
+    .cyber-grid-overlay {
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(to right, rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 44px 44px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ─── LIVE NEWS MARQUEE ────────────────────────────────────────── */
+    .news-marquee-container {
+      background: rgba(8, 11, 18, 0.98);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+      padding: 9px 0;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      letter-spacing: 1px;
+      color: var(--neon-gold);
+      overflow: hidden;
+      white-space: nowrap;
+      position: relative;
+      z-index: 100;
+    }
+    .news-marquee-content {
+      display: inline-block;
+      animation: ticker 30s linear infinite;
+    }
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-right: 48px;
+    }
+    .ticker-highlight {
+      color: var(--neon-green);
+      font-weight: 700;
+    }
+
+    /* ─── DUAL BRAND HEADER (50% COLLEGE LOGO LEFT, 50% SCHOOL LOGO RIGHT) ── */
+    .college-header-wrapper {
+      position: relative;
+      z-index: 50;
+      width: 100%;
+      background: #ffffff;
+      border-bottom: 2.5px solid var(--cyan);
+      box-shadow: 0 0 35px rgba(0, 240, 255, 0.35);
+      padding: 14px 28px;
+    }
+    .college-header-dual {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .header-brand-half {
+      flex: 1 1 50%;
+      width: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
+    }
+    .pec-logo-img {
+      max-height: 105px;
+      height: 98px;
+      width: 100%;
+      max-width: 580px;
+      object-fit: contain;
+      display: block;
+      filter: none !important;
+      box-shadow: none !important;
+    }
+    .header-brand-divider {
+      height: 85px;
+      width: 2px;
+      background: linear-gradient(180deg, rgba(0,240,255,0.05), rgba(0,240,255,0.85), rgba(0,240,255,0.05));
+      flex-shrink: 0;
+    }
+    .school-brand-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    .school-icon-img {
+      height: 62px;
+      max-height: 68px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto 5px;
+      filter: none !important;
+      box-shadow: none !important;
+      border: none !important;
+      outline: none !important;
+    }
+    .school-brand-title {
+      font-family: var(--font-sans);
+      font-size: 14.5px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: 0.6px;
+      line-height: 1.25;
+      text-align: center;
+      text-shadow: none !important;
+    }
+    @media (max-width: 860px) {
+      .college-header-dual {
+        flex-direction: column;
+        gap: 14px;
+        text-align: center;
+      }
+      .header-brand-half {
+        flex: 1 1 100%;
+        width: 100%;
+        padding: 4px;
+      }
+      .header-brand-divider { display: none; }
+      .pec-logo-img { height: 60px; max-height: 60px; }
+      .school-icon-img { height: 50px; max-height: 50px; }
+      .school-brand-title { font-size: 13px; }
+      .college-header-wrapper { padding: 12px 14px; }
+    }
+
+    /* ─── DEPARTMENT BAR ───────────────────────────────────────────── */
+    .department-bar {
+      background: linear-gradient(90deg, rgba(8, 12, 20, 0.98), rgba(24, 12, 40, 0.98), rgba(8, 12, 20, 0.98));
+      border-bottom: 1.5px solid rgba(0, 240, 255, 0.3);
+      padding: 12px 16px;
+      position: relative;
+      z-index: 50;
+    }
+    .department-bar-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+    .dept-accent-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan));
+    }
+    .dept-accent-line.right {
+      background: linear-gradient(90deg, var(--cyan), transparent);
+    }
+    .department-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--font-cyber);
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #ffffff;
+      text-transform: uppercase;
+      text-shadow: 0 0 14px rgba(0, 240, 255, 0.7);
+      text-align: center;
+    }
+    .dept-shield-icon {
+      color: var(--cyan);
+      font-size: 1.2rem;
+      animation: pulseGlow 2s infinite alternate;
+    }
+    @keyframes pulseGlow {
+      from { filter: drop-shadow(0 0 4px var(--cyan)); }
+      to { filter: drop-shadow(0 0 14px var(--cyan)); }
+    }
+
+    /* ─── HUD PANEL CLASS ──────────────────────────────────────────── */
+    .hud-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glow);
+      backdrop-filter: blur(14px);
+      border-radius: 12px;
+      position: relative;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hud-panel::before {
+      content: '';
+      position: absolute;
+      top: -1px; left: -1px;
+      width: 14px; height: 14px;
+      border-top: 2px solid var(--cyan);
+      border-left: 2px solid var(--cyan);
+      border-top-left-radius: 12px;
+      pointer-events: none;
+    }
+    .hud-panel::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; right: -1px;
+      width: 14px; height: 14px;
+      border-bottom: 2px solid var(--cyan);
+      border-right: 2px solid var(--cyan);
+      border-bottom-right-radius: 12px;
+      pointer-events: none;
+    }
+
+    /* ─── HERO SECTION ─────────────────────────────────────────────── */
+    .hero-section {
+      position: relative;
+      z-index: 10;
+      padding: 48px 20px 24px;
+      text-align: center;
+    }
+    .hero-content {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      color: var(--cyan);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      letter-spacing: 2px;
+      padding: 6px 18px;
+      border-radius: 50px;
+      margin-bottom: 16px;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+    }
+    .hero-title {
+      font-family: var(--font-cyber);
+      font-size: clamp(2.4rem, 7vw, 4.4rem);
+      font-weight: 900;
+      letter-spacing: 2px;
+      line-height: 1.1;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #ffffff 20%, var(--cyan) 60%, var(--neon-purple) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+    }
+    .hero-subtitle-format {
+      font-family: var(--font-tech);
+      font-size: clamp(1.1rem, 3vw, 1.5rem);
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: var(--neon-gold);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .hero-tagline {
+      font-family: var(--font-sans);
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 720px;
+      margin: 0 auto 24px;
+    }
+    
+    .hero-meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .meta-chip {
+      background: rgba(16, 22, 35, 0.8);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+    }
+    .meta-chip i { color: var(--cyan); }
+    .meta-chip.gold i { color: var(--neon-gold); }
+    .meta-chip.green i { color: var(--neon-green); }
+
+    /* ─── LIVE COUNTDOWN (9TH OCT 2026, 6:00 PM) ──────────────────── */
+    .countdown-section {
+      max-width: 1080px;
+      margin: 0 auto 40px;
+      padding: 0 16px;
+      position: relative;
+      z-index: 10;
+    }
+    .countdown-wrapper {
+      padding: 28px 20px;
+      text-align: center;
+      border-color: rgba(0, 240, 255, 0.35);
+      background: linear-gradient(135deg, rgba(8, 14, 25, 0.95), rgba(18, 10, 32, 0.95));
+      box-shadow: 0 0 35px rgba(0, 240, 255, 0.18);
+    }
+    .countdown-heading {
+      font-family: var(--font-cyber);
+      font-size: 0.92rem;
+      letter-spacing: 2px;
+      color: var(--cyan);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .countdown-subtext {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--neon-gold);
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+    .countdown-grid {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .countdown-box {
+      background: rgba(4, 7, 12, 0.85);
+      border: 1.5px solid rgba(0, 240, 255, 0.3);
+      border-radius: 10px;
+      padding: 14px 18px;
+      min-width: 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: inset 0 0 15px rgba(0, 240, 255, 0.1);
+    }
+    .countdown-val {
+      font-family: var(--font-cyber);
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1;
+      text-shadow: 0 0 15px var(--cyan);
+    }
+    .countdown-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--cyan);
+      letter-spacing: 1.5px;
+      margin-top: 6px;
+    }
+    .countdown-divider {
+      font-family: var(--font-cyber);
+      font-size: 1.8rem;
+      color: var(--cyan);
+      opacity: 0.7;
+      animation: blinkDivider 1s infinite;
+    }
+    @keyframes blinkDivider { 50% { opacity: 0.2; } }
+
+    /* ─── CASH PRIZE ARENA ─────────────────────────────────────────── */
+    .prize-arena-section {
+      max-width: 1080px;
+      margin: 0 auto 50px;
+      padding: 0 16px;
+      position: relative;
+      z-index: 10;
+    }
+    .prize-arena-card {
+      background: linear-gradient(135deg, rgba(25, 14, 45, 0.9) 0%, rgba(12, 17, 30, 0.95) 50%, rgba(35, 20, 10, 0.9) 100%);
+      border: 2px solid var(--neon-gold);
+      box-shadow: 0 0 40px rgba(255, 215, 0, 0.28), inset 0 0 25px rgba(255, 215, 0, 0.1);
+      padding: 36px 24px;
+      text-align: center;
+    }
+    .prize-tag {
+      font-family: var(--font-mono);
+      color: var(--neon-gold);
+      font-size: 0.82rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+    .prize-main-title {
+      font-family: var(--font-cyber);
+      font-size: clamp(1.6rem, 4vw, 2.5rem);
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 1.5px;
+      margin-bottom: 8px;
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    }
+    .prize-highlight-quote {
+      font-family: var(--font-tech);
+      font-size: clamp(1.2rem, 3vw, 1.6rem);
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    
+    .podium-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+    .podium-box {
+      border-radius: 12px 12px 0 0;
+      padding: 16px 20px;
+      min-width: 140px;
+      text-align: center;
+      font-family: var(--font-cyber);
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .podium-box.rank-1 {
+      background: linear-gradient(180deg, rgba(255, 215, 0, 0.4), rgba(255, 140, 0, 0.2));
+      border-color: var(--neon-gold);
+      height: 140px;
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.35);
+    }
+    .podium-box.rank-2 {
+      background: linear-gradient(180deg, rgba(200, 220, 240, 0.3), rgba(100, 130, 160, 0.15));
+      border-color: #c8dcf0;
+      height: 115px;
+    }
+    .podium-box.rank-3 {
+      background: linear-gradient(180deg, rgba(205, 127, 50, 0.3), rgba(120, 70, 30, 0.15));
+      border-color: #cd7f32;
+      height: 95px;
+    }
+    .podium-medal { font-size: 2rem; margin-bottom: 4px; }
+    .podium-rank { font-size: 0.95rem; font-weight: 800; color: #fff; }
+    .podium-prize { font-family: var(--font-mono); font-size: 0.8rem; color: var(--neon-gold); margin-top: 4px; }
+
+    /* ─── EVENTS SECTION & SPACE ALLOCATION ───────────────────────── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 10; }
+    
+    .section-header {
+      text-align: center;
+      margin-bottom: 38px;
+      position: relative;
+    }
+    .section-tag {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      letter-spacing: 3px;
+      color: var(--cyan);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .section-title {
+      font-family: var(--font-cyber);
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: #fff;
+    }
+
+    /* SPACIOUS EVENTS GRID (Requested: Space Allocation) */
+    .events-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 26px; /* Generous gap */
+      margin-bottom: 65px;
+    }
+    .event-hud-card {
+      padding: 30px 26px; /* Spacious internal padding */
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 250px; /* Ample breathing room */
+      border: 1px solid rgba(0, 240, 255, 0.18);
+      transition: all 0.3s ease;
+    }
+    .event-hud-card:hover {
+      border-color: var(--cyan);
+      transform: translateY(-5px);
+      box-shadow: 0 14px 35px rgba(0, 240, 255, 0.22);
+    }
+    .event-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .event-number {
+      font-family: var(--font-cyber);
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--cyan);
+      opacity: 0.9;
+    }
+    .event-badge-tag {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      padding: 4px 12px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .badge-tech { background: rgba(0, 240, 255, 0.12); color: var(--cyan); border: 1px solid rgba(0, 240, 255, 0.35); }
+    .badge-nontech { background: rgba(0, 255, 102, 0.12); color: var(--neon-green); border: 1px solid rgba(0, 255, 102, 0.35); }
+    .badge-hack { background: rgba(255, 119, 0, 0.15); color: var(--neon-orange); border: 1px solid rgba(255, 119, 0, 0.45); }
+
+    .event-title {
+      font-family: var(--font-cyber);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+    .event-desc {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin-bottom: 22px;
+      line-height: 1.6;
+    }
+    .event-timing-box {
+      background: rgba(8, 11, 18, 0.7);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--neon-gold);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* ─── REGISTRATION FORM & SELECTOR SPACING ─────────────────────── */
+    .form-wrapper { margin-bottom: 70px; }
+    .registration-hud-card {
+      padding: 44px 36px;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+    }
+    @media (max-width: 600px) {
+      .registration-hud-card { padding: 24px 16px; }
+    }
+
+    .form-info-strip {
+      background: rgba(0, 240, 255, 0.06);
+      border-left: 3px solid var(--cyan);
+      padding: 16px 20px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      margin-bottom: 32px;
+      color: #dbe4f5;
+      line-height: 1.8;
+    }
+    .form-info-strip strong { color: var(--cyan); }
+
+    .sub-section-title {
+      font-family: var(--font-cyber);
+      font-size: 1.05rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 28px 0 18px;
+      letter-spacing: 1px;
+    }
+    .sub-section-title i { color: var(--cyan); }
+
+    .form-grid {
+      display: grid;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+    .form-grid.cols2 { grid-template-columns: 1fr 1fr; }
+    @media (max-width: 620px) { .form-grid.cols2 { grid-template-columns: 1fr; } }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .cyber-label {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      color: var(--cyan);
+      letter-spacing: 1px;
+    }
+    .req { color: var(--neon-pink); }
+
+    .cyber-input {
+      background: rgba(10, 14, 22, 0.85);
+      border: 1.5px solid rgba(0, 240, 255, 0.2);
+      border-radius: 8px;
+      padding: 13px 15px;
+      color: #fff;
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .cyber-input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.35);
+      background: rgba(14, 19, 32, 0.95);
+    }
+    .cyber-input.error { border-color: var(--neon-pink); }
+    .err-text {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--neon-pink);
+      display: none;
+    }
+    .err-text.show { display: block; }
+
+    /* Spacious Event Selector Options */
+    .cyber-selector-grid {
+      display: grid;
+      gap: 14px; /* Generous gap between options */
+    }
+    .cyber-event-option {
+      background: rgba(12, 17, 26, 0.7);
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 18px 22px; /* Generous padding */
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .cyber-event-option:hover {
+      border-color: var(--cyan);
+      background: rgba(0, 240, 255, 0.05);
+    }
+    .cyber-event-option.selected {
+      border-color: var(--cyan);
+      background: rgba(0, 240, 255, 0.12);
+      box-shadow: 0 0 18px rgba(0, 240, 255, 0.2);
+    }
+    .cyber-event-option input[type="radio"] { display: none; }
+    
+    .cyber-radio-indicator {
+      width: 22px;
+      height: 22px;
+      border: 2px solid rgba(0, 240, 255, 0.4);
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cyber-event-option.selected .cyber-radio-indicator {
+      border-color: var(--cyan);
+      background: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan);
+    }
+    .cyber-event-option.selected .cyber-radio-indicator::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #000;
+    }
+    .ev-meta-text h4 {
+      font-family: var(--font-cyber);
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+    .ev-meta-text p {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+    }
+    .ev-timing-tag {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      padding: 5px 12px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--neon-gold);
+      white-space: nowrap;
+    }
+
+    /* Hackathon Strike Team Block */
+    #hackathon-team-panel {
+      display: none;
+      margin-top: 26px;
+      background: rgba(35, 20, 10, 0.6);
+      border: 1.5px dashed var(--neon-orange);
+      border-radius: 12px;
+      padding: 26px;
+      box-shadow: inset 0 0 20px rgba(255, 119, 0, 0.1);
+    }
+    #hackathon-team-panel.show { display: block; }
+    .hack-title {
+      font-family: var(--font-cyber);
+      font-size: 1.05rem;
+      color: var(--neon-orange);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .team-member-card {
+      background: rgba(14, 18, 28, 0.85);
+      border: 1px solid rgba(255, 119, 0, 0.25);
+      border-radius: 8px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+    .team-member-card h5 {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--neon-orange);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    /* Payment Block */
+    .payment-hud-block {
+      background: rgba(16, 22, 35, 0.7);
+      border: 1.5px solid var(--border-purple);
+      border-radius: 12px;
+      padding: 26px;
+      margin-top: 28px;
+    }
+    .fee-chips-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .fee-badge-pill {
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      padding: 9px 18px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .fee-badge-pill.standard {
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+    }
+    .fee-badge-pill.hack-fee {
+      background: rgba(255, 119, 0, 0.12);
+      border: 1.5px solid var(--neon-orange);
+      color: var(--neon-orange);
+    }
+
+    .upload-hud-dropzone {
+      border: 2px dashed rgba(0, 240, 255, 0.35);
+      border-radius: 10px;
+      padding: 28px 16px;
+      text-align: center;
+      background: rgba(8, 12, 18, 0.7);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    .upload-hud-dropzone:hover {
+      border-color: var(--cyan);
+      background: rgba(0, 240, 255, 0.05);
+    }
+    .upload-hud-dropzone.has-file {
+      border-color: var(--neon-green);
+      background: rgba(0, 255, 102, 0.05);
+    }
+    .upload-hud-dropzone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%; height: 100%;
+    }
+    .upload-icon { font-size: 2.4rem; color: var(--cyan); margin-bottom: 8px; }
+    .upload-filename {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--neon-green);
+      margin-top: 8px;
+      display: none;
+    }
+    #preview-image-elem {
+      max-width: 100%;
+      max-height: 220px;
+      border-radius: 8px;
+      margin-top: 14px;
+      border: 1.5px solid var(--neon-green);
+      display: none;
+    }
+
+    /* ── PAYMENT DESK QR & INSTRUCTIONS LAYOUT ── */
+    .payment-desk-layout {
+      display: grid;
+      grid-template-columns: 290px 1fr;
+      gap: 22px;
+      margin-bottom: 24px;
+      align-items: stretch;
+    }
+    @media (max-width: 820px) {
+      .payment-desk-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    .payment-qr-card {
+      background: #ffffff;
+      border: 2px solid var(--cyan);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.25);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .payment-qr-badge {
+      font-family: var(--font-cyber);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      color: #004b93;
+      background: #e6f0fa;
+      border: 1px solid #b3d4f5;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .payment-qr-img-wrap {
+      width: 100%;
+      max-width: 240px;
+      margin: 0 auto;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+      background: #ffffff;
+      transition: transform 0.2s ease;
+    }
+    .payment-qr-img-wrap:hover {
+      transform: scale(1.02);
+    }
+    .payment-qr-poster {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+    .payment-upi-details {
+      width: 100%;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid #e2e8f0;
+    }
+    .upi-id-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 6px 10px;
+      gap: 8px;
+    }
+    .upi-id-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #64748b;
+    }
+    .upi-id-val {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #0f172a;
+      user-select: all;
+      word-break: break-all;
+    }
+    .btn-copy-upi {
+      background: #004b93;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 10px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-copy-upi:hover {
+      background: #002d59;
+      transform: translateY(-1px);
+    }
+    .upi-bank-name {
+      font-size: 0.68rem;
+      color: #475569;
+      margin-top: 6px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    .payment-instructions-panel {
+      background: rgba(10, 14, 24, 0.85);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      border-radius: 12px;
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .pay-step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .pay-step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--cyan);
+      color: #07090e;
+      font-family: var(--font-cyber);
+      font-weight: 900;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .pay-step-text {
+      font-size: 0.86rem;
+      color: #e2e8f0;
+      line-height: 1.5;
+    }
+    .pay-step-text strong {
+      color: #ffffff;
+    }
+    .pay-step-text code {
+      background: rgba(0, 240, 255, 0.12);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--cyan);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+    }
+
+    /* Submit Button */
+    .btn-cyber-primary {
+      width: 100%;
+      padding: 17px 24px;
+      font-family: var(--font-cyber);
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #07090e;
+      background: linear-gradient(135deg, var(--cyan) 0%, var(--neon-green) 100%);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.4);
+      transition: all 0.25s ease;
+      margin-top: 26px;
+    }
+    .btn-cyber-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 35px rgba(0, 255, 102, 0.6);
+    }
+
+    .cyber-btn {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .cb-outline {
+      background: rgba(0, 240, 255, 0.08);
+      border-color: rgba(0, 240, 255, 0.4);
+      color: var(--cyan);
+    }
+    .cb-outline:hover {
+      background: rgba(0, 240, 255, 0.2);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+    }
+    .cb-green {
+      background: rgba(0, 255, 102, 0.12);
+      border-color: var(--neon-green);
+      color: var(--neon-green);
+    }
+    .cb-green:hover {
+      background: rgba(0, 255, 102, 0.25);
+      box-shadow: 0 0 15px rgba(0, 255, 102, 0.4);
+    }
+
+    /* ─── COORDINATORS ─────────────────────────────────────────────── */
+    .coordinators-wrapper { margin-bottom: 75px; }
+    .coord-category-title {
+      font-family: var(--font-cyber);
+      font-size: 1rem;
+      letter-spacing: 2px;
+      color: var(--neon-purple);
+      margin: 32px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .coord-category-title i { color: var(--neon-purple); }
+    .coord-category-title.student-title { color: var(--neon-green); }
+    .coord-category-title.student-title i { color: var(--neon-green); }
+
+    .coordinators-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 18px;
+    }
+    .organizer-person-box {
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      transition: all 0.25s ease;
+    }
+    .organizer-person-box:hover {
+      border-color: var(--cyan);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+    .organizer-avatar-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      background: rgba(0, 240, 255, 0.1);
+      border: 1.5px solid var(--cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cyan);
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .organizer-person-name {
+      font-family: var(--font-cyber);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+    .organizer-person-role {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .organizer-person-phone {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.84rem;
+      color: var(--neon-gold);
+      text-decoration: none;
+      margin-top: 8px;
+    }
+    .organizer-person-phone:hover {
+      color: #fff;
+      text-shadow: 0 0 8px var(--neon-gold);
+    }
+
+    /* ─── SUCCESS MODAL WITH CONFIRMATION EMAIL BADGE ─────────────── */
+    #success-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 6, 12, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    #success-modal-overlay.show { display: flex; }
+    .success-hud-card {
+      max-width: 560px;
+      width: 100%;
+      padding: 36px 28px;
+      text-align: center;
+      border: 1.5px solid var(--neon-green);
+      box-shadow: 0 0 50px rgba(0, 255, 102, 0.25);
+      animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.85); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .success-trophy-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(0, 255, 102, 0.15);
+      border: 2px solid var(--neon-green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 2.2rem;
+      color: var(--neon-green);
+    }
+    .reg-id-display {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--cyan);
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid var(--cyan);
+      padding: 8px 24px;
+      border-radius: 6px;
+      margin: 12px 0;
+      letter-spacing: 2px;
+    }
+    .email-sent-badge {
+      background: rgba(0, 255, 102, 0.12);
+      border: 1px solid var(--neon-green);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      color: var(--neon-green);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+      margin: 14px 0;
+    }
+    #reg-summary-details {
+      background: rgba(8, 12, 18, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+      text-align: left;
+      font-size: 0.85rem;
+      line-height: 1.9;
+    }
+    #reg-summary-details strong { color: var(--cyan); }
+
+    /* ── INVALID PAYMENT PROOF MODAL ── */
+    #invalid-payment-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 6, 12, 0.92);
+      backdrop-filter: blur(10px);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    #invalid-payment-modal-overlay.show { display: flex; }
+    .invalid-payment-hud-card {
+      max-width: 540px;
+      width: 100%;
+      background: #0d121c;
+      border: 2px solid #ff0055;
+      border-radius: 14px;
+      padding: 32px 26px;
+      text-align: center;
+      box-shadow: 0 0 50px rgba(255, 0, 85, 0.45);
+      animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .invalid-payment-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(255, 0, 85, 0.15);
+      border: 2px solid #ff0055;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 2.2rem;
+      color: #ff0055;
+      animation: pulseAlert 1.5s infinite;
+    }
+    @keyframes pulseAlert {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(255,0,85,0.6)); }
+      50% { transform: scale(1.08); filter: drop-shadow(0 0 25px rgba(255,0,85,0.9)); }
+    }
+    .invalid-payment-checklist {
+      background: rgba(255, 0, 85, 0.08);
+      border: 1px solid rgba(255, 0, 85, 0.3);
+      border-radius: 8px;
+      padding: 14px 18px;
+      text-align: left;
+      font-size: 0.84rem;
+      color: #cbd5e1;
+      margin: 18px 0;
+    }
+    .invalid-payment-checklist .chk-hdr {
+      font-family: var(--font-cyber);
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #ff7700;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+    .invalid-payment-checklist ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .invalid-payment-checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.4;
+    }
+    .invalid-payment-checklist li i {
+      margin-top: 3px;
+      flex-shrink: 0;
+    }
+
+    /* ── SCANNING & VERIFIED BADGES ── */
+    #payment-scan-indicator {
+      display: none;
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid var(--cyan);
+      border-radius: 8px;
+      padding: 14px;
+      margin-top: 12px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+    }
+    #payment-verified-badge {
+      display: none;
+      background: rgba(0, 255, 102, 0.1);
+      border: 1.5px solid var(--neon-green);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-top: 12px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: 0 0 25px rgba(0, 255, 102, 0.25);
+    }
+    #payment-verified-badge.show {
+      display: flex;
+    }
+
+    /* Spinner & Toast */
+    #cyber-spinner {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 6, 12, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+    }
+    #cyber-spinner.show { display: flex; }
+    .spinner-hud-ring {
+      width: 60px; height: 60px;
+      border: 4px solid rgba(0, 240, 255, 0.2);
+      border-top-color: var(--cyan);
+      border-right-color: var(--neon-green);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-hud-text { font-family: var(--font-mono); color: var(--cyan); letter-spacing: 2px; }
+
+    #cyber-toast {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: rgba(14, 19, 30, 0.95);
+      border: 1px solid var(--cyan);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+      color: #fff;
+      padding: 12px 22px;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      z-index: 20000;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    #cyber-toast.show { transform: translateY(0); opacity: 1; }
+    #cyber-toast.success { border-color: var(--neon-green); color: var(--neon-green); }
+    #cyber-toast.error { border-color: var(--neon-pink); color: var(--neon-pink); }
+
+    /* ─── FOOTER WITH FULL COLLEGE ADDRESS ─────────────────────────── */
+    .cyber-footer {
+      border-top: 1.5px solid rgba(0, 240, 255, 0.25);
+      background: rgba(5, 7, 12, 0.98);
+      padding: 50px 20px 30px;
+      position: relative;
+      z-index: 10;
+    }
+    .footer-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1.5fr;
+      gap: 36px;
+      margin-bottom: 35px;
+    }
+    @media (max-width: 860px) {
+      .footer-container { grid-template-columns: 1fr; gap: 28px; }
+    }
+    .footer-col h3 {
+      font-family: var(--font-cyber);
+      font-size: 1.05rem;
+      color: #fff;
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+    .footer-col p {
+      color: var(--text-muted);
+      font-size: 0.86rem;
+      line-height: 1.7;
+    }
+    .footer-address-block {
+      background: rgba(14, 20, 32, 0.6);
+      border: 1px solid rgba(0, 240, 255, 0.18);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 12px;
+    }
+    .footer-address-block i { color: var(--cyan); margin-right: 8px; }
+    .footer-address-text {
+      font-size: 0.88rem;
+      color: #e2e8f5;
+      line-height: 1.6;
+    }
+    .footer-links-list {
+      list-style: none;
+    }
+    .footer-links-list li { margin-bottom: 8px; }
+    .footer-links-list a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.86rem;
+      transition: color 0.2s;
+    }
+    .footer-links-list a:hover { color: var(--cyan); }
+    .footer-bottom-bar {
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 20px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- CANVAS PARTICLES & GRID -->
+  <canvas id="cyber-canvas"></canvas>
+  <div class="cyber-grid-overlay"></div>
+
+  <!-- LIVE NEWS TICKER MARQUEE -->
+  <div class="news-marquee-container">
+    <div class="news-marquee-content">
+      <span class="ticker-item"><i class="fas fa-fire" style="color:var(--neon-orange);"></i> <span class="ticker-highlight">Q-AURA 2026 REGISTRATION IS LIVE</span> • 14 OCTOBER 2026</span>
+      <span class="ticker-item"><i class="fas fa-trophy" style="color:var(--neon-gold);"></i> <span class="ticker-highlight">WIN BIG. INNOVATE BIGGER.</span> • CASH PRIZES FOR TOP 3 HACKATHON WINNERS!</span>
+      <span class="ticker-item"><i class="fas fa-hourglass-half" style="color:var(--cyan);"></i> ENLISTMENT CLOSES: 09 OCTOBER 2026 @ 06:00 PM IST</span>
+      <span class="ticker-item"><i class="fas fa-map-marker-alt" style="color:var(--cyan);"></i> TOWER-C THINK TANK THEATER, RATHINAM GLOBAL UNIVERSITY</span>
+      <span class="ticker-item"><i class="fas fa-fire" style="color:var(--neon-orange);"></i> <span class="ticker-highlight">Q-AURA 2026 REGISTRATION IS LIVE</span> • 14 OCTOBER 2026</span>
+      <span class="ticker-item"><i class="fas fa-trophy" style="color:var(--neon-gold);"></i> <span class="ticker-highlight">WIN BIG. INNOVATE BIGGER.</span> • CASH PRIZES FOR TOP 3 HACKATHON WINNERS!</span>
+      <span class="ticker-item"><i class="fas fa-hourglass-half" style="color:var(--cyan);"></i> ENLISTMENT CLOSES: 09 OCTOBER 2026 @ 06:00 PM IST</span>
+      <span class="ticker-item"><i class="fas fa-map-marker-alt" style="color:var(--cyan);"></i> TOWER-C THINK TANK THEATER, RATHINAM GLOBAL UNIVERSITY</span>
+    </div>
+  </div>
+
+  <!-- DUAL BRAND HEADER (50% COLLEGE LOGO LEFT, 50% SCHOOL LOGO RIGHT) -->
+  <header class="college-header-wrapper">
+    <div class="college-header-dual">
+      <div class="header-brand-half header-brand-left">
+        <img src="assets/logo.png" alt="Rathinam Global University Logo" class="pec-logo-img">
+      </div>
+      <div class="header-brand-divider"></div>
+      <div class="header-brand-half header-brand-right">
+        <div class="school-brand-box">
+          <img src="assets/school_icon.png" alt="School of Quantum Sciences, Computing & AI Icon" class="school-icon-img">
+          <div class="school-brand-title">School of Quantum Sciences, Computing &amp; AI</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- DEPARTMENT BAR -->
+  <div class="department-bar">
+    <div class="department-bar-inner">
+      <span class="dept-accent-line left"></span>
+      <div class="department-badge">
+        <i class="fas fa-atom dept-shield-icon"></i>
+        <span>SCHOOL OF QUANTUM SCIENCE AND COMPUTING AI</span>
+      </div>
+      <span class="dept-accent-line right"></span>
+    </div>
+  </div>
+
+  <!-- HERO SECTION -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-tag">
+        <i class="fas fa-microchip"></i> NATIONAL LEVEL TECH FEST 2026
+      </div>
+      <h1 class="hero-title">Q-AURA 2026</h1>
+      <div class="hero-subtitle-format">THE NEXT BIG THING IS YOU</div>
+      <p class="hero-tagline">
+        TECH • IDEAS • INNOVATION • FUTURE &nbsp;|&nbsp; 5 Hours of Challenges &bull; 6 Exciting Events &bull; 1 Unforgettable Experience
+      </p>
+
+      <div class="hero-meta-bar">
+        <div class="meta-chip">
+          <i class="fas fa-calendar-alt"></i>
+          <span>OCTOBER 14, 2026 (WEDNESDAY)</span>
+        </div>
+        <div class="meta-chip gold">
+          <i class="fas fa-map-marked-alt"></i>
+          <span>TOWER - C, THINK TANK THEATER</span>
+        </div>
+        <div class="meta-chip green">
+          <i class="fas fa-ticket-alt"></i>
+          <span>FEE: ₹250 / STUDENT &bull; HACKATHON: ₹300 / TEAM</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COUNTDOWN TIMER: TODAY TILL 9TH OCTOBER 2026 6:00 PM (REQUESTED) -->
+  <section class="countdown-section">
+    <div class="countdown-wrapper hud-panel">
+      <div class="countdown-heading">
+        <i class="fas fa-satellite-dish"></i> <span>ENLISTMENT WINDOW CLOSES IN</span>
+      </div>
+      <div class="countdown-subtext">
+        TARGET DEADLINE: 09 OCTOBER 2026 • 06:00 PM IST
+      </div>
+      <div class="countdown-grid">
+        <div class="countdown-box">
+          <span class="countdown-val" id="cd-days">00</span>
+          <span class="countdown-label">DAYS</span>
+        </div>
+        <div class="countdown-divider">:</div>
+        <div class="countdown-box">
+          <span class="countdown-val" id="cd-hours">00</span>
+          <span class="countdown-label">HOURS</span>
+        </div>
+        <div class="countdown-divider">:</div>
+        <div class="countdown-box">
+          <span class="countdown-val" id="cd-minutes">00</span>
+          <span class="countdown-label">MINUTES</span>
+        </div>
+        <div class="countdown-divider">:</div>
+        <div class="countdown-box">
+          <span class="countdown-val" id="cd-seconds">00</span>
+          <span class="countdown-label">SECONDS</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WIN BIG INNOVATE BIGGER CASH PRIZE ARENA -->
+  <section class="prize-arena-section">
+    <div class="prize-arena-card hud-panel">
+      <span class="prize-tag"><i class="fas fa-crown"></i> OFFICIAL BATTLEGROUND TREASURY</span>
+      <h2 class="prize-main-title">WIN BIG. INNOVATE BIGGER.</h2>
+      <div class="prize-highlight-quote">
+        🔥 CASH PRIZES ARE WAITING FOR THE TOP 3 HACKATHON WINNERS! 🔥
+      </div>
+
+      <div class="podium-container">
+        <!-- 2nd Place -->
+        <div class="podium-box rank-2">
+          <div class="podium-medal">🥈</div>
+          <div class="podium-rank">2ND PLACE</div>
+          <div class="podium-prize">RUNNER UP BOUNTY</div>
+        </div>
+
+        <!-- 1st Place -->
+        <div class="podium-box rank-1">
+          <div class="podium-medal">🥇</div>
+          <div class="podium-rank">1ST PLACE</div>
+          <div class="podium-prize">CHAMPION CASH PRIZE</div>
+        </div>
+
+        <!-- 3rd Place -->
+        <div class="podium-box rank-3">
+          <div class="podium-medal">🥉</div>
+          <div class="podium-rank">3RD PLACE</div>
+          <div class="podium-prize">2ND RUNNER UP</div>
+        </div>
+      </div>
+
+      <p style="font-family:var(--font-mono);font-size:0.84rem;color:var(--text-muted);margin-top:22px;">
+        ⚡ 5-Hour Prototype Hackathon (10:00 AM – 3:00 PM) &bull; 3 Members Per Team &bull; Cash Prizes for Top 3 &bull; Certificates Provided &bull; Student Kits
+      </p>
+    </div>
+  </section>
+
+  <!-- EVENTS SHOWCASE SECTION WITH GENEROUS SPACE ALLOCATION (REQUESTED) -->
+  <section class="container">
+    <div class="section-header">
+      <div class="section-tag">[ OPERATIONAL DIRECTIVES ]</div>
+      <h2 class="section-title">CHALLENGE ARENAS</h2>
+    </div>
+
+    <!-- Generous Space Allocation Grid -->
+    <div class="events-grid">
+      <!-- 01 Cyber Forge -->
+      <div class="event-hud-card hud-panel">
+        <div>
+          <div class="event-top-row">
+            <span class="event-number">01</span>
+            <span class="event-badge-tag badge-tech">Technical Workshop</span>
+          </div>
+          <h3 class="event-title">Cyber Forge</h3>
+          <p class="event-desc">
+            Deep-dive hands-on practical cybersecurity workshop. Learn real-world threat hunting, ethical vulnerability auditing, and defensive tactics like a professional.
+          </p>
+        </div>
+        <div class="event-timing-box">
+          <i class="fas fa-clock"></i> 10:00 AM – 12:00 PM (2 Hours)
+        </div>
+      </div>
+
+      <!-- 02 Cloud Craft -->
+      <div class="event-hud-card hud-panel">
+        <div>
+          <div class="event-top-row">
+            <span class="event-number">02</span>
+            <span class="event-badge-tag badge-tech">Technical Workshop</span>
+          </div>
+          <h3 class="event-title">Cloud Craft</h3>
+          <p class="event-desc">
+            Explore scalable AWS cloud architectures, microservices, containerization pipelines, and real-world deployment cases across the enterprise cloud ecosystem.
+          </p>
+        </div>
+        <div class="event-timing-box">
+          <i class="fas fa-clock"></i> 10:00 AM – 12:00 PM (2 Hours)
+        </div>
+      </div>
+
+      <!-- 03 CTF Challenge -->
+      <div class="event-hud-card hud-panel">
+        <div>
+          <div class="event-top-row">
+            <span class="event-number">03</span>
+            <span class="event-badge-tag badge-tech">CTF Warfare</span>
+          </div>
+          <h3 class="event-title">CTF Challenge</h3>
+          <p class="event-desc">
+            High-octane Capture The Flag battlefield. Solve cryptographic riddles, analyze packet captures, exploit vulnerable binaries, discover hidden flags, and top the leaderboard.
+          </p>
+        </div>
+        <div class="event-timing-box">
+          <i class="fas fa-clock"></i> 10:00 AM – 1:30 PM (2.5 Hours)
+        </div>
+      </div>
+
+      <!-- 04 Hackathon -->
+      <div class="event-hud-card hud-panel" style="border-color:rgba(255,119,0,0.5);">
+        <div>
+          <div class="event-top-row">
+            <span class="event-number" style="color:var(--neon-orange);">04</span>
+            <span class="event-badge-tag badge-hack">5 Hours &bull; 3 Per Team 🏆</span>
+          </div>
+          <h3 class="event-title">Hackathon (5 Hours)</h3>
+          <p class="event-desc">
+            5-hour rapid prototyping marathon (10:00 AM – 3:00 PM). Build innovative solutions in 5 hours. Work in teams of 3, turn ideas into real projects. Top 3 teams win sovereign cash bounties!
+          </p>
+        </div>
+        <div class="event-timing-box" style="color:var(--neon-orange);border-color:rgba(255,119,0,0.3);">
+          <i class="fas fa-clock"></i> 10:00 AM – 3:00 PM (5 Hours) &bull; 3 Per Team
+        </div>
+      </div>
+
+      <!-- 05 Prompt Generating -->
+      <div class="event-hud-card hud-panel">
+        <div>
+          <div class="event-top-row">
+            <span class="event-number" style="color:var(--neon-green);">05</span>
+            <span class="event-badge-tag badge-nontech">AI Creativity</span>
+          </div>
+          <h3 class="event-title">Prompt Generating</h3>
+          <p class="event-desc">
+            Master generative AI tools and context engineering frameworks. Craft precision multimodal prompts, optimize token outputs, and pioneer state-of-the-art AI synthesis.
+          </p>
+        </div>
+        <div class="event-timing-box">
+          <i class="fas fa-clock"></i> 1:30 PM – 3:00 PM (1.5 Hours)
+        </div>
+      </div>
+
+      <!-- 06 Click N Chill -->
+      <div class="event-hud-card hud-panel">
+        <div>
+          <div class="event-top-row">
+            <span class="event-number" style="color:var(--neon-pink);">06</span>
+            <span class="event-badge-tag badge-nontech">Photography</span>
+          </div>
+          <h3 class="event-title">Click N Chill</h3>
+          <p class="event-desc">
+            On-campus photography competition. Frame raw perspectives, capture high-contrast aesthetics, and express compelling thematic visual stories through your camera lens.
+          </p>
+        </div>
+        <div class="event-timing-box">
+          <i class="fas fa-clock"></i> 1:30 PM – 3:00 PM (1.5 Hours)
+        </div>
+      </div>
+
+      <!-- 07 Quiz Competition -->
+      <div class="event-hud-card hud-panel">
+        <div>
+          <div class="event-top-row">
+            <span class="event-number" style="color:var(--neon-gold);">07</span>
+            <span class="event-badge-tag badge-nontech">Logic & Speed</span>
+          </div>
+          <h3 class="event-title">Quiz Competition</h3>
+          <p class="event-desc">
+            High-voltage battle of speed and intellect. Test logical deduction, technical algorithms, speed trivia, and pop-culture tech knowledge. Think, buzz, conquer!
+          </p>
+        </div>
+        <div class="event-timing-box">
+          <i class="fas fa-clock"></i> 2:00 PM – 3:00 PM (1 Hour)
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REGISTRATION FORM SECTION -->
+  <section class="container form-wrapper" id="register-section">
+    <div class="section-header">
+      <div class="section-tag">[ ENLISTMENT PROTOCOL ]</div>
+      <h2 class="section-title">OFFICIAL REGISTRATION</h2>
+    </div>
+
+    <div class="registration-hud-card hud-panel">
+      <div class="form-info-strip">
+        <strong>◈ ENLISTMENT DIRECTIVES:</strong><br/>
+        &bull; Each operative can register for <strong>exactly one Technical event</strong> and <strong>one Non-Technical event</strong>.<br/>
+        &bull; <strong>Hackathon</strong> is a team event (strictly <strong>3 members</strong> per team: 1 Leader + 2 Teammates) with a registration fee of <strong>₹300 per team</strong>.<br/>
+        &bull; Standard registration fee for other events: <strong>₹250 per participant</strong>.<br/>
+        &bull; <strong>Food &amp; Accommodation:</strong> Will <strong>NOT</strong> be provided.<br/>
+        &bull; Upload payment confirmation screenshot to validate submission.<br/>
+        &bull; <strong>Instant Registration Pass:</strong> You will be able to download and print your official event pass immediately upon submission.
+      </div>
+
+      <form id="cyberRegForm" novalidate autocomplete="off">
+        
+        <!-- OPERATIVE DETAILS -->
+        <div class="sub-section-title">
+          <i class="fas fa-user-astronaut"></i> <span>01. OPERATIVE CREDENTIALS</span>
+        </div>
+
+        <div class="form-grid cols2">
+          <div class="form-group">
+            <label class="cyber-label">First Name <span class="req">*</span></label>
+            <input type="text" id="firstName" class="cyber-input" placeholder="e.g. Arun"/>
+            <span class="err-text" id="err-firstName">First name is required.</span>
+          </div>
+          <div class="form-group">
+            <label class="cyber-label">Last Name <span class="req">*</span></label>
+            <input type="text" id="lastName" class="cyber-input" placeholder="e.g. Kumar"/>
+            <span class="err-text" id="err-lastName">Last name is required.</span>
+          </div>
+        </div>
+
+        <div class="form-grid cols2">
+          <div class="form-group">
+            <label class="cyber-label">Mobile Number (WhatsApp) <span class="req">*</span></label>
+            <input type="tel" id="mobile" class="cyber-input" placeholder="10-digit mobile number" maxlength="10"/>
+            <span class="err-text" id="err-mobile">Enter a valid 10-digit Indian mobile number.</span>
+          </div>
+          <div class="form-group">
+            <label class="cyber-label">Email Address <span class="req">*</span></label>
+            <input type="email" id="email" class="cyber-input" placeholder="operative@institution.edu"/>
+            <span class="err-text" id="err-email">Enter a valid email address.</span>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 24px;">
+          <label class="cyber-label">College / Institution Name <span class="req">*</span></label>
+          <input type="text" id="college" class="cyber-input" placeholder="e.g. Rathinam Global University"/>
+          <span class="err-text" id="err-college">Please enter your college name.</span>
+        </div>
+
+        <!-- TECHNICAL EVENT SELECTION (SPACIOUS OPTIONS) -->
+        <div class="sub-section-title">
+          <i class="fas fa-terminal"></i> <span>02. SELECT TECHNICAL EVENT (CHOOSE 1)</span>
+        </div>
+
+        <div class="cyber-selector-grid" id="techGrid">
+          <label class="cyber-event-option" onclick="selectCyberEvent(this, 'tech')">
+            <input type="radio" name="tech" value="Cyber Forge (Workshop)"/>
+            <div class="cyber-radio-indicator"></div>
+            <div class="ev-meta-text">
+              <h4>01 · Cyber Forge</h4>
+              <p>Technical Workshop &bull; Practical Hands-on Cybersecurity</p>
+            </div>
+            <span class="ev-timing-tag">10:00 AM – 12:00 PM</span>
+          </label>
+
+          <label class="cyber-event-option" onclick="selectCyberEvent(this, 'tech')">
+            <input type="radio" name="tech" value="Cloud Craft (Workshop)"/>
+            <div class="cyber-radio-indicator"></div>
+            <div class="ev-meta-text">
+              <h4>02 · Cloud Craft</h4>
+              <p>Technical Workshop &bull; AWS Cloud Services &amp; Architecture</p>
+            </div>
+            <span class="ev-timing-tag">10:00 AM – 12:00 PM</span>
+          </label>
+
+          <label class="cyber-event-option" onclick="selectCyberEvent(this, 'tech')">
+            <input type="radio" name="tech" value="CTF Challenge"/>
+            <div class="cyber-radio-indicator"></div>
+            <div class="ev-meta-text">
+              <h4>03 · CTF Challenge</h4>
+              <p>Capture The Flag &bull; Exploitation, Defense &amp; Flag Hunting</p>
+            </div>
+            <span class="ev-timing-tag">10:00 AM – 1:30 PM</span>
+          </label>
+
+          <label class="cyber-event-option" onclick="selectCyberEvent(this, 'tech')">
+            <input type="radio" name="tech" value="Hackathon"/>
+            <div class="cyber-radio-indicator"></div>
+            <div class="ev-meta-text">
+              <h4>04 · Hackathon 🏆</h4>
+              <p>Team Prototype Sprint (3 Members) &bull; Top 3 Cash Bounties</p>
+            </div>
+            <span class="ev-timing-tag" style="border-color:var(--neon-orange);color:var(--neon-orange);">5 Hours (10:00 AM – 3:00 PM)</span>
+          </label>
+        </div>
+        <span class="err-text" id="err-tech" style="margin-top:6px;">Please select one technical event.</span>
+
+        <!-- HACKATHON STRIKE TEAM PANEL -->
+        <div id="hackathon-team-panel">
+          <div class="hack-title">
+            <i class="fas fa-users-cog"></i> <span>HACKATHON STRIKE TEAM PROTOCOL</span>
+          </div>
+          <div style="font-family:var(--font-mono);font-size:0.82rem;color:var(--neon-orange);margin-bottom:18px;">
+            ⚠️ Strictly 3 operatives per team (1 Team Leader + 2 Teammates). Registration Fee: ₹300 per team.
+          </div>
+
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="cyber-label">Team Call-Sign / Name <span class="req">*</span></label>
+            <input type="text" id="teamName" class="cyber-input" placeholder="e.g. CyberVanguard"/>
+            <span class="err-text" id="err-teamName">Enter team name.</span>
+          </div>
+
+          <!-- Team Leader -->
+          <div class="team-member-card">
+            <h5>👑 Operative 1: Team Leader</h5>
+            <div class="form-grid cols2">
+              <div class="form-group">
+                <label class="cyber-label">Leader Name <span class="req">*</span></label>
+                <input type="text" id="leaderName" class="cyber-input" placeholder="Full Name"/>
+                <span class="err-text" id="err-leaderName">Team leader name is required.</span>
+              </div>
+              <div class="form-group">
+                <label class="cyber-label">Leader Mobile <span class="req">*</span></label>
+                <input type="tel" id="leaderPhone" class="cyber-input" placeholder="10-digit mobile" maxlength="10"/>
+                <span class="err-text" id="err-leaderPhone">Valid phone required.</span>
+              </div>
+            </div>
+            <div class="form-group" style="margin-top:10px;">
+              <label class="cyber-label">Leader Email <span class="req">*</span></label>
+              <input type="email" id="leaderEmail" class="cyber-input" placeholder="leader@institution.edu"/>
+              <span class="err-text" id="err-leaderEmail">Valid email required.</span>
+            </div>
+          </div>
+
+          <!-- Teammates -->
+          <div class="team-member-card">
+            <h5>👥 Operative 2: Teammate</h5>
+            <input type="text" id="tm2" class="cyber-input" placeholder="Full Name"/>
+            <span class="err-text" id="err-tm2">Teammate 2 name is required.</span>
+          </div>
+
+          <div class="team-member-card">
+            <h5>👥 Operative 3: Teammate</h5>
+            <input type="text" id="tm3" class="cyber-input" placeholder="Full Name"/>
+            <span class="err-text" id="err-tm3">Teammate 3 name is required.</span>
+          </div>
+        </div>
+
+        <!-- NON-TECHNICAL EVENT SELECTION -->
+        <div class="sub-section-title">
+          <i class="fas fa-palette"></i> <span>03. SELECT NON-TECHNICAL EVENT (CHOOSE 1)</span>
+        </div>
+
+        <div class="cyber-selector-grid" id="nonTechGrid">
+          <label class="cyber-event-option" onclick="selectCyberEvent(this, 'nontech')">
+            <input type="radio" name="nontech" value="Prompt Generating"/>
+            <div class="cyber-radio-indicator"></div>
+            <div class="ev-meta-text">
+              <h4>05 · Prompt Generating</h4>
+              <p>Generative AI Tools &bull; Context Engineering &amp; Creativity</p>
+            </div>
+            <span class="ev-timing-tag">1:30 PM – 3:00 PM</span>
+          </label>
+
+          <label class="cyber-event-option" onclick="selectCyberEvent(this, 'nontech')">
+            <input type="radio" name="nontech" value="Click N Chill (Photography)"/>
+            <div class="cyber-radio-indicator"></div>
+            <div class="ev-meta-text">
+              <h4>06 · Click N Chill</h4>
+              <p>Visual Storytelling &bull; On-Campus Lens Competition</p>
+            </div>
+            <span class="ev-timing-tag">1:30 PM – 3:00 PM</span>
+          </label>
+
+          <label class="cyber-event-option" onclick="selectCyberEvent(this, 'nontech')">
+            <input type="radio" name="nontech" value="Quiz Competition"/>
+            <div class="cyber-radio-indicator"></div>
+            <div class="ev-meta-text">
+              <h4>07 · Quiz Competition</h4>
+              <p>Speed &amp; Logic Showdown &bull; Technical &amp; General Trivia</p>
+            </div>
+            <span class="ev-timing-tag">2:00 PM – 3:00 PM</span>
+          </label>
+        </div>
+        <span class="err-text" id="err-nontech" style="margin-top:6px;">Please select one non-technical event.</span>
+
+        <!-- PAYMENT VERIFICATION -->
+        <div class="payment-hud-block">
+          <div class="sub-section-title" style="margin-top:0;">
+            <i class="fas fa-qrcode"></i> <span>04. PAYMENT VERIFICATION</span>
+          </div>
+
+          <div class="fee-chips-container">
+            <div class="fee-badge-pill standard">
+              <i class="fas fa-user"></i> Standard Fee: <strong>₹250 / Student</strong>
+            </div>
+            <div class="fee-badge-pill hack-fee">
+              <i class="fas fa-users"></i> Hackathon Team: <strong>₹300 / Team</strong>
+            </div>
+          </div>
+
+          <!-- UPI PAYMENT DESK WITH OFFICIAL FEDERAL BANK QR POSTER -->
+          <div class="payment-desk-layout">
+            <!-- Left Column: Official Federal Bank QR Card -->
+            <div class="payment-qr-card">
+              <div class="payment-qr-badge">
+                <i class="fas fa-shield-alt"></i> OFFICIAL UNIVERSITY UPI PORTAL
+              </div>
+              <div class="payment-qr-img-wrap" title="Scan with any UPI App">
+                <img src="assets/payment_qr.png" alt="Federal Bank UPI QR Code - Rathinam Global Deemed to be University" class="payment-qr-poster"/>
+              </div>
+              <div class="payment-upi-details">
+                <div class="upi-id-row">
+                  <div>
+                    <span class="upi-id-label">UPI ID: </span>
+                    <span class="upi-id-val" id="textUpiId">rgdeemeduni01qr@fbl</span>
+                  </div>
+                  <button type="button" class="btn-copy-upi" onclick="copyUpiId()" title="Copy UPI ID to clipboard">
+                    <i class="fas fa-copy"></i> <span id="copyUpiText">COPY</span>
+                  </button>
+                </div>
+                <div class="upi-bank-name">Federal Bank &bull; Rathinam Global Deemed to be University</div>
+              </div>
+            </div>
+
+            <!-- Right Column: Step-by-Step Payment Directives -->
+            <div class="payment-instructions-panel">
+              <div class="pay-step-item">
+                <div class="pay-step-num">1</div>
+                <div class="pay-step-text">
+                  <strong>Scan QR Code or Use UPI ID:</strong><br/>
+                  Scan the Federal Bank QR code using any UPI App (GPay, PhonePe, Paytm, BHIM), or pay directly to UPI ID <code>rgdeemeduni01qr@fbl</code>.
+                </div>
+              </div>
+              <div class="pay-step-item">
+                <div class="pay-step-num">2</div>
+                <div class="pay-step-text">
+                  <strong>Verify Recipient &amp; Enter Exact Fee:</strong><br/>
+                  Confirm the payee account: <strong>RATHINAM GLOBAL DEEMED TO BE UNIVERSITY</strong>.<br/>
+                  &bull; Standard Events: <strong style="color:var(--cyan);">₹250 / Student</strong><br/>
+                  &bull; Hackathon Strike Team: <strong style="color:var(--neon-orange);">₹300 / Team</strong>
+                </div>
+              </div>
+              <div class="pay-step-item">
+                <div class="pay-step-num">3</div>
+                <div class="pay-step-text">
+                  <strong>Capture Payment Confirmation Screenshot:</strong><br/>
+                  Save a screenshot showing the completed transaction status with the <strong>UTR / UPI Ref Number</strong> visible.
+                </div>
+              </div>
+              <div class="pay-step-item">
+                <div class="pay-step-num">4</div>
+                <div class="pay-step-text">
+                  <strong>Upload Receipt Proof Below:</strong><br/>
+                  Attach your screenshot proof to validate registration and immediately generate your official Q-AURA 2026 pass.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="cyber-label">Upload Payment Screenshot <span class="req">*</span></label>
+            <div class="upload-hud-dropzone" id="cyberDropzone">
+              <input type="file" id="paymentInput" accept="image/*" onchange="processScreenshot(event)"/>
+              <div class="upload-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+              <p style="font-family:var(--font-mono);font-size:0.85rem;color:#fff;">
+                CLICK OR DROP PAYMENT PROOF HERE
+              </p>
+              <p style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">
+                Accepts PNG, JPG, JPEG, WEBP &bull; <strong>UPI &amp; Bank Payment Receipts Only</strong>
+              </p>
+              <div class="upload-filename" id="uploadFilename"></div>
+            </div>
+
+            <!-- SCANNING HUD INDICATOR -->
+            <div id="payment-scan-indicator">
+              <i class="fas fa-spinner fa-spin" style="color:var(--cyan);font-size:1.3rem;margin-bottom:6px;"></i>
+              <div style="font-family:var(--font-mono);font-size:0.85rem;color:#fff;font-weight:700;">
+                ANALYZING PAYMENT CONFIRMATION METRICS...
+              </div>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:3px;">
+                Scanning for UPI Ref ID, UTR, and Transaction Status
+              </div>
+            </div>
+
+            <!-- VERIFIED PROOF BADGE -->
+            <div id="payment-verified-badge">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <i class="fas fa-check-circle" style="color:var(--neon-green);font-size:1.3rem;"></i>
+                <div style="text-align:left;">
+                  <div style="font-family:var(--font-cyber);font-size:0.82rem;color:var(--neon-green);font-weight:800;">
+                    ✓ PAYMENT SCREENSHOT ATTACHED
+                  </div>
+                  <div id="payment-matched-tokens" style="font-family:var(--font-mono);font-size:0.74rem;color:#cbd5e1;margin-top:2px;">
+                    Screenshot Ready for Registration
+                  </div>
+                </div>
+              </div>
+              <button type="button" onclick="resetPaymentUpload()" class="cyber-btn cb-outline" style="padding:5px 10px;font-size:0.72rem;">
+                REPLACE
+              </button>
+            </div>
+
+            <img id="preview-image-elem" alt="Transaction Proof Preview"/>
+            <span class="err-text" id="err-payment">Payment screenshot is required for registration.</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-cyber-primary">
+          [ SUBMIT REGISTRATION FOR Q-AURA 2026 ]
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- COORDINATORS SECTION -->
+  <section class="container coordinators-wrapper">
+    <div class="section-header">
+      <div class="section-tag">[ LEADERSHIP &amp; ORGANIZING COMMITTEE ]</div>
+      <h2 class="section-title">ORGANIZING COMMITTEE</h2>
+    </div>
+
+    <!-- 1. CONVENORS -->
+    <div class="coord-category-title" style="color:var(--neon-gold);">
+      <i class="fas fa-crown"></i> <span>CONVENORS</span>
+    </div>
+    <div class="coordinators-grid" style="margin-bottom: 36px;">
+      <!-- Dr. K. Geetha -->
+      <div class="organizer-person-box hud-panel">
+        <div class="organizer-avatar-badge" style="border-color:var(--neon-gold);color:var(--neon-gold);"><i class="fas fa-atom"></i></div>
+        <div class="organizer-person-details">
+          <div class="organizer-person-name">Dr. K. Geetha</div>
+          <div class="organizer-person-role">Dean – School of Quantum Science Computing &amp; AI</div>
+        </div>
+      </div>
+
+      <!-- Dr. S. Palanivel rajan -->
+      <div class="organizer-person-box hud-panel">
+        <div class="organizer-avatar-badge" style="border-color:var(--neon-purple);color:var(--neon-purple);"><i class="fas fa-user-graduate"></i></div>
+        <div class="organizer-person-details">
+          <div class="organizer-person-name">Dr. S. Palanivel rajan</div>
+          <div class="organizer-person-role">Dean – Engineering &amp; Emerging AI</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. ORGANIZING TEAM (HODs) -->
+    <div class="coord-category-title" style="color:var(--cyan);margin-top:20px;">
+      <i class="fas fa-sitemap"></i> <span>ORGANIZING TEAM</span>
+    </div>
+    <div class="coordinators-grid" style="margin-bottom: 36px;">
+      <!-- Dr. S. Raja -->
+      <div class="organizer-person-box hud-panel">
+        <div class="organizer-avatar-badge" style="border-color:var(--cyan);color:var(--cyan);"><i class="fas fa-laptop-code"></i></div>
+        <div class="organizer-person-details">
+          <div class="organizer-person-name">Dr. S. Raja</div>
+          <div class="organizer-person-role">HOD / CS</div>
+        </div>
+      </div>
+
+      <!-- Dr. A. Uthiramoorthy -->
+      <div class="organizer-person-box hud-panel">
+        <div class="organizer-avatar-badge" style="border-color:var(--cyan);color:var(--cyan);"><i class="fas fa-microchip"></i></div>
+        <div class="organizer-person-details">
+          <div class="organizer-person-name">Dr. A. Uthiramoorthy</div>
+          <div class="organizer-person-role">HOD / R-Smart Pro</div>
+        </div>
+      </div>
+
+      <!-- Dr. V. Vimal kumar -->
+      <div class="organizer-person-box hud-panel">
+        <div class="organizer-avatar-badge" style="border-color:var(--cyan);color:var(--cyan);"><i class="fas fa-brain"></i></div>
+        <div class="organizer-person-details">
+          <div class="organizer-person-name">Dr. V. Vimal kumar</div>
+          <div class="organizer-person-role">HOD / AI</div>
+        </div>
+      </div>
+
+      <!-- Dr. S. Karithikeyan -->
+      <div class="organizer-person-box hud-panel">
+        <div class="organizer-avatar-badge" style="border-color:var(--cyan);color:var(--cyan);"><i class="fas fa-shield-alt"></i></div>
+        <div class="organizer-person-details">
+          <div class="organizer-person-name">Dr. S. Karithikeyan</div>
+          <div class="organizer-person-role">HOD / Computing &amp; Cyber Security</div>
+        </div>
+      </div>
+
+      <!-- Mrs. Udhaya nirmala mary -->
+      <div class="organizer-person-box hud-panel">
+        <div class="organizer-avatar-badge" style="border-color:var(--cyan);color:var(--cyan);"><i class="fas fa-network-wired"></i></div>
+        <div class="organizer-person-details">
+          <div class="organizer-person-name">Mrs. Udhaya nirmala mary</div>
+          <div class="organizer-person-role">HOD / IT</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. FACULTY COORDINATORS -->
+    <div class="coord-category-title" style="color:var(--neon-green);margin-top:20px;">
+      <i class="fas fa-chalkboard-teacher"></i> <span>FACULTY COORDINATORS</span>
+    </div>
+    <div class="coordinators-grid" style="margin-bottom: 36px;">
+      <!-- Dr. P. Sukumar -->
+      <div class="organizer-person-box hud-panel">
+        <div class="organizer-avatar-badge" style="border-color:var(--neon-green);color:var(--neon-green);"><i class="fas fa-user-tie"></i></div>
+        <div class="organizer-person-details">
+          <div class="organizer-person-name">Dr. P. Sukumar</div>
+          <div class="organizer-person-role">Faculty Coordinator</div>
+          <a href="tel:7010303993" class="organizer-person-phone">
+            <i class="fas fa-phone-alt"></i> 70103 03993
+          </a>
+        </div>
+      </div>
+
+      <!-- Mr. V. Arthanariswara -->
+      <div class="organizer-person-box hud-panel">
+        <div class="organizer-avatar-badge" style="border-color:var(--neon-green);color:var(--neon-green);"><i class="fas fa-user-tie"></i></div>
+        <div class="organizer-person-details">
+          <div class="organizer-person-name">Mr. V. Arthanariswara</div>
+          <div class="organizer-person-role">Faculty Coordinator</div>
+          <a href="tel:7708333036" class="organizer-person-phone">
+            <i class="fas fa-phone-alt"></i> 7708333036
+          </a>
+        </div>
+      </div>
+
+      <!-- Mr. M. Saravana kumar -->
+      <div class="organizer-person-box hud-panel">
+        <div class="organizer-avatar-badge" style="border-color:var(--neon-green);color:var(--neon-green);"><i class="fas fa-user-tie"></i></div>
+        <div class="organizer-person-details">
+          <div class="organizer-person-name">Mr. M. Saravana kumar</div>
+          <div class="organizer-person-role">Faculty Coordinator</div>
+          <a href="tel:9952338439" class="organizer-person-phone">
+            <i class="fas fa-phone-alt"></i> 9952338439
+          </a>
+        </div>
+      </div>
+
+      <!-- Mr. S. Sunil kumar -->
+      <div class="organizer-person-box hud-panel">
+        <div class="organizer-avatar-badge" style="border-color:var(--neon-green);color:var(--neon-green);"><i class="fas fa-user-shield"></i></div>
+        <div class="organizer-person-details">
+          <div class="organizer-person-name">Mr. S. Sunil kumar</div>
+          <div class="organizer-person-role">Cyber Security &amp; Cyber Forensics</div>
+          <a href="tel:6385865347" class="organizer-person-phone">
+            <i class="fas fa-phone-alt"></i> 6385865347
+          </a>
+        </div>
+      </div>
+
+      <!-- Mr. M. Veera Surya -->
+      <div class="organizer-person-box hud-panel">
+        <div class="organizer-avatar-badge" style="border-color:var(--neon-green);color:var(--neon-green);"><i class="fas fa-laptop-code"></i></div>
+        <div class="organizer-person-details">
+          <div class="organizer-person-name">Mr. M. Veera Surya</div>
+          <div class="organizer-person-role">Faculty Coordinator</div>
+          <a href="tel:8524084816" class="organizer-person-phone">
+            <i class="fas fa-phone-alt"></i> 8524084816
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. STUDENT COORDINATORS -->
+    <div class="coord-category-title student-title" style="margin-top: 20px;">
+      <i class="fas fa-user-astronaut"></i> <span>STUDENT COORDINATORS</span>
+    </div>
+    <div class="coordinators-grid">
+      <!-- K AjithKumar -->
+      <div class="organizer-person-box hud-panel">
+        <div class="organizer-avatar-badge" style="border-color:var(--neon-green);color:var(--neon-green);"><i class="fas fa-user-ninja"></i></div>
+        <div class="organizer-person-details">
+          <div class="organizer-person-name">K AjithKumar</div>
+          <div class="organizer-person-role">Student Coordinator</div>
+          <a href="tel:6385512473" class="organizer-person-phone">
+            <i class="fas fa-phone-alt"></i> 6385512473
+          </a>
+        </div>
+      </div>
+
+      <!-- R Jeyasimhaa -->
+      <div class="organizer-person-box hud-panel">
+        <div class="organizer-avatar-badge" style="border-color:var(--cyan);color:var(--cyan);"><i class="fas fa-user-ninja"></i></div>
+        <div class="organizer-person-details">
+          <div class="organizer-person-name">R Jeyasimhaa</div>
+          <div class="organizer-person-role">Student Coordinator</div>
+          <a href="tel:9940928677" class="organizer-person-phone">
+            <i class="fas fa-phone-alt"></i> 99409 28677
+          </a>
+        </div>
+      </div>
+
+      <!-- A. Mukesh -->
+      <div class="organizer-person-box hud-panel">
+        <div class="organizer-avatar-badge" style="border-color:var(--neon-gold);color:var(--neon-gold);"><i class="fas fa-user-astronaut"></i></div>
+        <div class="organizer-person-details">
+          <div class="organizer-person-name">A. Mukesh</div>
+          <div class="organizer-person-role">Student Coordinator</div>
+          <a href="tel:8270866217" class="organizer-person-phone">
+            <i class="fas fa-phone-alt"></i> 8270866217
+          </a>
+        </div>
+      </div>
+
+      <!-- S S Surya Prakash -->
+      <div class="organizer-person-box hud-panel">
+        <div class="organizer-avatar-badge" style="border-color:var(--neon-purple);color:var(--neon-purple);"><i class="fas fa-user-check"></i></div>
+        <div class="organizer-person-details">
+          <div class="organizer-person-name">S S Surya Prakash</div>
+          <div class="organizer-person-role">Student Coordinator</div>
+          <a href="tel:8056657572" class="organizer-person-phone">
+            <i class="fas fa-phone-alt"></i> 80566 57572
+          </a>
+        </div>
+      </div>
+
+      <!-- M Dharun -->
+      <div class="organizer-person-box hud-panel">
+        <div class="organizer-avatar-badge" style="border-color:var(--neon-orange);color:var(--neon-orange);"><i class="fas fa-user-secret"></i></div>
+        <div class="organizer-person-details">
+          <div class="organizer-person-name">M Dharun</div>
+          <div class="organizer-person-role">Student Coordinator</div>
+          <a href="tel:8870311010" class="organizer-person-phone">
+            <i class="fas fa-phone-alt"></i> 8870311010
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUCCESS MODAL WITH CONFIRMATION EMAIL DISPATCH BADGE -->
+  <div id="success-modal-overlay">
+    <div class="success-hud-card hud-panel">
+      <div class="success-trophy-icon"><i class="fas fa-check-circle"></i></div>
+      <h2 style="font-family:var(--font-cyber);color:#fff;font-size:1.4rem;">ENLISTMENT CONFIRMED</h2>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-top:6px;">
+        You have successfully registered for <strong>Q-AURA 2026</strong>.
+      </p>
+
+      <div class="reg-id-display" id="modalRegId">QAURA-2026-0000</div>
+      
+      <!-- DOWNLOAD REGISTRATION PASS HIGHLIGHT BLOCK -->
+      <div style="background:rgba(0,240,255,0.06);border:1.5px solid var(--neon-green);border-radius:10px;padding:20px 16px;margin:18px 0;text-align:center;box-shadow:0 0 25px rgba(0,255,102,0.15);">
+        <div style="font-family:var(--font-cyber);font-size:1.05rem;color:#fff;margin-bottom:6px;">
+          <i class="fas fa-file-invoice" style="color:var(--neon-green);margin-right:8px;"></i>
+          OFFICIAL REGISTRATION PASS
+        </div>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin-bottom:16px;">
+          Download or print your official registration slip now. Present this pass at Tower-C Think Tank Theater on October 14, 2026.
+        </p>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+          <button type="button" id="btnDownloadPass" class="cyber-btn cb-green" style="flex:1;min-width:210px;justify-content:center;padding:12px 18px;font-size:0.86rem;">
+            <i class="fas fa-download"></i> DOWNLOAD PASS SLIP (.TXT)
+          </button>
+          <button type="button" id="btnPrintPass" class="cyber-btn cb-outline" style="flex:1;min-width:210px;justify-content:center;padding:12px 18px;font-size:0.86rem;">
+            <i class="fas fa-print"></i> PRINT / SAVE PDF PASS
+          </button>
+        </div>
+      </div>
+
+      <div id="reg-summary-details"></div>
+
+      <button type="button" class="btn-cyber-primary" style="margin-top:10px;" onclick="closeSuccessModal()">
+        [ ACKNOWLEDGE &amp; REGISTER ANOTHER ]
+      </button>
+    </div>
+  </div>
+
+  <!-- INVALID PAYMENT PROOF WARNING MODAL -->
+  <div id="invalid-payment-modal-overlay">
+    <div class="invalid-payment-hud-card hud-panel">
+      <div class="invalid-payment-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h2 style="font-family:var(--font-cyber);color:#ff0055;font-size:1.35rem;letter-spacing:1px;margin-bottom:8px;">
+        PAYMENT PROOF REJECTED
+      </h2>
+      <p style="color:#e2e8f0;font-size:0.92rem;line-height:1.6;margin-bottom:12px;">
+        The uploaded file is <strong>not an authentic UPI or banking payment screenshot</strong>.
+      </p>
+      <div id="invalid-payment-reason-msg" style="color:#ff88aa;font-size:0.86rem;margin-bottom:14px;padding:9px 14px;background:rgba(255,0,85,0.12);border:1px dashed #ff0055;border-radius:6px;display:none;text-align:left;"></div>
+
+      <div class="invalid-payment-checklist">
+        <div class="chk-hdr"><i class="fas fa-shield-alt"></i> STRICT VALIDATION REQUIREMENTS:</div>
+        <ul>
+          <li><i class="fas fa-times-circle" style="color:#ff0055;"></i> Random images, selfies, memes, posters, or wallpapers are <strong>strictly prohibited</strong>.</li>
+          <li><i class="fas fa-check-circle" style="color:var(--neon-green);"></i> Upload only completed transaction receipts from <strong>Google Pay, PhonePe, Paytm, BHIM, Cred, YONO, or Net Banking</strong>.</li>
+          <li><i class="fas fa-check-circle" style="color:var(--neon-green);"></i> The receipt must clearly show <strong>Payment Status (Successful / Paid)</strong>, <strong>UPI Ref / UTR / Txn ID</strong>, and <strong>Amount</strong>.</li>
+          <li><i class="fas fa-check-circle" style="color:var(--neon-green);"></i> Registration cannot proceed without an authentic payment confirmation.</li>
+        </ul>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:22px;flex-wrap:wrap;">
+        <button type="button" class="cyber-btn cb-red" style="flex:1;min-width:200px;justify-content:center;padding:13px 18px;font-size:0.85rem;" onclick="closeInvalidPaymentModalAndRetry()">
+          <i class="fas fa-upload"></i> UPLOAD VALID PAYMENT SCREENSHOT
+        </button>
+        <button type="button" class="cyber-btn cb-outline" style="justify-content:center;padding:13px 20px;font-size:0.85rem;" onclick="closeInvalidPaymentModal()">
+          CLOSE
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPINNER -->
+  <div id="cyber-spinner">
+    <div class="spinner-hud-ring"></div>
+    <div class="spinner-hud-text">[ PROCESSING REGISTRATION ]</div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="cyber-toast"></div>
+
+  <!-- FOOTER WITH GOOGLE-SOURCED COLLEGE ADDRESS (REQUESTED) -->
+  <footer class="cyber-footer">
+    <div class="footer-container">
+      
+      <!-- Col 1: About & Organizers -->
+      <div class="footer-col">
+        <h3>Q-AURA 2026</h3>
+        <p style="margin-bottom:12px;">
+          National Level Technical Symposium organized by <strong>School of Quantum Science and Computing AI</strong> in association with <strong>Department of Cyber Security</strong>, Rathinam Global University.
+        </p>
+        <p style="font-size:0.82rem;color:var(--cyan);">
+          &bull; Date: October 14, 2026 &bull; Venue: Tower-C Think Tank Theater
+        </p>
+      </div>
+
+      <!-- Col 2: Fast Directives -->
+      <div class="footer-col">
+        <h3>QUICK NAVIGATION &amp; SUPPORT</h3>
+        <ul class="footer-links-list">
+          <li><a href="#register-section"><i class="fas fa-caret-right" style="color:var(--cyan);margin-right:6px;"></i> Event Registration</a></li>
+          <li><a href="tel:6385512473"><i class="fas fa-caret-right" style="color:var(--cyan);margin-right:6px;"></i> K AjithKumar: 6385512473</a></li>
+          <li><a href="tel:8270866217"><i class="fas fa-caret-right" style="color:var(--cyan);margin-right:6px;"></i> A. Mukesh: 8270866217</a></li>
+          <li><a href="tel:9940928677"><i class="fas fa-caret-right" style="color:var(--cyan);margin-right:6px;"></i> R Jeyasimhaa: 99409 28677</a></li>
+          <li><a href="tel:8056657572"><i class="fas fa-caret-right" style="color:var(--cyan);margin-right:6px;"></i> S S Surya Prakash: 80566 57572</a></li>
+          <li><a href="tel:8870311010"><i class="fas fa-caret-right" style="color:var(--cyan);margin-right:6px;"></i> M Dharun: 8870311010</a></li>
+        </ul>
+      </div>
+
+      <!-- Col 3: Official College Address (From Google) -->
+      <div class="footer-col">
+        <h3>CAMPUS LOCATION</h3>
+        <div class="footer-address-block">
+          <div class="footer-address-text">
+            <i class="fas fa-map-marker-alt"></i> <strong>Rathinam Global University</strong><br/>
+            Rathinam Techzone Campus,<br/>
+            Pollachi Main Road, Eachanari,<br/>
+            Coimbatore, Tamil Nadu – 641021, India.
+          </div>
+          <div style="margin-top:10px;font-size:0.8rem;color:var(--text-muted);">
+            <i class="fas fa-phone-alt" style="color:var(--neon-gold);"></i> <strong>Campus Info:</strong> +91 422 4040909
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom-bar">
+      &copy; 2026 Rathinam Global University &bull; School of Quantum Science and Computing AI &bull; All Rights Reserved.
+    </div>
+  </footer>
+
+  <script>
+    // ─── LIVE COUNTDOWN TIMER (TILL 9TH OCTOBER 2026 6:00 PM IST) ──
+    (function initCountdownTimer() {
+      // 9th October 2026 at 18:00:00 (6:00 PM IST)
+      const targetTime = new Date('2026-10-09T18:00:00+05:30').getTime();
+
+      function updateCountdown() {
+        const now = new Date().getTime();
+        const difference = targetTime - now;
+
+        if (difference <= 0) {
+          document.getElementById('cd-days').textContent = '00';
+          document.getElementById('cd-hours').textContent = '00';
+          document.getElementById('cd-minutes').textContent = '00';
+          document.getElementById('cd-seconds').textContent = '00';
+          return;
+        }
+
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+        document.getElementById('cd-days').textContent = String(days).padStart(2, '0');
+        document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
+        document.getElementById('cd-minutes').textContent = String(minutes).padStart(2, '0');
+        document.getElementById('cd-seconds').textContent = String(seconds).padStart(2, '0');
+      }
+
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+    })();
+
+    // ─── CYBER BACKGROUND PARTICLES ─────────────────────────────────
+    (function initCyberParticles() {
+      const canvas = document.getElementById('cyber-canvas');
+      const ctx = canvas.getContext('2d');
+      let w, h, particles = [];
+
+      function resize() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      for (let i = 0; i < 55; i++) {
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5,
+          radius: Math.random() * 2 + 1,
+          color: Math.random() > 0.5 ? '#00f0ff' : '#9d4edd'
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, w, h);
+        for (let i = 0; i < particles.length; i++) {
+          let p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < 0) p.x = w;
+          if (p.x > w) p.x = 0;
+          if (p.y < 0) p.y = h;
+          if (p.y > h) p.y = 0;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = p.color;
+          ctx.fill();
+
+          for (let j = i + 1; j < particles.length; j++) {
+            let p2 = particles[j];
+            let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+            if (dist < 110) {
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.strokeStyle = `rgba(0, 240, 255, ${0.15 * (1 - dist / 110)})`;
+              ctx.lineWidth = 0.8;
+              ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+
+
+    // ─── LOCAL STORAGE KEY ──────────────────────────────────────────
+    const LS_KEY_REGS = 'qaura2026_registrations';
+    let base64PaymentProof = null;
+
+    // ─── COLLEGE LOGO BASE64 ────────────────────────────────────────
+    let collegeLogoBase64 = window.collegeLogoBase64 || '';
+    if (!collegeLogoBase64) {
+      try {
+        const img = new Image();
+        img.onload = function() {
+          const c = document.createElement('canvas');
+          c.width = img.naturalWidth; c.height = img.naturalHeight;
+          c.getContext('2d').drawImage(img, 0, 0);
+          collegeLogoBase64 = c.toDataURL('image/png');
+        };
+        img.src = 'assets/logo.png';
+      } catch(e) {}
+    }
+
+
+    // ─── INVALID PAYMENT MODAL HELPERS ──────────────────────────────
+    function showInvalidPaymentModal(reasonText) {
+      const modal = document.getElementById('invalid-payment-modal-overlay');
+      const reasonEl = document.getElementById('invalid-payment-reason-msg');
+      if (reasonEl) {
+        if (reasonText) {
+          reasonEl.innerHTML = '<i class="fas fa-ban" style="color:#ff0055;margin-right:6px;"></i> ' + reasonText;
+          reasonEl.style.display = 'block';
+        } else {
+          reasonEl.style.display = 'none';
+        }
+      }
+      if (modal) modal.classList.add('show');
+    }
+
+    function closeInvalidPaymentModal() {
+      const modal = document.getElementById('invalid-payment-modal-overlay');
+      if (modal) modal.classList.remove('show');
+    }
+
+    function closeInvalidPaymentModalAndRetry() {
+      closeInvalidPaymentModal();
+      const dropzone = document.getElementById('cyberDropzone');
+      if (dropzone) {
+        dropzone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      setTimeout(() => {
+        const inp = document.getElementById('paymentInput');
+        if (inp) inp.click();
+      }, 350);
+    }
+
+    function resetPaymentUpload() {
+      const inp = document.getElementById('paymentInput');
+      if (inp) inp.value = '';
+      base64PaymentProof = null;
+      document.getElementById('preview-image-elem').style.display = 'none';
+      document.getElementById('uploadFilename').style.display = 'none';
+      document.getElementById('payment-verified-badge').classList.remove('show');
+      document.getElementById('payment-scan-indicator').style.display = 'none';
+      document.getElementById('cyberDropzone').classList.remove('has-file');
+      if (inp) inp.click();
+    }
+
+    // ─── SCREENSHOT UPLOAD HANDLER (INSTANT DIRECT ATTACHMENT) ────────
+    function processScreenshot(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const dropzone    = document.getElementById('cyberDropzone');
+      const filenameEl  = document.getElementById('uploadFilename');
+      const preview     = document.getElementById('preview-image-elem');
+      const scanHud     = document.getElementById('payment-scan-indicator');
+      const verifiedHud = document.getElementById('payment-verified-badge');
+      const tokenList   = document.getElementById('payment-matched-tokens');
+
+      if (scanHud) scanHud.style.display = 'none';
+      hideError('err-payment');
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const maxW = 1200;
+          const scale = img.width > maxW ? maxW / img.width : 1;
+          canvas.width  = Math.round(img.width  * scale);
+          canvas.height = Math.round(img.height * scale);
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+
+          base64PaymentProof = compressedBase64;
+          preview.src = compressedBase64;
+          preview.style.display = 'block';
+          dropzone.classList.add('has-file');
+          filenameEl.textContent = '✓ ATTACHED: ' + file.name;
+          filenameEl.style.display = 'block';
+
+          if (tokenList) tokenList.textContent = 'Payment Receipt Attached (' + file.name + ')';
+          if (verifiedHud) verifiedHud.classList.add('show');
+          triggerToast('✓ Payment screenshot attached successfully!', 'success');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ─── COPY UPI ID TO CLIPBOARD ────────────────────────────────────
+    function copyUpiId() {
+      const upi = 'rgdeemeduni01qr@fbl';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(upi).then(showUpiCopied).catch(() => fallbackCopyUpi(upi));
+      } else {
+        fallbackCopyUpi(upi);
+      }
+    }
+    function fallbackCopyUpi(text) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showUpiCopied();
+      } catch(e) {
+        prompt('Copy UPI ID:', text);
+      }
+    }
+    function showUpiCopied() {
+      const btn = document.getElementById('copyUpiText');
+      if (btn) btn.textContent = 'COPIED!';
+      triggerToast('✓ UPI ID copied: rgdeemeduni01qr@fbl', 'success');
+      setTimeout(() => {
+        if (btn) btn.textContent = 'COPY';
+      }, 2500);
+    }
+
+    // ─── EVENT SELECTOR LOGIC ───────────────────────────────────────
+    function selectCyberEvent(element, group) {
+      const selectorId = group === 'tech' ? '#techGrid' : '#nonTechGrid';
+      document.querySelectorAll(selectorId + ' .cyber-event-option').forEach(opt => {
+        opt.classList.remove('selected');
+      });
+      element.classList.add('selected');
+      element.querySelector('input[type="radio"]').checked = true;
+
+      if (group === 'tech') {
+        const val = element.querySelector('input[type="radio"]').value;
+        const hackPanel = document.getElementById('hackathon-team-panel');
+        if (val === 'Hackathon') {
+          hackPanel.classList.add('show');
+        } else {
+          hackPanel.classList.remove('show');
+          clearHackErrors();
+        }
+        hideError('err-tech');
+      } else {
+        hideError('err-nontech');
+      }
+    }
+
+    function clearHackErrors() {
+      ['teamName', 'leaderName', 'leaderPhone', 'leaderEmail', 'tm2', 'tm3', 'tm4'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('error');
+        hideError('err-' + id);
+      });
+    }
+
+    // ─── VALIDATION HELPERS ─────────────────────────────────────────
+    function getVal(id) {
+      const el = document.getElementById(id);
+      return el ? el.value.trim() : '';
+    }
+    function showError(errId, inputId) {
+      const e = document.getElementById(errId);
+      if (e) e.classList.add('show');
+      if (inputId) {
+        const inp = document.getElementById(inputId);
+        if (inp) inp.classList.add('error');
+      }
+    }
+    function hideError(errId, inputId) {
+      const e = document.getElementById(errId);
+      if (e) e.classList.remove('show');
+      if (inputId) {
+        const inp = document.getElementById(inputId);
+        if (inp) inp.classList.remove('error');
+      }
+    }
+
+    const isValidEmail = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+    const isValidPhone = (s) => /^[6-9]\d{9}$/.test(s);
+    const createRegId  = () => 'QAURA-2026-' + Math.floor(1000 + Math.random() * 9000);
+
+    // ─── TOAST NOTIFICATION ─────────────────────────────────────────
+    function triggerToast(message, type = 'info') {
+      const t = document.getElementById('cyber-toast');
+      t.textContent = message;
+      t.className = 'show ' + type;
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => { t.className = ''; }, 3600);
+    }
+
+    // ─── SAFE LOCALSTORAGE SAVE ─────────────────────────────────────
+    // Saves registration; if screenshot too large, retries without it
+    function saveRegistration(entry) {
+      try {
+        const stored = JSON.parse(localStorage.getItem(LS_KEY_REGS) || '[]');
+        stored.unshift(entry);
+        localStorage.setItem(LS_KEY_REGS, JSON.stringify(stored));
+        return true;
+      } catch (e) {
+        // Quota exceeded — retry without the screenshot
+        try {
+          const entryCopy = Object.assign({}, entry, { paymentScreenshot: '[IMAGE TOO LARGE - SUBMIT MANUALLY]' });
+          const stored = JSON.parse(localStorage.getItem(LS_KEY_REGS) || '[]');
+          stored.unshift(entryCopy);
+          localStorage.setItem(LS_KEY_REGS, JSON.stringify(stored));
+          triggerToast('⚠️ Screenshot too large to store, but registration saved!', 'error');
+          return true;
+        } catch (e2) {
+          triggerToast('❌ Storage full. Please clear browser data and retry.', 'error');
+          return false;
+        }
+      }
+    }
+
+    // ─── SUBMISSION DISPATCHER ──────────────────────────────────────
+    document.getElementById('cyberRegForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      try {
+        let isValid = true;
+
+        // Base fields validation
+        if (!getVal('firstName'))              { showError('err-firstName', 'firstName');   isValid = false; } else { hideError('err-firstName', 'firstName'); }
+        if (!getVal('lastName'))               { showError('err-lastName',  'lastName');    isValid = false; } else { hideError('err-lastName',  'lastName'); }
+        if (!isValidPhone(getVal('mobile')))   { showError('err-mobile',    'mobile');      isValid = false; } else { hideError('err-mobile',    'mobile'); }
+        if (!isValidEmail(getVal('email')))    { showError('err-email',     'email');       isValid = false; } else { hideError('err-email',     'email'); }
+        if (!getVal('college'))                { showError('err-college',   'college');     isValid = false; } else { hideError('err-college',   'college'); }
+
+        // Technical event
+        const techChoice = document.querySelector('input[name="tech"]:checked');
+        if (!techChoice) { showError('err-tech'); isValid = false; } else { hideError('err-tech'); }
+
+        // Hackathon-specific fields
+        const isHack = techChoice && techChoice.value === 'Hackathon';
+        if (isHack) {
+          if (!getVal('teamName'))                  { showError('err-teamName',    'teamName');    isValid = false; } else { hideError('err-teamName',    'teamName'); }
+          if (!getVal('leaderName'))                { showError('err-leaderName',  'leaderName');  isValid = false; } else { hideError('err-leaderName',  'leaderName'); }
+          if (!isValidPhone(getVal('leaderPhone'))) { showError('err-leaderPhone', 'leaderPhone'); isValid = false; } else { hideError('err-leaderPhone', 'leaderPhone'); }
+          if (!isValidEmail(getVal('leaderEmail'))) { showError('err-leaderEmail', 'leaderEmail'); isValid = false; } else { hideError('err-leaderEmail', 'leaderEmail'); }
+          if (!getVal('tm2'))                       { showError('err-tm2', 'tm2');                 isValid = false; } else { hideError('err-tm2', 'tm2'); }
+          if (!getVal('tm3'))                       { showError('err-tm3', 'tm3');                 isValid = false; } else { hideError('err-tm3', 'tm3'); }
+        }
+
+        // Non-technical event
+        const nonTechChoice = document.querySelector('input[name="nontech"]:checked');
+        if (!nonTechChoice) { showError('err-nontech'); isValid = false; } else { hideError('err-nontech'); }
+
+        // Payment proof
+        if (!base64PaymentProof) {
+          showError('err-payment');
+          isValid = false;
+        } else {
+          hideError('err-payment');
+        }
+
+        if (!isValid) {
+          if (!base64PaymentProof) {
+            showInvalidPaymentModal('A verified UPI or banking payment screenshot is required to complete registration.');
+            const pBlock = document.getElementById('cyberDropzone');
+            if (pBlock) pBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+          }
+          const firstErr = document.querySelector('.err-text.show');
+          if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          triggerToast('⚠️ Please fix the highlighted errors.', 'error');
+          return;
+        }
+
+        // Build registration record
+        const regId = createRegId();
+        const reg = {
+          regId,
+          timestamp:         new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+          firstName:         getVal('firstName'),
+          lastName:          getVal('lastName'),
+          mobile:            getVal('mobile'),
+          email:             getVal('email'),
+          college:           getVal('college'),
+          techEvent:         techChoice.value,
+          nonTechEvent:      nonTechChoice.value,
+          teamName:          isHack ? getVal('teamName')    : '',
+          leaderName:        isHack ? getVal('leaderName')  : '',
+          leaderPhone:       isHack ? getVal('leaderPhone') : '',
+          leaderEmail:       isHack ? getVal('leaderEmail') : '',
+          tm2:               isHack ? getVal('tm2')         : '',
+          tm3:               isHack ? getVal('tm3')         : '',
+          tm4:               '',
+          fee:               isHack ? '₹300 (Team)' : '₹250',
+          paymentScreenshot: base64PaymentProof,
+          status:            'Pending Verification'
+        };
+
+        const spinner = document.getElementById('cyber-spinner');
+        if (spinner) spinner.style.display = 'flex';
+
+        // ── 1. Save to PostgreSQL Database with Verification Check ───
+        const apiBase = (typeof QAURA_CONFIG !== 'undefined' && QAURA_CONFIG.API_BASE_URL)
+          ? QAURA_CONFIG.API_BASE_URL
+          : '';
+        const pgEndpoint = apiBase ? `${apiBase}/api/register` : '/api/register';
+
+        let pgResult = null;
+        try {
+          const res = await fetch(pgEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(reg)
+          });
+          pgResult = await res.json();
+        } catch (fetchErr) {
+          console.warn('PostgreSQL sync notice (local backup active):', fetchErr.message);
+        }
+
+        if (spinner) spinner.style.display = 'none';
+
+        // ── 2. Save to localStorage backup ───────────────────────────
+        saveRegistration(reg);
+
+        // ── 3. Non-blocking secondary sync to Google Sheets (if configured)
+        if (typeof QAURA_CONFIG !== 'undefined' && QAURA_CONFIG.APPS_SCRIPT_URL) {
+          try {
+            fetch(QAURA_CONFIG.APPS_SCRIPT_URL, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(reg)
+            }).catch(e => console.warn('Background sync deferred:', e));
+          } catch(e) {}
+        }
+
+        // Populate Success Modal fields
+        document.getElementById('modalRegId').textContent = regId;
+
+        const summaryLines = [
+          `<strong>Name:</strong> ${reg.firstName} ${reg.lastName}`,
+          `<strong>Mobile:</strong> ${reg.mobile} &bull; <strong>Email:</strong> ${reg.email}`,
+          `<strong>Institution:</strong> ${reg.college}`,
+          `<strong>Technical Event:</strong> ${reg.techEvent}`,
+          `<strong>Non-Technical Event:</strong> ${reg.nonTechEvent}`,
+          `<strong>Fee Assessed:</strong> ${reg.fee}`,
+          `<strong>Payment Proof:</strong> Attached &amp; Pending Verification`
+        ];
+        if (isHack) {
+          summaryLines.push(
+            `<strong>Team Name:</strong> ${reg.teamName}`,
+            `<strong>Team Leader:</strong> ${reg.leaderName} (${reg.leaderPhone})`,
+            `<strong>Teammates (3 Members):</strong> ${reg.tm2}, ${reg.tm3}`,
+            `<strong>Hackathon Timing:</strong> 10:00 AM – 3:00 PM (5 Hours)`
+          );
+        }
+        document.getElementById('reg-summary-details').innerHTML =
+          summaryLines.map(l => `<div style="margin-bottom:6px;">${l}</div>`).join('');
+
+        // ── Build Pass Text (for .TXT download) ──────────────────────
+        const passText =
+`=============================================================
+             Q-AURA 2026 — OFFICIAL REGISTRATION PASS
+   School of Quantum Science and Computing AI
+   Rathinam Global University, Coimbatore
+=============================================================
+
+REGISTRATION ID : ${reg.regId}
+TIMESTAMP       : ${reg.timestamp}
+STATUS          : Registered (Pending Verification)
+
+--- OPERATIVE DETAILS ---
+NAME            : ${reg.firstName} ${reg.lastName}
+MOBILE          : ${reg.mobile}
+EMAIL           : ${reg.email}
+COLLEGE         : ${reg.college}
+
+--- EVENT ALLOCATION ---
+TECHNICAL EVENT : ${reg.techEvent}
+NON-TECHNICAL   : ${reg.nonTechEvent}
+REGISTRATION FEE: ${reg.fee}
+${isHack ? `
+--- HACKATHON STRIKE TEAM (3 MEMBERS) ---
+TEAM NAME       : ${reg.teamName}
+TEAM LEADER     : ${reg.leaderName} (${reg.leaderPhone})
+TEAMMATES       : ${reg.tm2}, ${reg.tm3}
+TIMING          : 10:00 AM to 03:00 PM (5 Hours Sprint)
+` : ''}
+--- SCHEDULE & VENUE ---
+EVENT DATE      : October 14, 2026 (Wednesday)
+REPORTING TIME  : 09:00 AM IST
+VENUE           : Tower - C, Think Tank Theater
+CAMPUS ADDRESS  : Rathinam Techzone Campus, Pollachi Main Road,
+                  Eachanari, Coimbatore, Tamil Nadu - 641021
+
+COORDINATORS    :
+- Dr. P. Sukumar          (Faculty): 70103 03993
+- Mr. V. Arthanariswara   (Faculty): 7708333036
+- Mr. M. Saravana Kumar   (Faculty): 9952338439
+- Mr. S. Sunil kumar      (Faculty): 6385865347
+- Mr. M. Veera Surya      (Faculty): 8524084816
+- K AjithKumar            (Student): 6385512473
+- A. Mukesh              (Student): 8270866217
+- R Jeyasimhaa            (Student): 99409 28677
+- S S Surya Prakash       (Student): 80566 57572
+- M Dharun                (Student): 8870311010
+=============================================================
+Please carry this pass & your College ID to the venue.
+Food & Accommodation: Will NOT be provided.
+=============================================================`;
+
+        // ── DOWNLOAD PASS (.TXT) button ──────────────────────────────
+        document.getElementById('btnDownloadPass').onclick = function() {
+          try {
+            const blob = new Blob([passText], { type: 'text/plain;charset=utf-8' });
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href     = url;
+            a.download = `QAURA_2026_Pass_${reg.regId}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            triggerToast('✓ Pass downloaded!', 'success');
+          } catch(err) {
+            triggerToast('Download failed. Try Print instead.', 'error');
+          }
+        };
+
+        // ── PRINT / SAVE PDF — Instant Portrait Pass with Logo & QR ──
+        document.getElementById('btnPrintPass').onclick = function() {
+          try {
+            // Live PostgreSQL Database Verification Endpoint for mobile QR scan
+            const apiBase = (typeof QAURA_CONFIG !== 'undefined' && QAURA_CONFIG.API_BASE_URL)
+              ? QAURA_CONFIG.API_BASE_URL
+              : (window.location.origin || 'http://localhost:5000');
+            const verifyUrl = `${apiBase}/verify?id=${encodeURIComponent(reg.regId)}`;
+
+            // Synchronously generate QR Code Data URL encoding the live verification URL
+            let qrImgSrc = '';
+            try {
+              if (typeof qrcode === 'function') {
+                const qr = qrcode(0, 'M');
+                qr.addData(verifyUrl);
+                qr.make();
+                qrImgSrc = qr.createDataURL(4, 2);
+              }
+            } catch (qrErr) {
+              console.warn('QR generation error:', qrErr);
+            }
+
+            const logoSrc = window.collegeLogoBase64 || collegeLogoBase64 || 'assets/logo.png';
+            const schoolLogoSrc = window.schoolLogoBase64 || 'assets/school_icon.png';
+            const logoTag = `<img src="${logoSrc}" alt="Rathinam Global University Logo" class="pass-logo-img"/>`;
+            const schoolLogoTag = `
+              <div class="pass-right-brand" title="School of Quantum Sciences, Computing & AI">
+                <img src="${schoolLogoSrc}" alt="School of Quantum Sciences, Computing & AI Icon" class="pass-school-icon"/>
+                <div class="pass-school-title">School of Quantum Sciences,<br/>Computing &amp; AI</div>
+              </div>`;
+
+            const qrTag = qrImgSrc
+              ? `<img src="${qrImgSrc}" alt="Registration QR Code" class="pass-qr-img"/>`
+              : `<div class="qr-fallback-box"><i class="fas fa-qrcode"></i><br>QAURA-2026<br>${reg.regId}</div>`;
+
+            const hackSection = isHack ? `
+              <div class="sec-hdr">🔥 HACKATHON STRIKE TEAM (3 MEMBERS | 5 HOURS)</div>
+              <div class="data-grid">
+                <div class="data-item full"><div class="lbl">Strike Team Name</div><div class="val highlight-orange">${reg.teamName}</div></div>
+                <div class="data-item"><div class="lbl">Team Leader</div><div class="val">${reg.leaderName}</div></div>
+                <div class="data-item"><div class="lbl">Leader Mobile</div><div class="val">${reg.leaderPhone}</div></div>
+                <div class="data-item full"><div class="lbl">Team Operatives (3 Members)</div><div class="val">${[reg.leaderName + ' (Leader)', reg.tm2, reg.tm3].filter(Boolean).join(' &bull; ')}</div></div>
+                <div class="data-item full"><div class="lbl">Hackathon Marathon Timing</div><div class="val highlight-orange">10:00 AM – 03:00 PM (5 Hours Sprint)</div></div>
+              </div>` : '';
+
+            const printContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Q-AURA 2026 Official Pass - ${reg.regId}</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 10mm 10mm 10mm 10mm;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 16px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .ticket-container {
+      max-width: 680px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 2px solid #0f172a;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    }
+
+    /* ── HEADER ── */
+    .ticket-header {
+      background: #ffffff;
+      padding: 14px 20px 12px;
+      text-align: center;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    .ticket-dual-logos {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+    .pass-left-brand {
+      flex: 1 1 50%;
+      width: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pass-logo-img {
+      max-height: 75px;
+      height: 70px;
+      width: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    .pass-right-brand {
+      flex: 1 1 50%;
+      width: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .pass-school-icon {
+      max-height: 48px;
+      height: 44px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto 3px;
+      filter: none !important;
+      box-shadow: none !important;
+      border: none !important;
+    }
+    .pass-school-title {
+      font-size: 11px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.2;
+      text-align: center;
+    }
+    .dept-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #1e3a8a;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      line-height: 1.3;
+    }
+    .event-ribbon {
+      display: inline-block;
+      background: #0f172a;
+      color: #fbbf24;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      padding: 4px 18px;
+      border-radius: 20px;
+      margin-top: 8px;
+      text-transform: uppercase;
+    }
+
+    /* ── REG STRIP ── */
+    .reg-strip {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #fbbf24;
+    }
+    .reg-strip-id {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #38bdf8;
+    }
+    .status-badge {
+      background: #f59e0b;
+      color: #0f172a;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
+    }
+
+    /* ── CONTENT BODY ── */
+    .ticket-body {
+      padding: 18px 20px;
+    }
+    .portrait-cols {
+      display: flex;
+      gap: 16px;
+      align-items: stretch;
+    }
+    .col-left {
+      flex: 1;
+    }
+    .col-right {
+      width: 180px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #f8fafc;
+      border: 1.5px dashed #cbd5e1;
+      border-radius: 8px;
+      padding: 12px 10px;
+      text-align: center;
+    }
+
+    .pass-qr-img {
+      width: 150px;
+      height: 150px;
+      display: block;
+      border: 2px solid #0f172a;
+      border-radius: 6px;
+      background: #ffffff;
+    }
+    .qr-fallback-box {
+      width: 150px;
+      height: 150px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #e2e8f0;
+      border: 2px solid #0f172a;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: bold;
+      color: #475569;
+    }
+    .qr-caption {
+      font-size: 9px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-top: 8px;
+    }
+    .qr-subtext {
+      font-size: 8px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    /* ── SECTION HEADINGS ── */
+    .sec-hdr {
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      color: #1e3a8a;
+      background: #eff6ff;
+      border-left: 3px solid #2563eb;
+      padding: 4px 8px;
+      border-radius: 0 4px 4px 0;
+      margin: 10px 0 6px;
+      text-transform: uppercase;
+    }
+    .sec-hdr:first-child { margin-top: 0; }
+
+    /* ── DATA GRID ── */
+    .data-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .data-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 6px 8px;
+    }
+    .data-item.full { grid-column: 1 / -1; }
+    .lbl {
+      font-size: 8.5px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .val {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-top: 1px;
+      word-break: break-word;
+    }
+    .highlight-blue { color: #0284c7; }
+    .highlight-green { color: #16a34a; }
+    .highlight-orange { color: #ea580c; }
+
+    /* ── DIRECTIVES BOX ── */
+    .venue-card {
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-top: 12px;
+      font-size: 11px;
+      line-height: 1.6;
+      color: #14532d;
+    }
+    .venue-card strong { color: #064e3b; }
+
+    .help-card {
+      background: #fefce8;
+      border: 1.5px solid #fde047;
+      border-radius: 8px;
+      padding: 8px 14px;
+      margin-top: 6px;
+      font-size: 10.5px;
+      line-height: 1.5;
+      color: #713f12;
+    }
+
+    .ticket-footer {
+      text-align: center;
+      font-size: 9.5px;
+      color: #64748b;
+      margin-top: 12px;
+      padding-top: 8px;
+      border-top: 1px dashed #cbd5e1;
+    }
+
+    @media print {
+      body { background: #ffffff; padding: 0; }
+      .ticket-container { box-shadow: none; border: 1.5px solid #000; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ticket-container">
+    
+    <!-- HEADER WITH DUAL BRAND LOGOS: COLLEGE (LEFT) & SCHOOL (RIGHT) -->
+    <div class="ticket-header">
+      <div class="ticket-dual-logos">
+        <div class="pass-left-brand">
+          ${logoTag}
+        </div>
+        ${schoolLogoTag}
+      </div>
+      <div class="dept-title">School of Quantum Science and Computing AI</div>
+      <div class="event-ribbon">⚡ Q-AURA 2026 &bull; OFFICIAL ENTRY PASS ⚡</div>
+    </div>
+
+    <!-- REGISTRATION ID STRIP -->
+    <div class="reg-strip">
+      <div>
+        <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Official Pass ID</div>
+        <div class="reg-strip-id">${reg.regId}</div>
+      </div>
+      <div class="status-badge">⏳ Pending Verification</div>
+    </div>
+
+    <!-- CONTENT BODY -->
+    <div class="ticket-body">
+      <div class="portrait-cols">
+        
+        <!-- LEFT COLUMN: STUDENT & EVENT DETAILS -->
+        <div class="col-left">
+          
+          <div class="sec-hdr">👤 Operative Credentials</div>
+          <div class="data-grid">
+            <div class="data-item"><div class="lbl">Participant Name</div><div class="val">${reg.firstName} ${reg.lastName}</div></div>
+            <div class="data-item"><div class="lbl">Mobile Number</div><div class="val">${reg.mobile}</div></div>
+            <div class="data-item full"><div class="lbl">Email Address</div><div class="val">${reg.email}</div></div>
+            <div class="data-item full"><div class="lbl">Institution / College</div><div class="val">${reg.college}</div></div>
+          </div>
+
+          <div class="sec-hdr">🎯 Event Allocation</div>
+          <div class="data-grid">
+            <div class="data-item"><div class="lbl">Technical Arena</div><div class="val highlight-blue">${reg.techEvent}</div></div>
+            <div class="data-item"><div class="lbl">Non-Technical Arena</div><div class="val highlight-green">${reg.nonTechEvent}</div></div>
+            <div class="data-item"><div class="lbl">Registration Fee</div><div class="val highlight-orange">${reg.fee}</div></div>
+            <div class="data-item"><div class="lbl">Registered On</div><div class="val" style="font-size:10px;">${reg.timestamp}</div></div>
+          </div>
+
+          ${hackSection}
+
+        </div>
+
+        <!-- RIGHT COLUMN: OFFICIAL PASS QR CODE -->
+        <div class="col-right">
+          ${qrTag}
+          <div class="qr-caption">PASS ID</div>
+          <div class="qr-subtext" style="font-weight:800;font-size:11px;color:#0f172a;margin-top:4px;letter-spacing:0.5px;">${reg.regId}</div>
+        </div>
+
+      </div>
+
+      <!-- VENUE & SCHEDULE -->
+      <div class="venue-card">
+        <strong>📍 REPORTING &amp; VENUE DIRECTIVES:</strong><br/>
+        📅 <strong>Date:</strong> October 14, 2026 (Wednesday) &nbsp;|&nbsp; ⏰ <strong>Reporting:</strong> 09:00 AM IST<br/>
+        🏛️ <strong>Venue:</strong> Tower - C, Think Tank Theater, Rathinam Techzone Campus,<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pollachi Main Road, Eachanari, Coimbatore, Tamil Nadu – 641021
+      </div>
+
+      <!-- HELPLINES -->
+      <div class="help-card">
+        📞 <strong>Student Coordinators:</strong> K. AjithKumar (6385512473) &bull; A. Mukesh (8270866217) &bull; R. Jeyasimhaa (99409 28677) &bull; S. S. Surya Prakash (80566 57572) &bull; M. Dharun (8870311010)
+      </div>
+
+      <!-- FOOTER NOTE -->
+      <div class="ticket-footer">
+        ⚠️ Please present this pass along with your <strong>College ID Card</strong> at the registration desk.<br/>
+        Computer Generated Pass &bull; Rathinam Global University &bull; School of Quantum Science &amp; Computing AI
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    window.onload = function() {
+      setTimeout(function() { window.print(); }, 400);
+    };
+  <\/script>
+</body>
+</html>`;
+
+            const printWin = window.open('', '_blank');
+            if (!printWin) {
+              triggerToast('Pop-up blocked! Allow pop-ups in your browser to print the pass.', 'error');
+              return;
+            }
+            printWin.document.open();
+            printWin.document.write(printContent);
+            printWin.document.close();
+            triggerToast('✓ Official Portrait Pass Ready for Printing!', 'success');
+          } catch (err) {
+            console.error('Print pass error:', err);
+            triggerToast('Print failed: ' + err.message, 'error');
+          }
+        };
+
+        // Show success modal
+        document.getElementById('success-modal-overlay').classList.add('show');
+        triggerToast('✓ Registration Confirmed! Download your pass below.', 'success');
+
+      } catch (globalErr) {
+        console.error('Registration error:', globalErr);
+        triggerToast('❌ Registration error: ' + globalErr.message + '. Please try again.', 'error');
+      }
+    });
+
+
+    // ─── CLOSE MODAL & RESET ────────────────────────────────────────
+    function closeSuccessModal() {
+      document.getElementById('success-modal-overlay').classList.remove('show');
+      document.getElementById('cyberRegForm').reset();
+      document.querySelectorAll('.cyber-event-option').forEach(o => o.classList.remove('selected'));
+      document.getElementById('hackathon-team-panel').classList.remove('show');
+      document.querySelectorAll('.cyber-input').forEach(i => i.classList.remove('error'));
+      document.querySelectorAll('.err-text').forEach(e => e.classList.remove('show'));
+      document.getElementById('cyberDropzone').classList.remove('has-file');
+      document.getElementById('uploadFilename').style.display = 'none';
+      document.getElementById('preview-image-elem').style.display = 'none';
+      base64PaymentProof = null;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Dynamic error removal on input
+    document.querySelectorAll('.cyber-input').forEach(input => {
+      input.addEventListener('input', () => {
+        input.classList.remove('error');
+        hideError('err-' + input.id);
+      });
+    });
+
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "qaura2026",
+  "version": "1.0.0",
+  "description": "| File | Purpose | |---|---| | `index.html` | Student registration portal | | `admin.html` | Admin dashboard (stats, table, CSV export) | | `code.gs` | Google Apps Script — writes to Google Sheets | | `assets/logo.png` | RGU logo | | `assets/poster.jpg` | Q-AURA event poster |",
+  "main": "config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "pg": "^8.23.0",
+    "tesseract.js": "^7.0.0"
+  }
+}

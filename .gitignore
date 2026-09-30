@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Environment Variables & Credentials
+.env
+.env.local
+*.pem
+*.key
+
+# Temporary / OCR Artifacts
+eng.traineddata
+bottom_crop.jpg
+coord_box.jpg
+coord_box_enhanced.png
+
+# Logs
+*.log
+npm-debug.log*
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+Desktop.ini

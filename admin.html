@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Q-AURA 2026 — Admin Command Operations</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --bg-dark: #07090e;
+      --bg-surface: #0e121b;
+      --bg-card: rgba(16, 21, 32, 0.85);
+      
+      --cyan: #00f0ff;
+      --neon-green: #00ff66;
+      --neon-purple: #9d4edd;
+      --neon-gold: #ffd700;
+      --neon-orange: #ff7700;
+      --neon-pink: #ff0055;
+      
+      --border-glow: rgba(0, 240, 255, 0.22);
+      --text-main: #f0f4fc;
+      --text-muted: #8b9bb4;
+      
+      --font-cyber: 'Orbitron', monospace;
+      --font-tech: 'Rajdhani', sans-serif;
+      --font-mono: 'Share Tech Mono', monospace;
+      --font-sans: 'Space Grotesk', system-ui, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ─── CYBER GRID BACKGROUND ────────────────────────────── */
+    .cyber-grid-overlay {
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(to right, rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── HEADER ───────────────────────────────────────────── */
+    header {
+      background: rgba(11, 15, 24, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.25);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+    }
+    .hd-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .admin-logo-box {
+      background: #ffffff;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--cyan);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+      display: flex;
+      align-items: center;
+    }
+    .admin-logo-box img {
+      height: 44px;
+      object-fit: contain;
+    }
+    .admin-title-wrap h1 {
+      font-family: var(--font-cyber);
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+    .admin-title-wrap .sub {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--cyan);
+      letter-spacing: 1px;
+    }
+
+    .hd-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .cyber-btn {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .cb-outline {
+      background: rgba(0, 240, 255, 0.08);
+      border-color: rgba(0, 240, 255, 0.4);
+      color: var(--cyan);
+    }
+    .cb-outline:hover {
+      background: rgba(0, 240, 255, 0.2);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+    }
+    .cb-green {
+      background: rgba(0, 255, 102, 0.12);
+      border-color: var(--neon-green);
+      color: var(--neon-green);
+    }
+    .cb-green:hover {
+      background: rgba(0, 255, 102, 0.25);
+      box-shadow: 0 0 15px rgba(0, 255, 102, 0.4);
+    }
+    .cb-gold {
+      background: rgba(255, 215, 0, 0.12);
+      border-color: var(--neon-gold);
+      color: var(--neon-gold);
+    }
+    .cb-gold:hover {
+      background: rgba(255, 215, 0, 0.25);
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+    }
+    .cb-red {
+      background: rgba(255, 0, 85, 0.12);
+      border-color: var(--neon-pink);
+      color: var(--neon-pink);
+    }
+    .cb-red:hover {
+      background: rgba(255, 0, 85, 0.25);
+    }
+
+    /* ─── HUD PANEL CLASS ──────────────────────────────────── */
+    .hud-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glow);
+      backdrop-filter: blur(12px);
+      border-radius: 10px;
+      position: relative;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+    }
+    .hud-panel::before {
+      content: '';
+      position: absolute;
+      top: -1px; left: -1px;
+      width: 10px; height: 10px;
+      border-top: 2px solid var(--cyan);
+      border-left: 2px solid var(--cyan);
+      border-top-left-radius: 10px;
+      pointer-events: none;
+    }
+    .hud-panel::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; right: -1px;
+      width: 10px; height: 10px;
+      border-bottom: 2px solid var(--cyan);
+      border-right: 2px solid var(--cyan);
+      border-bottom-right-radius: 10px;
+      pointer-events: none;
+    }
+
+    /* ─── MAIN LAYOUT ──────────────────────────────────────── */
+    .page-container {
+      max-width: 1400px;
+      margin: 24px auto;
+      padding: 0 16px 60px;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* ─── STATS CARDS ──────────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    .stat-hud-box {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .s-icon { font-size: 1.4rem; color: var(--cyan); margin-bottom: 4px; }
+    .s-num {
+      font-family: var(--font-cyber);
+      font-size: 2rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+    }
+    .s-lbl {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* ─── CHARTS ROW ───────────────────────────────────────── */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+    @media(max-width: 768px) {
+      .charts-row { grid-template-columns: 1fr; }
+    }
+    .chart-hud-card { padding: 20px; }
+    .chart-hud-title {
+      font-family: var(--font-cyber);
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      color: var(--cyan);
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .bar-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      width: 140px;
+      flex-shrink: 0;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .bar-track {
+      flex: 1;
+      height: 18px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 8px;
+      transition: width 0.6s ease;
+    }
+    .bar-fill span {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #07090e;
+    }
+
+    /* ─── GOOGLE SHEETS LIVE SYNC BAR ──────────────────────── */
+    .sheets-sync-panel {
+      padding: 18px 22px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      border-color: rgba(0, 255, 102, 0.35);
+      background: rgba(10, 24, 18, 0.85);
+    }
+    .sc-icon {
+      font-size: 2rem;
+      color: var(--neon-green);
+      flex-shrink: 0;
+    }
+    .sc-info { flex: 1; min-width: 220px; }
+    .sc-info h3 {
+      font-family: var(--font-cyber);
+      font-size: 0.95rem;
+      color: var(--neon-green);
+      margin-bottom: 4px;
+    }
+    .sc-info p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .sc-input-row {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .sc-url-input {
+      flex: 1;
+      background: rgba(4, 8, 12, 0.9);
+      border: 1px solid rgba(0, 255, 102, 0.4);
+      border-radius: 6px;
+      padding: 9px 14px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--neon-green);
+      outline: none;
+    }
+    .sc-url-input:focus {
+      border-color: var(--neon-green);
+      box-shadow: 0 0 12px rgba(0, 255, 102, 0.4);
+    }
+
+    /* ─── TOOLBAR ──────────────────────────────────────────── */
+    .filter-toolbar {
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .search-input {
+      flex: 1;
+      min-width: 200px;
+      background: rgba(6, 9, 15, 0.85);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      border-radius: 6px;
+      padding: 9px 14px;
+      color: #fff;
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .search-input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+    .filter-select {
+      background: rgba(6, 9, 15, 0.85);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      border-radius: 6px;
+      padding: 9px 12px;
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      outline: none;
+      cursor: pointer;
+    }
+    .filter-select:focus { border-color: var(--cyan); }
+
+    /* ─── DATA TABLE ───────────────────────────────────────── */
+    .table-container {
+      overflow: hidden;
+      border-radius: 10px;
+    }
+    .table-responsive { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    thead tr {
+      background: rgba(14, 20, 32, 0.95);
+      border-bottom: 1.5px solid rgba(0, 240, 255, 0.3);
+    }
+    thead th {
+      padding: 14px 12px;
+      font-family: var(--font-cyber);
+      font-size: 0.72rem;
+      letter-spacing: 1px;
+      color: var(--cyan);
+      text-align: left;
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
+    tbody tr {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      transition: background 0.15s ease;
+    }
+    tbody tr:hover {
+      background: rgba(0, 240, 255, 0.04);
+    }
+    tbody tr.hack-row {
+      background: rgba(255, 119, 0, 0.05);
+    }
+    tbody tr.hack-row:hover {
+      background: rgba(255, 119, 0, 0.1);
+    }
+    td {
+      padding: 12px;
+      vertical-align: middle;
+      color: var(--text-main);
+    }
+    .badge-reg {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--cyan);
+      background: rgba(0, 240, 255, 0.1);
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 240, 255, 0.25);
+    }
+    .badge-event-t {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(0, 240, 255, 0.12);
+      color: var(--cyan);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      white-space: nowrap;
+    }
+    .badge-event-t.hack {
+      background: rgba(255, 119, 0, 0.15);
+      color: var(--neon-orange);
+      border-color: rgba(255, 119, 0, 0.35);
+    }
+    .badge-event-nt {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(0, 255, 102, 0.12);
+      color: var(--neon-green);
+      border: 1px solid rgba(0, 255, 102, 0.25);
+      white-space: nowrap;
+    }
+    
+    /* Payment thumbnail */
+    .proof-thumbnail {
+      width: 42px;
+      height: 42px;
+      border-radius: 6px;
+      object-fit: cover;
+      cursor: zoom-in;
+      border: 1px solid rgba(0, 255, 102, 0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .proof-thumbnail:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 15px rgba(0, 255, 102, 0.5);
+    }
+    
+    /* Status Badge */
+    .status-pill {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 700;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .status-pending {
+      background: rgba(255, 140, 0, 0.15);
+      color: var(--neon-orange);
+      border: 1px solid var(--neon-orange);
+    }
+    .status-verified {
+      background: rgba(0, 255, 102, 0.15);
+      color: var(--neon-green);
+      border: 1px solid var(--neon-green);
+    }
+    .status-rejected {
+      background: rgba(255, 0, 85, 0.15);
+      color: var(--neon-pink);
+      border: 1px solid var(--neon-pink);
+    }
+
+    .table-footer-bar {
+      padding: 12px 18px;
+      background: rgba(14, 20, 32, 0.95);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* ─── MODAL ────────────────────────────────────────────── */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 6, 12, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow-y: auto;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal-hud-card {
+      max-width: 650px;
+      width: 100%;
+      padding: 28px;
+      border: 1.5px solid var(--cyan);
+      box-shadow: 0 0 50px rgba(0, 240, 255, 0.25);
+      animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.25);
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+    }
+    .modal-header-row h2 {
+      font-family: var(--font-cyber);
+      font-size: 1.1rem;
+      color: #fff;
+    }
+    .modal-close-x {
+      background: transparent;
+      border: none;
+      color: var(--cyan);
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    @media(max-width: 580px){ .detail-grid { grid-template-columns: 1fr; } }
+    .detail-cell {
+      background: rgba(8, 12, 18, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+    .detail-cell.full { grid-column: 1 / -1; }
+    .dc-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--cyan);
+      text-transform: uppercase;
+    }
+    .dc-val {
+      font-size: 0.88rem;
+      color: #fff;
+      margin-top: 3px;
+      word-break: break-word;
+    }
+    .proof-full-preview {
+      text-align: center;
+      background: rgba(6, 9, 14, 0.9);
+      border: 1px dashed rgba(0, 255, 102, 0.4);
+      border-radius: 8px;
+      padding: 14px;
+      margin: 16px 0;
+    }
+    .proof-full-preview img {
+      max-width: 100%;
+      max-height: 320px;
+      border-radius: 6px;
+      border: 1px solid var(--neon-green);
+    }
+
+    /* Lightbox */
+    #imageLightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 100000;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+    }
+    #imageLightbox.show { display: flex; }
+    #imageLightbox img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 8px;
+      box-shadow: 0 0 40px rgba(0, 255, 102, 0.4);
+    }
+
+    /* Toast */
+    #adminToast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(14, 19, 30, 0.95);
+      border: 1px solid var(--cyan);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+      color: #fff;
+      padding: 12px 22px;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      z-index: 20000;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    #adminToast.show { transform: translateY(0); opacity: 1; }
+    #adminToast.success { border-color: var(--neon-green); color: var(--neon-green); }
+    #adminToast.error { border-color: var(--neon-pink); color: var(--neon-pink); }
+  </style>
+</head>
+
+<body>
+  <div class="cyber-grid-overlay"></div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="hd-left">
+      <div class="admin-logo-box">
+        <img src="assets/logo.png" alt="Rathinam Global University"/>
+      </div>
+      <div class="admin-title-wrap">
+        <h1>Q-AURA 2026 <span>COMMAND DESK</span></h1>
+        <div class="sub">SCHOOL OF QUANTUM SCIENCE AND COMPUTING AI</div>
+      </div>
+    </div>
+    <div class="hd-actions">
+      <div id="pgStatusBadge" style="display:inline-flex;align-items:center;gap:7px;padding:8px 14px;background:rgba(0,240,255,0.08);border:1px solid #00f0ff;border-radius:6px;font-family:var(--font-mono);font-size:0.75rem;color:#00f0ff;">
+        <i class="fas fa-database"></i> <span id="pgStatusText">PostgreSQL 18: Connecting...</span>
+      </div>
+      <button class="cyber-btn cb-outline" style="border-color:var(--cyan);background:rgba(0,240,255,0.15);color:var(--cyan);font-weight:700;" onclick="location.href='verify.html'">
+        <i class="fas fa-qrcode"></i> REDIRECT TO VERIFICATION DESK ➔
+      </button>
+      <button class="cyber-btn cb-green" onclick="exportDataCSV()"><i class="fas fa-file-excel"></i> DOWNLOAD (CSV)</button>
+      <button class="cyber-btn cb-gold" onclick="exportVerifiedOnly()"><i class="fas fa-check-double"></i> VERIFIED ONLY</button>
+      <button class="cyber-btn cb-red" onclick="wipeLocalData()"><i class="fas fa-trash-alt"></i> PURGE</button>
+    </div>
+  </header>
+
+  <div class="page-container">
+    
+    <!-- STATS ROW -->
+    <div class="stats-grid" id="statsGrid"></div>
+
+    <!-- CHARTS ROW -->
+    <div class="charts-row">
+      <div class="chart-hud-card hud-panel">
+        <div class="chart-hud-title"><i class="fas fa-microchip"></i> TECHNICAL ARENA REGISTRATIONS</div>
+        <div id="techChartBars"></div>
+      </div>
+      <div class="chart-hud-card hud-panel">
+        <div class="chart-hud-title"><i class="fas fa-palette"></i> NON-TECHNICAL ARENA REGISTRATIONS</div>
+        <div id="nonTechChartBars"></div>
+      </div>
+    </div>
+
+    <!-- ADMIN ROSTER DOWNLOAD CENTER -->
+    <div class="sheets-sync-panel hud-panel" style="border-color:rgba(0, 240, 255, 0.4);background:rgba(10, 18, 30, 0.9);">
+      <div class="sc-icon"><i class="fas fa-file-download" style="color:var(--neon-green);"></i></div>
+      <div class="sc-info">
+        <h3 style="color:#fff;">DOWNLOAD REGISTRATION ROSTER</h3>
+        <p>Export all participant details, event allocations, hackathon strike teams, and payment fees directly into an Excel-ready CSV sheet or JSON format.</p>
+        <div style="display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;">
+          <button class="cyber-btn cb-green" onclick="exportDataCSV()"><i class="fas fa-file-excel"></i> DOWNLOAD ALL (EXCEL / CSV)</button>
+          <button class="cyber-btn cb-gold" onclick="exportVerifiedOnly()"><i class="fas fa-check-circle"></i> DOWNLOAD VERIFIED ONLY</button>
+          <button class="cyber-btn cb-outline" onclick="exportDataJSON()"><i class="fas fa-file-code"></i> DOWNLOAD JSON BACKUP</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOOLBAR FILTERS -->
+    <div class="filter-toolbar hud-panel">
+      <input type="text" id="adminSearch" class="search-input" placeholder="🔍 Search operative name, email, college, call-sign, or Reg ID..." oninput="displayTable()"/>
+      <select id="selTech" class="filter-select" onchange="displayTable()">
+        <option value="">ALL TECHNICAL ARENAS</option>
+        <option>Cyber Forge (Workshop)</option>
+        <option>Cloud Craft (Workshop)</option>
+        <option>CTF Challenge</option>
+        <option>Hackathon</option>
+      </select>
+      <select id="selNonTech" class="filter-select" onchange="displayTable()">
+        <option value="">ALL NON-TECHNICAL ARENAS</option>
+        <option>Prompt Generating</option>
+        <option>Click N Chill (Photography)</option>
+        <option>Quiz Competition</option>
+      </select>
+      <select id="selStatus" class="filter-select" onchange="displayTable()">
+        <option value="">ALL VERIFICATION STATUSES</option>
+        <option>Pending Verification</option>
+        <option>Verified</option>
+        <option>Rejected</option>
+      </select>
+      <button class="cyber-btn cb-outline" onclick="reloadRegistrations()"><i class="fas fa-sync-alt"></i> REFRESH</button>
+      <button class="cyber-btn cb-gold" onclick="exportVerifiedOnly()"><i class="fas fa-check-double"></i> VERIFIED ONLY</button>
+    </div>
+
+    <!-- MAIN DATA TABLE -->
+    <div class="table-container hud-panel">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>REG ID</th>
+              <th>TIMESTAMP</th>
+              <th>OPERATIVE</th>
+              <th>MOBILE</th>
+              <th>INSTITUTION</th>
+              <th>TECHNICAL</th>
+              <th>NON-TECHNICAL</th>
+              <th>FEE</th>
+              <th>PAYMENT PROOF</th>
+              <th>STATUS</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div class="table-footer-bar" id="tableCounter"></div>
+    </div>
+  </div>
+
+  <!-- FOOTER WITH GOOGLE-SOURCED CAMPUS ADDRESS -->
+  <footer style="border-top:1.5px solid rgba(0,240,255,0.25);background:rgba(5,7,12,0.98);padding:35px 20px 25px;margin-top:40px;position:relative;z-index:10;">
+    <div style="max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;">
+      <div>
+        <div style="font-family:var(--font-cyber);font-size:1rem;color:#fff;margin-bottom:4px;">RATHINAM GLOBAL UNIVERSITY</div>
+        <div style="font-family:var(--font-mono);font-size:0.8rem;color:var(--cyan);margin-bottom:8px;">SCHOOL OF QUANTUM SCIENCE AND COMPUTING AI</div>
+        <div style="font-size:0.82rem;color:var(--text-muted);line-height:1.6;">
+          <i class="fas fa-map-marker-alt" style="color:var(--cyan);margin-right:6px;"></i> Rathinam Techzone Campus, Pollachi Main Road, Eachanari, Coimbatore, Tamil Nadu – 641021, India.<br/>
+          <i class="fas fa-phone-alt" style="color:var(--neon-gold);margin-right:6px;"></i> Campus Info: +91 422 4040909
+        </div>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-dim);text-align:right;">
+        Q-AURA 2026 COMMAND DESK &bull; OCT 14, 2026
+      </div>
+    </div>
+  </footer>
+
+  <!-- DETAIL MODAL -->
+  <div class="modal-backdrop" id="operativeModal">
+    <div class="modal-hud-card hud-panel">
+      <div class="modal-header-row">
+        <h2 id="modalRegTitle">OPERATIVE DOSSIER</h2>
+        <button class="modal-close-x" onclick="closeOperativeModal()">&times;</button>
+      </div>
+      <div id="modalDossierContent"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+        <button class="cyber-btn cb-red" id="btnDeleteRecord"><i class="fas fa-trash"></i> DELETE</button>
+        <button class="cyber-btn cb-green" id="btnDownloadProof"><i class="fas fa-download"></i> PROOF IMAGE</button>
+        <button class="cyber-btn cb-outline" onclick="closeOperativeModal()">DISMISS</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIGHTBOX -->
+  <div id="imageLightbox" onclick="this.classList.remove('show')">
+    <img id="lightboxImg" alt="Transaction Proof"/>
+  </div>
+
+  <!-- TOAST -->
+  <div id="adminToast"></div>
+
+  <!-- CONFIG & SCRIPTS -->
+  <script src="config.js"></script>
+  <script>
+    const STORAGE_KEY = 'qaura2026_registrations';
+    const URL_KEY = 'qaura2026_sheet_url';
+    let dataList = [];
+    let activeIndex = null;
+    let isPgConnected = false;
+
+    function getApiBase() {
+      if (typeof QAURA_CONFIG !== 'undefined' && QAURA_CONFIG.API_BASE_URL) {
+        return QAURA_CONFIG.API_BASE_URL;
+      }
+      return '';
+    }
+
+    function updateDbIndicator(connected, count) {
+      const badge = document.getElementById('pgStatusBadge');
+      const txt = document.getElementById('pgStatusText');
+      if (!badge || !txt) return;
+      if (connected) {
+        badge.style.borderColor = '#00ff66';
+        badge.style.color = '#00ff66';
+        badge.style.background = 'rgba(0, 255, 102, 0.1)';
+        txt.innerHTML = `PostgreSQL 18: ONLINE (${count} Records)`;
+      } else {
+        badge.style.borderColor = '#ffd700';
+        badge.style.color = '#ffd700';
+        badge.style.background = 'rgba(255, 215, 0, 0.1)';
+        txt.innerHTML = `Local Cache: ${count} Records (PG Offline)`;
+      }
+    }
+
+    let lastDataCache = '';
+
+    async function initData() {
+      // 1. Try PostgreSQL API first
+      try {
+        const apiBase = getApiBase();
+        const endpoint = apiBase ? `${apiBase}/api/registrations` : '/api/registrations';
+        const res = await fetch(endpoint, { cache: 'no-store' });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.status === 'ok' && Array.isArray(json.registrations)) {
+            const freshCache = JSON.stringify(json.registrations);
+            if (freshCache !== lastDataCache) {
+              dataList = json.registrations;
+              lastDataCache = freshCache;
+              isPgConnected = true;
+              localStorage.setItem(STORAGE_KEY, freshCache);
+              updateDbIndicator(true, dataList.length);
+              renderAllComponents();
+            }
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('PostgreSQL fetch notice, using local cache:', err);
+      }
+
+      // 2. Fallback to localStorage
+      try {
+        const cached = localStorage.getItem(STORAGE_KEY) || '[]';
+        if (cached !== lastDataCache) {
+          dataList = JSON.parse(cached);
+          lastDataCache = cached;
+          isPgConnected = false;
+          updateDbIndicator(false, dataList.length);
+          renderAllComponents();
+        }
+      } catch {
+        dataList = [];
+        updateDbIndicator(false, 0);
+        renderAllComponents();
+      }
+    }
+
+    function persistData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(dataList));
+    }
+
+    async function updateRemoteStatus(regId, newStatus) {
+      try {
+        const apiBase = getApiBase();
+        const endpoint = apiBase ? `${apiBase}/api/registrations/${encodeURIComponent(regId)}/status` : `/api/registrations/${encodeURIComponent(regId)}/status`;
+        await fetch(endpoint, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+      } catch (err) {
+        console.warn('Remote PostgreSQL status update failed:', err);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem(URL_KEY) || '';
+      if (saved && document.getElementById('sheetSyncUrl')) document.getElementById('sheetSyncUrl').value = saved;
+      initData();
+
+      // Auto-poll PostgreSQL every 3 seconds for instant real-time live sync
+      setInterval(initData, 3000);
+
+      // Auto-refresh when tab gains focus or visibility
+      window.addEventListener('focus', initData);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) initData();
+      });
+    });
+
+    function saveTargetUrl() {
+      const u = document.getElementById('sheetSyncUrl').value.trim();
+      if (u && !u.startsWith('https://')) {
+        adminNotify('Provide a valid HTTPS endpoint URL.', 'error');
+        return;
+      }
+      localStorage.setItem(URL_KEY, u);
+      adminNotify('✓ URL configured and saved.', 'success');
+    }
+
+    // Google Sheets Sync
+    async function syncWithGoogleSheets() {
+      const endpoint = localStorage.getItem(URL_KEY);
+      if (!endpoint) {
+        adminNotify('Configure and save your Google Apps Script Web App URL first.', 'error');
+        return;
+      }
+      if (!dataList.length) {
+        adminNotify('No registration data available to transmit.', 'error');
+        return;
+      }
+      adminNotify('Transmitting registration records to Google Sheets...', 'info');
+
+      let syncedCount = 0;
+      for (const item of dataList) {
+        if (item.syncedToSheet) continue;
+        const payload = { ...item };
+        delete payload.paymentScreenshot; // Exclude base64 image from sheet row payload
+        try {
+          await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(payload),
+            mode: 'no-cors'
+          });
+          item.syncedToSheet = true;
+          syncedCount++;
+        } catch (e) {
+          console.warn('Sync issue:', e);
+        }
+      }
+      persistData();
+      renderAllComponents();
+      adminNotify(`✓ Synced ${syncedCount} new registration(s) directly to Google Sheet!`, 'success');
+    }
+
+    // Metrics Display
+    function displayMetrics() {
+      const total = dataList.length;
+      const hackCount = dataList.filter(d => d.techEvent === 'Hackathon').length;
+      const uniqueColleges = new Set(dataList.map(d => d.college)).size;
+      const pending = dataList.filter(d => d.status === 'Pending Verification').length;
+      const verified = dataList.filter(d => d.status === 'Verified').length;
+      const synced = dataList.filter(d => d.syncedToSheet).length;
+
+      document.getElementById('statsGrid').innerHTML = `
+        <div class="stat-hud-box hud-panel">
+          <div class="s-icon"><i class="fas fa-users"></i></div>
+          <div class="s-num" style="color:var(--cyan);">${total}</div>
+          <div class="s-lbl">TOTAL REGISTRATIONS</div>
+        </div>
+        <div class="stat-hud-box hud-panel">
+          <div class="s-icon"><i class="fas fa-users-cog" style="color:var(--neon-orange);"></i></div>
+          <div class="s-num" style="color:var(--neon-orange);">${hackCount}</div>
+          <div class="s-lbl">HACKATHON TEAMS</div>
+        </div>
+        <div class="stat-hud-box hud-panel">
+          <div class="s-icon"><i class="fas fa-university"></i></div>
+          <div class="s-num" style="color:var(--neon-purple);">${uniqueColleges}</div>
+          <div class="s-lbl">COLLEGES REPRESENTED</div>
+        </div>
+        <div class="stat-hud-box hud-panel">
+          <div class="s-icon"><i class="fas fa-hourglass-half" style="color:var(--neon-orange);"></i></div>
+          <div class="s-num" style="color:var(--neon-orange);">${pending}</div>
+          <div class="s-lbl">PENDING PROOFS</div>
+        </div>
+        <div class="stat-hud-box hud-panel">
+          <div class="s-icon"><i class="fas fa-check-circle" style="color:var(--neon-green);"></i></div>
+          <div class="s-num" style="color:var(--neon-green);">${verified}</div>
+          <div class="s-lbl">VERIFIED OPERATIVES</div>
+        </div>
+        <div class="stat-hud-box hud-panel">
+          <div class="s-icon"><i class="fas fa-file-download" style="color:var(--neon-green);"></i></div>
+          <div class="s-num" style="color:var(--neon-green);">${total}</div>
+          <div class="s-lbl">READY TO EXPORT</div>
+        </div>
+      `;
+    }
+
+    // Charts Rendering
+    function displayCharts() {
+      const tMap = {}, ntMap = {};
+      dataList.forEach(r => {
+        tMap[r.techEvent] = (tMap[r.techEvent] || 0) + 1;
+        ntMap[r.nonTechEvent] = (ntMap[r.nonTechEvent] || 0) + 1;
+      });
+      renderBarChart('techChartBars', tMap, ['#00f0ff', '#9d4edd', '#00ff66', '#ff7700']);
+      renderBarChart('nonTechChartBars', ntMap, ['#ffd700', '#ff0055', '#00ff66']);
+    }
+
+    function renderBarChart(id, map, colors) {
+      const container = document.getElementById(id);
+      const items = Object.entries(map).sort((a,b) => b[1]-a[1]);
+      const max = items.length ? items[0][1] : 1;
+      if (!items.length) {
+        container.innerHTML = '<p style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);padding:10px 0;">NO REGISTRATION DATA RECORDED.</p>';
+        return;
+      }
+      container.innerHTML = items.map(([lbl, val], idx) => `
+        <div class="bar-row">
+          <div class="bar-label" title="${lbl}">${lbl}</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:${Math.round(val/max*100)}%;background:${colors[idx % colors.length]};">
+              <span>${val}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Table Filter and Render
+    function retrieveFiltered() {
+      const q = document.getElementById('adminSearch').value.toLowerCase();
+      const ft = document.getElementById('selTech').value;
+      const fnt = document.getElementById('selNonTech').value;
+      const fs = document.getElementById('selStatus').value;
+
+      return dataList.filter(row => {
+        const str = [row.firstName, row.lastName, row.email, row.mobile, row.college, row.regId, row.teamName, row.leaderName].join(' ').toLowerCase();
+        return (!q || str.includes(q))
+          && (!ft || row.techEvent === ft)
+          && (!fnt || row.nonTechEvent === fnt)
+          && (!fs || row.status === fs);
+      });
+    }
+
+    function displayTable() {
+      const filtered = retrieveFiltered();
+      const tbody = document.getElementById('tableBody');
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:40px;color:var(--text-muted);font-family:var(--font-mono);">NO MATCHING RECORDS LOCATED IN SYSTEM.</td></tr>`;
+        document.getElementById('tableCounter').textContent = '';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((row, i) => {
+        const isHack = row.techEvent === 'Hackathon';
+        const realIdx = dataList.indexOf(row);
+        const statusClass = row.status === 'Verified' ? 'status-verified' : row.status === 'Rejected' ? 'status-rejected' : 'status-pending';
+        const proofElem = row.paymentScreenshot
+          ? `<img src="${row.paymentScreenshot}" class="proof-thumbnail" onclick="triggerLightbox(${realIdx})" title="Click to inspect"/>`
+          : '<span style="color:var(--text-muted);font-family:var(--font-mono);">N/A</span>';
+
+        return `
+          <tr class="${isHack ? 'hack-row' : ''}">
+            <td style="font-family:var(--font-mono);color:var(--text-muted);">${i + 1}</td>
+            <td><span class="badge-reg">${row.regId || '—'}</span></td>
+            <td style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">${row.timestamp || '—'}</td>
+            <td><strong>${row.firstName} ${row.lastName}</strong></td>
+            <td style="font-family:var(--font-mono);">${row.mobile}</td>
+            <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${row.college}">${row.college}</td>
+            <td><span class="badge-event-t ${isHack ? 'hack' : ''}">${row.techEvent}</span></td>
+            <td><span class="badge-event-nt">${row.nonTechEvent}</span></td>
+            <td style="font-family:var(--font-mono);color:var(--neon-gold);">${row.fee || '₹250'}</td>
+            <td>${proofElem}</td>
+            <td><span class="status-pill ${statusClass}" onclick="cycleStatus(${realIdx})" title="Click to toggle status">${row.status || 'Pending Verification'}</span></td>
+            <td style="white-space:nowrap;display:flex;gap:6px;">
+              <button class="cyber-btn cb-outline" style="padding:4px 10px;font-size:0.75rem;" onclick="viewOperativeDossier(${realIdx})">DOSSIER</button>
+              <a href="verify.html?id=${encodeURIComponent(row.regId || '')}" target="_blank" class="cyber-btn cb-outline" style="padding:4px 9px;font-size:0.75rem;color:var(--cyan);text-decoration:none;" title="Redirect to Verification Desk"><i class="fas fa-qrcode"></i></a>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('tableCounter').innerHTML = `DISPATCHING <strong>${filtered.length}</strong> OF <strong>${dataList.length}</strong> OPERATIVES`;
+    }
+
+    // Status Cycler
+    async function cycleStatus(idx) {
+      const r = dataList[idx];
+      const cycle = ['Pending Verification', 'Verified', 'Rejected'];
+      const next = (cycle.indexOf(r.status) + 1) % cycle.length;
+      r.status = cycle[next];
+      persistData();
+      renderAllComponents();
+      adminNotify(`Status updated to: ${r.status}`, r.status === 'Verified' ? 'success' : r.status === 'Rejected' ? 'error' : 'info');
+      if (r.regId) {
+        await updateRemoteStatus(r.regId, r.status);
+      }
+    }
+
+    // Lightbox
+    function triggerLightbox(idx) {
+      const record = dataList[idx];
+      if (!record || !record.paymentScreenshot) return;
+      document.getElementById('lightboxImg').src = record.paymentScreenshot;
+      document.getElementById('imageLightbox').classList.add('show');
+    }
+
+    // Operative Dossier Modal
+    function viewOperativeDossier(idx) {
+      const r = dataList[idx];
+      if (!r) return;
+      activeIndex = idx;
+      document.getElementById('modalRegTitle').textContent = `DOSSIER: ${r.regId || 'OPERATIVE'}`;
+      const isHack = r.techEvent === 'Hackathon';
+
+      let content = `
+        <div class="dc-label" style="margin-bottom:8px;">OPERATIVE CREDENTIALS</div>
+        <div class="detail-grid">
+          <div class="detail-cell"><div class="dc-label">Full Name</div><div class="dc-val">${r.firstName} ${r.lastName}</div></div>
+          <div class="detail-cell"><div class="dc-label">Mobile Number</div><div class="dc-val">${r.mobile}</div></div>
+          <div class="detail-cell"><div class="dc-label">Email Address</div><div class="dc-val">${r.email}</div></div>
+          <div class="detail-cell"><div class="dc-label">Registration Fee</div><div class="dc-val" style="color:var(--neon-gold);">${r.fee || '₹250'}</div></div>
+          <div class="detail-cell full"><div class="dc-label">Institution / College</div><div class="dc-val">${r.college}</div></div>
+          <div class="detail-cell"><div class="dc-label">Technical Arena</div><div class="dc-val">${r.techEvent}</div></div>
+          <div class="detail-cell"><div class="dc-label">Non-Technical Arena</div><div class="dc-val">${r.nonTechEvent}</div></div>
+        </div>
+      `;
+
+      if (isHack) {
+        content += `
+          <div class="dc-label" style="margin:16px 0 8px;color:var(--neon-orange);">HACKATHON STRIKE TEAM PROTOCOL (3 MEMBERS | 5 HOURS)</div>
+          <div class="detail-grid">
+            <div class="detail-cell full"><div class="dc-label">Team Call-Sign</div><div class="dc-val" style="font-weight:700;color:var(--neon-orange);">${r.teamName}</div></div>
+            <div class="detail-cell"><div class="dc-label">Leader Name</div><div class="dc-val">${r.leaderName}</div></div>
+            <div class="detail-cell"><div class="dc-label">Leader Phone</div><div class="dc-val">${r.leaderPhone}</div></div>
+            <div class="detail-cell full"><div class="dc-label">Leader Email</div><div class="dc-val">${r.leaderEmail}</div></div>
+            <div class="detail-cell"><div class="dc-label">Operative 2</div><div class="dc-val">${r.tm2}</div></div>
+            <div class="detail-cell full"><div class="dc-label">Operative 3</div><div class="dc-val">${r.tm3}</div></div>
+          </div>
+        `;
+      }
+
+      content += `
+        <div class="dc-label" style="margin:16px 0 8px;">PAYMENT PROOF ATTACHMENT</div>
+      `;
+      if (r.paymentScreenshot) {
+        content += `
+          <div class="proof-full-preview">
+            <img src="${r.paymentScreenshot}" alt="Proof" onclick="triggerLightbox(${idx})" style="cursor:zoom-in" title="Click to view full screen"/>
+            <p style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);margin-top:6px;">TRANSACTION ATTACHMENT PRESENT</p>
+          </div>
+        `;
+      } else {
+        content += `<p style="font-family:var(--font-mono);color:var(--neon-pink);font-size:0.8rem;padding:8px 0;">NO PROOF IMAGE REGISTERED.</p>`;
+      }
+
+      content += `
+        <div style="display:flex;align-items:center;gap:12px;margin-top:16px;background:rgba(8,12,18,0.8);padding:10px 14px;border-radius:6px;flex-wrap:wrap;">
+          <span class="dc-label">SET STATUS:</span>
+          <select id="modalStatusSelect" class="filter-select" style="flex:1;min-width:140px;">
+            <option ${r.status === 'Pending Verification' ? 'selected' : ''}>Pending Verification</option>
+            <option ${r.status === 'Verified' ? 'selected' : ''}>Verified</option>
+            <option ${r.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+          </select>
+          <button class="cyber-btn cb-outline" onclick="applyModalStatus(${idx})">UPDATE</button>
+          <a href="verify.html?id=${encodeURIComponent(r.regId || '')}" target="_blank" class="cyber-btn cb-outline" style="border-color:var(--cyan);color:var(--cyan);text-decoration:none;"><i class="fas fa-qrcode"></i> VERIFY AT DESK ➔</a>
+        </div>
+      `;
+
+      document.getElementById('modalDossierContent').innerHTML = content;
+      document.getElementById('btnDeleteRecord').onclick = () => removeOperativeRecord(idx);
+      document.getElementById('btnDownloadProof').onclick = () => saveProofImage(idx);
+      document.getElementById('btnDownloadProof').style.display = r.paymentScreenshot ? 'inline-flex' : 'none';
+      document.getElementById('operativeModal').classList.add('show');
+    }
+
+    function closeOperativeModal() {
+      document.getElementById('operativeModal').classList.remove('show');
+      activeIndex = null;
+    }
+
+    async function applyModalStatus(idx) {
+      const select = document.getElementById('modalStatusSelect');
+      if (!select) return;
+      dataList[idx].status = select.value;
+      persistData();
+      renderAllComponents();
+      adminNotify(`Status updated to: ${select.value}`, select.value === 'Verified' ? 'success' : select.value === 'Rejected' ? 'error' : 'info');
+      if (dataList[idx].regId) {
+        await updateRemoteStatus(dataList[idx].regId, select.value);
+      }
+    }
+
+    function removeOperativeRecord(idx) {
+      if (!confirm('CONFIRM DELETION: Are you sure you want to permanently erase this registration record?')) return;
+      dataList.splice(idx, 1);
+      persistData();
+      renderAllComponents();
+      closeOperativeModal();
+      adminNotify('Operative record removed.', 'error');
+    }
+
+    function saveProofImage(idx) {
+      const r = dataList[idx];
+      if (!r || !r.paymentScreenshot) return;
+      const a = document.createElement('a');
+      a.href = r.paymentScreenshot;
+      a.download = `Proof_${r.regId || idx}.png`;
+      a.click();
+      adminNotify('Proof file downloaded.', 'success');
+    }
+
+    // CSV Builders
+    function buildCSV(rows) {
+      const headers = ['Reg ID','Timestamp','Status','First Name','Last Name','Mobile','Email','College',
+        'Technical Arena','Non-Technical Arena','Fee Assessed','Team Call-Sign','Leader Name','Leader Phone',
+        'Leader Email','Teammate 2','Teammate 3','Teammate 4','Synced to Sheet'];
+
+      const content = rows.map(r => [
+        r.regId||'', r.timestamp||'', r.status||'',
+        r.firstName, r.lastName, r.mobile, r.email, r.college,
+        r.techEvent, r.nonTechEvent, r.fee||'₹250',
+        r.teamName||'', r.leaderName||'', r.leaderPhone||'', r.leaderEmail||'',
+        r.tm2||'', r.tm3||'', r.tm4||'',
+        r.syncedToSheet ? 'Yes' : 'No'
+      ].map(f => `"${String(f).replace(/"/g, '""')}"`));
+
+      return [headers.map(h => `"${h}"`).join(','), ...content.map(c => c.join(','))].join('\r\n');
+    }
+
+    function triggerFileDownload(content, filename) {
+      const blob = new Blob(['\uFEFF' + content], { type: 'text/csv;charset=utf-8;' });
+      const u = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = u;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(u);
+    }
+
+    function exportDataCSV() {
+      if (!dataList.length) {
+        adminNotify('No records available to export.', 'error');
+        return;
+      }
+      triggerFileDownload(buildCSV(dataList), `QAURA2026_FullRoster_${new Date().toISOString().slice(0,10)}.csv`);
+      adminNotify('✓ Full CSV Roster Exported.', 'success');
+    }
+
+    function exportVerifiedOnly() {
+      const verified = dataList.filter(d => d.status === 'Verified');
+      if (!verified.length) {
+        adminNotify('No verified operatives in records.', 'error');
+        return;
+      }
+      triggerFileDownload(buildCSV(verified), `QAURA2026_VerifiedOperatives_${new Date().toISOString().slice(0,10)}.csv`);
+      adminNotify(`✓ Exported ${verified.length} verified operatives.`, 'success');
+    }
+
+    function exportDataJSON() {
+      if (!dataList.length) {
+        adminNotify('No records available to export.', 'error');
+        return;
+      }
+      const blob = new Blob([JSON.stringify(dataList, null, 2)], { type: 'application/json' });
+      const u = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = u;
+      link.download = `QAURA2026_RegistrationsBackup_${new Date().toISOString().slice(0,10)}.json`;
+      link.click();
+      URL.revokeObjectURL(u);
+      adminNotify('✓ JSON Backup Exported.', 'success');
+    }
+
+    function wipeLocalData() {
+      if (!confirm('PURGE WARNING: Erase all locally cached registration entries? This does not alter remote Google Sheets.')) return;
+      localStorage.removeItem(STORAGE_KEY);
+      dataList = [];
+      renderAllComponents();
+      adminNotify('Local records purged.', 'error');
+    }
+
+    async function reloadRegistrations() {
+      adminNotify('Synchronizing with PostgreSQL Registry...', 'info');
+      await initData();
+      adminNotify('✓ Records synchronized with PostgreSQL.', 'success');
+    }
+
+    function renderAllComponents() {
+      displayMetrics();
+      displayCharts();
+      displayTable();
+    }
+
+    function adminNotify(msg, type = 'info') {
+      const t = document.getElementById('adminToast');
+      t.textContent = msg;
+      t.className = 'show ' + type;
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => { t.className = ''; }, 3400);
+    }
+
+    // Modal background close
+    document.getElementById('operativeModal').addEventListener('click', function(e) {
+      if (e.target === this) closeOperativeModal();
+    });
+  </script>
+</body>
+</html>

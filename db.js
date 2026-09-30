@@ -1,0 +1,186 @@
+// ═══════════════════════════════════════════════════════════════════
+// Q-AURA 2026 — PostgreSQL Database Module
+// School of Quantum Sciences, Computing & AI, Rathinam Global University
+// ═══════════════════════════════════════════════════════════════════
+
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  host: process.env.PG_HOST || 'localhost',
+  port: parseInt(process.env.PG_PORT, 10) || 5432,
+  database: process.env.PG_DATABASE || 'qaura2026_db',
+  user: process.env.PG_USER || 'postgres',
+  password: process.env.PG_PASSWORD || '',
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000
+});
+
+// Initialize database schema
+async function initDb() {
+  const client = await pool.connect();
+  try {
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS registrations (
+        id SERIAL PRIMARY KEY,
+        reg_id VARCHAR(50) UNIQUE NOT NULL,
+        first_name VARCHAR(100) NOT NULL,
+        last_name VARCHAR(100) NOT NULL,
+        mobile VARCHAR(25) NOT NULL,
+        email VARCHAR(150) NOT NULL,
+        college TEXT NOT NULL,
+        tech_event VARCHAR(100) NOT NULL,
+        non_tech_event VARCHAR(100) NOT NULL,
+        fee VARCHAR(50) NOT NULL,
+        team_name VARCHAR(100),
+        leader_name VARCHAR(100),
+        leader_phone VARCHAR(25),
+        leader_email VARCHAR(150),
+        tm2 VARCHAR(100),
+        tm3 VARCHAR(100),
+        tm4 VARCHAR(100),
+        payment_screenshot TEXT,
+        status VARCHAR(50) DEFAULT 'Pending Verification',
+        created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+        verified_at TIMESTAMPTZ
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_registrations_reg_id ON registrations (reg_id);
+      CREATE INDEX IF NOT EXISTS idx_registrations_mobile ON registrations (mobile);
+    `);
+    console.log('✓ PostgreSQL: Database schema & indexes verified in qaura2026_db');
+  } finally {
+    client.release();
+  }
+}
+
+// Create a new registration
+async function createRegistration(data) {
+  const query = `
+    INSERT INTO registrations (
+      reg_id, first_name, last_name, mobile, email, college,
+      tech_event, non_tech_event, fee,
+      team_name, leader_name, leader_phone, leader_email,
+      tm2, tm3, tm4, payment_screenshot, status
+    ) VALUES (
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
+    )
+    ON CONFLICT (reg_id) DO UPDATE SET
+      first_name = EXCLUDED.first_name,
+      last_name = EXCLUDED.last_name,
+      mobile = EXCLUDED.mobile,
+      email = EXCLUDED.email,
+      college = EXCLUDED.college,
+      tech_event = EXCLUDED.tech_event,
+      non_tech_event = EXCLUDED.non_tech_event,
+      fee = EXCLUDED.fee,
+      team_name = EXCLUDED.team_name,
+      leader_name = EXCLUDED.leader_name,
+      leader_phone = EXCLUDED.leader_phone,
+      leader_email = EXCLUDED.leader_email,
+      tm2 = EXCLUDED.tm2,
+      tm3 = EXCLUDED.tm3,
+      tm4 = EXCLUDED.tm4,
+      payment_screenshot = COALESCE(EXCLUDED.payment_screenshot, registrations.payment_screenshot)
+    RETURNING *;
+  `;
+
+  const isHack = data.techEvent && data.techEvent.includes('Hackathon');
+  const values = [
+    data.regId,
+    data.firstName || '',
+    data.lastName || '',
+    data.mobile || '',
+    data.email || '',
+    data.college || '',
+    data.techEvent || '',
+    data.nonTechEvent || '',
+    data.fee || (isHack ? '₹300 (Team)' : '₹250'),
+    data.teamName || '',
+    data.leaderName || '',
+    data.leaderPhone || '',
+    data.leaderEmail || '',
+    data.tm2 || '',
+    data.tm3 || '',
+    data.tm4 || '',
+    data.paymentScreenshot || '',
+    data.status || 'Pending Verification'
+  ];
+
+  const res = await pool.query(query, values);
+  return res.rows[0];
+}
+
+// Fetch single registration by Reg ID or Mobile
+async function getRegistrationById(term) {
+  if (!term) return null;
+  const cleanTerm = term.trim();
+  const cleanId = cleanTerm.toUpperCase().replace(/\s+/g, '');
+
+  const query = `
+    SELECT * FROM registrations 
+    WHERE UPPER(REPLACE(reg_id, ' ', '')) = $1 
+       OR mobile = $2
+    LIMIT 1;
+  `;
+  const res = await pool.query(query, [cleanId, cleanTerm]);
+  return res.rows[0] || null;
+}
+
+// Fetch all registrations
+async function getAllRegistrations() {
+  const query = `
+    SELECT 
+      id, reg_id AS "regId", first_name AS "firstName", last_name AS "lastName",
+      mobile, email, college, tech_event AS "techEvent", non_tech_event AS "nonTechEvent",
+      fee, team_name AS "teamName", leader_name AS "leaderName",
+      leader_phone AS "leaderPhone", leader_email AS "leaderEmail",
+      tm2, tm3, tm4, payment_screenshot AS "paymentScreenshot",
+      status, created_at AS "createdAt", verified_at AS "verifiedAt"
+    FROM registrations
+    ORDER BY created_at DESC;
+  `;
+  const res = await pool.query(query);
+  return res.rows;
+}
+
+// Update registration verification status
+async function updateStatus(regId, newStatus) {
+  const isVerified = newStatus && newStatus.toLowerCase().includes('verif');
+  const query = `
+    UPDATE registrations 
+    SET status = $1,
+        verified_at = ${isVerified ? 'CURRENT_TIMESTAMP' : 'NULL'}
+    WHERE UPPER(REPLACE(reg_id, ' ', '')) = UPPER(REPLACE($2, ' ', ''))
+    RETURNING *;
+  `;
+  const res = await pool.query(query, [newStatus, regId]);
+  return res.rows[0] || null;
+}
+
+// Get metrics / stats
+async function getMetrics() {
+  const totalRes = await pool.query('SELECT COUNT(*) AS total FROM registrations;');
+  const verifiedRes = await pool.query("SELECT COUNT(*) AS verified FROM registrations WHERE status ILIKE '%verif%';");
+  const pendingRes = await pool.query("SELECT COUNT(*) AS pending FROM registrations WHERE status ILIKE '%pending%';");
+  const hackathonRes = await pool.query("SELECT COUNT(*) AS hackathon FROM registrations WHERE tech_event ILIKE '%hackathon%';");
+  const techRes = await pool.query('SELECT tech_event, COUNT(*) AS count FROM registrations GROUP BY tech_event;');
+  
+  return {
+    total: parseInt(totalRes.rows[0].total, 10),
+    verified: parseInt(verifiedRes.rows[0].verified, 10),
+    pending: parseInt(pendingRes.rows[0].pending, 10),
+    hackathonTeams: parseInt(hackathonRes.rows[0].hackathon, 10),
+    techDistribution: techRes.rows
+  };
+}
+
+module.exports = {
+  pool,
+  initDb,
+  createRegistration,
+  getRegistrationById,
+  getAllRegistrations,
+  updateStatus,
+  getMetrics
+};
