@@ -280,9 +280,17 @@
     <div style="font-family:var(--font-cyber);font-size:0.85rem;color:var(--cyan);letter-spacing:1px;display:flex;align-items:center;gap:7px;">
       <i class="fas fa-qrcode"></i> VERIFICATION DESK
     </div>
-    <a href="admin.html" class="nav-btn" style="background:rgba(0, 255, 102, 0.12);border-color:var(--neon-green);color:var(--neon-green);font-weight:700;">
-      <i class="fas fa-shield-alt"></i> REDIRECT TO ADMIN PANEL ➔
-    </a>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div style="font-family:var(--font-mono);font-size:0.75rem;color:#fff;background:rgba(0,255,102,0.08);border:1px solid rgba(0,255,102,0.3);padding:6px 12px;border-radius:6px;display:flex;align-items:center;gap:6px;">
+        <i class="fas fa-id-badge" style="color:var(--neon-green);"></i> <span id="deskUserDisplay">AGENT</span>
+      </div>
+      <a href="admin.html" class="nav-btn" style="background:rgba(0, 255, 102, 0.12);border-color:var(--neon-green);color:var(--neon-green);font-weight:700;">
+        <i class="fas fa-shield-alt"></i> ADMIN PANEL ➔
+      </a>
+      <button onclick="logoutDesk()" class="nav-btn" style="border-color:var(--neon-pink);color:var(--neon-pink);" title="Log out of Verification Desk">
+        <i class="fas fa-sign-out-alt"></i> LOGOUT
+      </button>
+    </div>
   </div>
 
   <!-- HEADER -->
@@ -324,6 +332,32 @@
   </div>
 
   <script>
+    // ── AUTHENTICATION GUARD ─────────────────────────────────────────
+    const AUTH_TOKEN = localStorage.getItem('qaura_auth_token');
+    const AUTH_ROLE  = localStorage.getItem('qaura_auth_role');
+    const AUTH_USER  = localStorage.getItem('qaura_auth_user');
+
+    if (!AUTH_TOKEN || (AUTH_ROLE !== 'desk' && AUTH_ROLE !== 'admin')) {
+      window.location.replace('login.html?portal=desk&redirect=verify.html');
+    }
+
+    try {
+      if (AUTH_USER) {
+        const u = JSON.parse(AUTH_USER);
+        window.addEventListener('DOMContentLoaded', () => {
+          const el = document.getElementById('deskUserDisplay');
+          if (el) el.textContent = (u.username || 'AGENT').toUpperCase();
+        });
+      }
+    } catch(e) {}
+
+    function logoutDesk() {
+      localStorage.removeItem('qaura_auth_token');
+      localStorage.removeItem('qaura_auth_role');
+      localStorage.removeItem('qaura_auth_user');
+      window.location.href = 'login.html?portal=desk';
+    }
+
     // Initialize logo from base64 if present
     if (window.collegeLogoBase64) {
       document.getElementById('instLogo').src = window.collegeLogoBase64;
@@ -500,7 +534,10 @@
         const endpoint = apiBase ? `${apiBase}/api/registrations/${encodeURIComponent(regId)}/status` : `/api/registrations/${encodeURIComponent(regId)}/status`;
         await fetch(endpoint, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + (localStorage.getItem('qaura_auth_token') || '')
+          },
           body: JSON.stringify({ status: newStatus })
         });
       } catch (err) {

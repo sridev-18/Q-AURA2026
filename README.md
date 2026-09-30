@@ -93,9 +93,23 @@ node server.js
 
 The server automatically initializes database tables and indexes on launch:
 - **Registration Portal:** [http://localhost:5000](http://localhost:5000)
+- **Security Gateway (Login):** [http://localhost:5000/login](http://localhost:5000/login)
 - **Admin Dashboard:** [http://localhost:5000/admin.html](http://localhost:5000/admin.html)
 - **Verification Desk:** [http://localhost:5000/verify.html](http://localhost:5000/verify.html)
 - **Mobile QR Scanner Endpoint:** `http://<YOUR_LAN_IP>:5000/verify?id=<REG_ID>`
+
+---
+
+## 🔐 Portal Security & Credentials
+
+The Admin Dashboard and On-Desk Verification Desk are guarded by role-based authentication:
+
+| Role | Target Portal | Default Username | Default Password | Clearance |
+| :--- | :--- | :--- | :--- | :--- |
+| **Administrator** | `admin.html` & `verify.html` | `admin` | `admin@qaura2026` | Full Access (Roster, CSV, Status, Analytics) |
+| **Desk Agent** | `verify.html` | `desk` | `verify@qaura2026` | Pass Scanner & Attendance Desk |
+
+*Credentials can be configured via environment variables: `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `DESK_USERNAME`, `DESK_PASSWORD`, `AUTH_SECRET`.*
 
 ---
 

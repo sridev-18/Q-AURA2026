@@ -653,12 +653,17 @@
       <div id="pgStatusBadge" style="display:inline-flex;align-items:center;gap:7px;padding:8px 14px;background:rgba(0,240,255,0.08);border:1px solid #00f0ff;border-radius:6px;font-family:var(--font-mono);font-size:0.75rem;color:#00f0ff;">
         <i class="fas fa-database"></i> <span id="pgStatusText">PostgreSQL 18: Connecting...</span>
       </div>
+      <div id="adminUserBadge" style="display:inline-flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(0,240,255,0.06);border:1px solid rgba(0,240,255,0.3);border-radius:6px;font-family:var(--font-mono);font-size:0.75rem;color:#fff;">
+        <i class="fas fa-user-shield" style="color:var(--cyan);"></i> <span id="adminUsernameDisplay">ADMIN</span>
+      </div>
       <button class="cyber-btn cb-outline" style="border-color:var(--cyan);background:rgba(0,240,255,0.15);color:var(--cyan);font-weight:700;" onclick="location.href='verify.html'">
-        <i class="fas fa-qrcode"></i> REDIRECT TO VERIFICATION DESK ➔
+        <i class="fas fa-qrcode"></i> VERIFY DESK ➔
       </button>
-      <button class="cyber-btn cb-green" onclick="exportDataCSV()"><i class="fas fa-file-excel"></i> DOWNLOAD (CSV)</button>
-      <button class="cyber-btn cb-gold" onclick="exportVerifiedOnly()"><i class="fas fa-check-double"></i> VERIFIED ONLY</button>
-      <button class="cyber-btn cb-red" onclick="wipeLocalData()"><i class="fas fa-trash-alt"></i> PURGE</button>
+      <button class="cyber-btn cb-green" onclick="exportDataCSV()"><i class="fas fa-file-excel"></i> CSV</button>
+      <button class="cyber-btn cb-gold" onclick="exportVerifiedOnly()"><i class="fas fa-check-double"></i> VERIFIED</button>
+      <button class="cyber-btn cb-outline" style="border-color:var(--neon-pink);color:var(--neon-pink);padding:6px 12px;" onclick="logoutAdmin()" title="Log out of Admin Dashboard">
+        <i class="fas fa-sign-out-alt"></i> LOGOUT
+      </button>
     </div>
   </header>
 
@@ -792,6 +797,32 @@
   <!-- CONFIG & SCRIPTS -->
   <script src="config.js"></script>
   <script>
+    // ── AUTHENTICATION GUARD ─────────────────────────────────────────
+    const AUTH_TOKEN = localStorage.getItem('qaura_auth_token');
+    const AUTH_ROLE  = localStorage.getItem('qaura_auth_role');
+    const AUTH_USER  = localStorage.getItem('qaura_auth_user');
+
+    if (!AUTH_TOKEN || AUTH_ROLE !== 'admin') {
+      window.location.replace('login.html?portal=admin&redirect=admin.html');
+    }
+
+    try {
+      if (AUTH_USER) {
+        const u = JSON.parse(AUTH_USER);
+        window.addEventListener('DOMContentLoaded', () => {
+          const el = document.getElementById('adminUsernameDisplay');
+          if (el) el.textContent = (u.username || 'ADMIN').toUpperCase();
+        });
+      }
+    } catch(e) {}
+
+    function logoutAdmin() {
+      localStorage.removeItem('qaura_auth_token');
+      localStorage.removeItem('qaura_auth_role');
+      localStorage.removeItem('qaura_auth_user');
+      window.location.href = 'login.html?portal=admin';
+    }
+
     const STORAGE_KEY = 'qaura2026_registrations';
     const URL_KEY = 'qaura2026_sheet_url';
     let dataList = [];
@@ -829,7 +860,18 @@
       try {
         const apiBase = getApiBase();
         const endpoint = apiBase ? `${apiBase}/api/registrations` : '/api/registrations';
-        const res = await fetch(endpoint, { cache: 'no-store' });
+        const res = await fetch(endpoint, {
+          cache: 'no-store',
+          headers: {
+            'Authorization': 'Bearer ' + (localStorage.getItem('qaura_auth_token') || '')
+          }
+        });
+
+        if (res.status === 401 || res.status === 403) {
+          logoutAdmin();
+          return;
+        }
+
         if (res.ok) {
           const json = await res.json();
           if (json.status === 'ok' && Array.isArray(json.registrations)) {
@@ -876,7 +918,10 @@
         const endpoint = apiBase ? `${apiBase}/api/registrations/${encodeURIComponent(regId)}/status` : `/api/registrations/${encodeURIComponent(regId)}/status`;
         await fetch(endpoint, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + (localStorage.getItem('qaura_auth_token') || '')
+          },
           body: JSON.stringify({ status: newStatus })
         });
       } catch (err) {

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Security Gateway — Q-AURA 2026 Access Portal</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+  <style>
+    :root {
+      --bg-space: #07090e;
+      --bg-card: rgba(13, 19, 32, 0.88);
+      --cyan: #00f0ff;
+      --neon-gold: #ffb703;
+      --neon-green: #00ff66;
+      --neon-pink: #ff0055;
+      --neon-purple: #9d4edd;
+      --text-muted: #8899ac;
+      --font-cyber: 'Orbitron', monospace;
+      --font-ui: 'Rajdhani', sans-serif;
+      --font-mono: 'Share Tech Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-space);
+      font-family: var(--font-ui);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient Cyber Canvas */
+    #cyber-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Grid overlay */
+    .cyber-grid {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: 
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 36px 36px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .login-container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 460px;
+    }
+
+    /* University Brand Header */
+    .brand-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .brand-logo {
+      height: 62px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 16px rgba(0, 240, 255, 0.4));
+      margin-bottom: 12px;
+    }
+    .brand-title {
+      font-family: var(--font-cyber);
+      font-size: 1.45rem;
+      letter-spacing: 2px;
+      color: #fff;
+      text-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+    }
+    .brand-title span { color: var(--cyan); }
+    .brand-subtitle {
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      margin-top: 4px;
+      text-transform: uppercase;
+    }
+
+    /* Login Card */
+    .cyber-card {
+      background: var(--bg-card);
+      border: 1.5px solid rgba(0, 240, 255, 0.35);
+      border-radius: 14px;
+      padding: 32px 28px;
+      box-shadow: 0 0 35px rgba(0, 240, 255, 0.15), inset 0 0 20px rgba(0, 240, 255, 0.05);
+      backdrop-filter: blur(12px);
+      position: relative;
+      overflow: hidden;
+    }
+    .cyber-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--cyan), var(--neon-purple), transparent);
+    }
+
+    /* Role Selector Tabs */
+    .role-tabs {
+      display: flex;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 4px;
+      margin-bottom: 24px;
+      gap: 4px;
+    }
+    .role-tab {
+      flex: 1;
+      padding: 10px 8px;
+      font-family: var(--font-cyber);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-align: center;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all 0.25s ease;
+    }
+    .role-tab.active {
+      color: #050b14;
+      background: var(--cyan);
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.6);
+    }
+    .role-tab.active.desk-active {
+      background: var(--neon-green);
+      box-shadow: 0 0 14px rgba(0, 255, 102, 0.6);
+      color: #05140a;
+    }
+
+    /* Form Fields */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--cyan);
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+    .input-wrapper {
+      position: relative;
+    }
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    .cyber-input {
+      width: 100%;
+      padding: 13px 42px 13px 40px;
+      background: rgba(6, 11, 20, 0.85);
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+    }
+    .cyber-input:focus {
+      outline: none;
+      border-color: var(--cyan);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.35);
+      background: rgba(0, 240, 255, 0.04);
+    }
+    .btn-toggle-pwd {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.95rem;
+      padding: 6px;
+    }
+    .btn-toggle-pwd:hover { color: var(--cyan); }
+
+    /* Submit Button */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--cyan), #00a8ff);
+      color: #050b14;
+      font-family: var(--font-cyber);
+      font-size: 0.92rem;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.25s ease;
+      box-shadow: 0 0 18px rgba(0, 240, 255, 0.4);
+      margin-top: 10px;
+    }
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.7);
+    }
+    .btn-submit:active { transform: translateY(0); }
+
+    /* Error Banner */
+    .auth-error {
+      display: none;
+      padding: 10px 14px;
+      background: rgba(255, 0, 85, 0.15);
+      border: 1px solid var(--neon-pink);
+      border-radius: 6px;
+      color: #ff6b93;
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+      margin-bottom: 18px;
+      align-items: center;
+      gap: 8px;
+    }
+    .auth-error.show { display: flex; }
+
+    /* Footer hints & public link */
+    .card-footer-info {
+      margin-top: 22px;
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      line-height: 1.6;
+    }
+    .card-footer-info a {
+      color: var(--cyan);
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .card-footer-info a:hover { text-decoration: underline; }
+
+    .credentials-hint-box {
+      margin-top: 18px;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-family: var(--font-mono);
+      color: #94a3b8;
+    }
+    .credentials-hint-box strong { color: #fff; }
+  </style>
+</head>
+<body>
+
+  <canvas id="cyber-canvas"></canvas>
+  <div class="cyber-grid"></div>
+
+  <div class="login-container">
+    
+    <!-- BRAND HEADER -->
+    <div class="brand-header">
+      <img src="assets/logo.png" alt="Rathinam Global University Logo" class="brand-logo"/>
+      <h2 class="brand-title">Q-AURA <span>2026</span></h2>
+      <div class="brand-subtitle">AUTHORIZED OPERATIVE ACCESS GATEWAY</div>
+    </div>
+
+    <!-- AUTHENTICATION CARD -->
+    <div class="cyber-card">
+      
+      <!-- Role Tabs -->
+      <div class="role-tabs">
+        <button type="button" class="role-tab active" id="tabAdmin" onclick="setRole('admin')">
+          <i class="fas fa-shield-alt"></i> ADMIN PANEL
+        </button>
+        <button type="button" class="role-tab" id="tabDesk" onclick="setRole('desk')">
+          <i class="fas fa-qrcode"></i> VERIFICATION DESK
+        </button>
+      </div>
+
+      <!-- Error Message -->
+      <div class="auth-error" id="authError">
+        <i class="fas fa-exclamation-triangle"></i> <span id="errorMsg">Invalid security credentials</span>
+      </div>
+
+      <!-- Form -->
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        
+        <div class="form-group">
+          <label class="form-label"><i class="fas fa-id-badge"></i> OPERATIVE USERNAME</label>
+          <div class="input-wrapper">
+            <i class="fas fa-user-astronaut input-icon"></i>
+            <input type="text" id="username" class="cyber-input" placeholder="e.g. admin or desk" required autocomplete="username" autofocus/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label"><i class="fas fa-key"></i> CLEARANCE PASSPHRASE</label>
+          <div class="input-wrapper">
+            <i class="fas fa-lock input-icon"></i>
+            <input type="password" id="password" class="cyber-input" placeholder="Enter password" required autocomplete="current-password"/>
+            <button type="button" class="btn-toggle-pwd" onclick="togglePasswordVisibility()" title="Toggle visibility">
+              <i class="fas fa-eye" id="pwdEyeIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btnSubmit">
+          <i class="fas fa-fingerprint"></i> <span id="btnText">AUTHENTICATE ACCESS</span>
+        </button>
+      </form>
+
+      <!-- Default Credentials Quick Guide -->
+      <div class="credentials-hint-box">
+        <div><strong>Default Admin:</strong> <code>admin</code> &bull; <code>admin@qaura2026</code></div>
+        <div style="margin-top:3px;"><strong>Default Desk:</strong> <code>desk</code> &bull; <code>verify@qaura2026</code></div>
+      </div>
+
+      <div class="card-footer-info">
+        Looking for Student Registration? <a href="index.html">Go to Registration Portal ➔</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+    let currentRole = 'admin';
+
+    // Parse URL parameter to check if pre-selected role or redirect was passed
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const requestedPortal = params.get('portal') || (window.location.hash.includes('desk') ? 'desk' : 'admin');
+      if (requestedPortal === 'desk') {
+        setRole('desk');
+      } else {
+        setRole('admin');
+      }
+    });
+
+    function setRole(role) {
+      currentRole = role;
+      const tabAdmin = document.getElementById('tabAdmin');
+      const tabDesk  = document.getElementById('tabDesk');
+      const btn = document.getElementById('btnSubmit');
+
+      if (role === 'desk') {
+        tabAdmin.className = 'role-tab';
+        tabDesk.className = 'role-tab active desk-active';
+        btn.style.background = 'linear-gradient(135deg, var(--neon-green), #00b894)';
+        btn.style.boxShadow = '0 0 18px rgba(0, 255, 102, 0.4)';
+        document.getElementById('username').placeholder = 'e.g. desk';
+      } else {
+        tabAdmin.className = 'role-tab active';
+        tabDesk.className = 'role-tab';
+        btn.style.background = 'linear-gradient(135deg, var(--cyan), #00a8ff)';
+        btn.style.boxShadow = '0 0 18px rgba(0, 240, 255, 0.4)';
+        document.getElementById('username').placeholder = 'e.g. admin';
+      }
+      hideError();
+    }
+
+    function togglePasswordVisibility() {
+      const pwd = document.getElementById('password');
+      const icon = document.getElementById('pwdEyeIcon');
+      if (pwd.type === 'password') {
+        pwd.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+      } else {
+        pwd.type = 'password';
+        icon.className = 'fas fa-eye';
+      }
+    }
+
+    function showError(msg) {
+      const box = document.getElementById('authError');
+      document.getElementById('errorMsg').textContent = msg;
+      box.classList.add('show');
+    }
+
+    function hideError() {
+      document.getElementById('authError').classList.remove('show');
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      hideError();
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const btn = document.getElementById('btnSubmit');
+      const btnText = document.getElementById('btnText');
+
+      if (!username || !password) {
+        showError('Please enter both username and password.');
+        return;
+      }
+
+      btn.disabled = true;
+      btnText.textContent = 'VERIFYING CREDENTIALS...';
+
+      try {
+        const apiBase = (typeof QAURA_CONFIG !== 'undefined' && QAURA_CONFIG.API_BASE_URL)
+          ? QAURA_CONFIG.API_BASE_URL
+          : '';
+        const endpoint = apiBase ? `${apiBase}/api/auth/login` : '/api/auth/login';
+
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password, portal: currentRole })
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.status === 'ok' && data.token) {
+          // Store security token
+          localStorage.setItem('qaura_auth_token', data.token);
+          localStorage.setItem('qaura_auth_role', data.user.role);
+          localStorage.setItem('qaura_auth_user', JSON.stringify(data.user));
+
+          btnText.textContent = 'ACCESS GRANTED! REDIRECTING...';
+          btn.style.background = 'var(--neon-green)';
+
+          // Determine redirect target
+          const params = new URLSearchParams(window.location.search);
+          const redirect = params.get('redirect');
+
+          setTimeout(() => {
+            if (redirect) {
+              window.location.href = redirect;
+            } else if (currentRole === 'desk') {
+              window.location.href = 'verify.html';
+            } else {
+              window.location.href = 'admin.html';
+            }
+          }, 450);
+        } else {
+          showError(data.message || 'Authentication rejected. Verify credentials.');
+          btn.disabled = false;
+          btnText.textContent = 'AUTHENTICATE ACCESS';
+        }
+      } catch (err) {
+        console.error('Login error:', err);
+        // Fallback for offline/client-only check if local dev
+        if (
+          (username === 'admin' && password === 'admin@qaura2026') ||
+          (username === 'desk' && password === 'verify@qaura2026')
+        ) {
+          const fallbackRole = username === 'admin' ? 'admin' : 'desk';
+          localStorage.setItem('qaura_auth_token', 'local_offline_token_' + Date.now());
+          localStorage.setItem('qaura_auth_role', fallbackRole);
+          localStorage.setItem('qaura_auth_user', JSON.stringify({ username, role: fallbackRole, name: 'Local Operative' }));
+          
+          btnText.textContent = 'ACCESS GRANTED (OFFLINE)';
+          setTimeout(() => {
+            window.location.href = (currentRole === 'desk') ? 'verify.html' : 'admin.html';
+          }, 450);
+          return;
+        }
+
+        showError('Network error connecting to verification gateway: ' + err.message);
+        btn.disabled = false;
+        btnText.textContent = 'AUTHENTICATE ACCESS';
+      }
+    }
+
+    // Background Canvas Particles
+    (function() {
+      const canvas = document.getElementById('cyber-canvas');
+      const ctx = canvas.getContext('2d');
+      let w, h, particles = [];
+
+      function resize() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      for (let i = 0; i < 35; i++) {
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: (Math.random() - 0.5) * 0.4,
+          radius: Math.random() * 2 + 1,
+          color: Math.random() > 0.5 ? '#00f0ff' : '#00ff66'
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, w, h);
+        for (let p of particles) {
+          p.x += p.vx; p.y += p.vy;
+          if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+          if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+  </script>
+</body>
+</html>

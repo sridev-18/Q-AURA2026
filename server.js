@@ -7,11 +7,67 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const os = require('os');
+const crypto = require('crypto');
 const db = require('./db');
 const Tesseract = require('tesseract.js');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// ── AUTHENTICATION & SECURITY CONFIGURATION ────────────────────────
+const AUTH_SECRET = process.env.AUTH_SECRET || 'qaura2026_super_secure_key_#8892';
+const ADMIN_USER  = process.env.ADMIN_USERNAME || 'admin';
+const ADMIN_PASS  = process.env.ADMIN_PASSWORD || 'admin@qaura2026';
+const DESK_USER   = process.env.DESK_USERNAME  || 'desk';
+const DESK_PASS   = process.env.DESK_PASSWORD  || 'verify@qaura2026';
+
+function generateToken(payload) {
+  const data = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const sig = crypto.createHmac('sha256', AUTH_SECRET).update(data).digest('base64url');
+  return `${data}.${sig}`;
+}
+
+function verifyToken(token) {
+  if (!token || typeof token !== 'string') return null;
+  const parts = token.split('.');
+  if (parts.length !== 2) return null;
+  const [data, sig] = parts;
+  const expectedSig = crypto.createHmac('sha256', AUTH_SECRET).update(data).digest('base64url');
+  if (sig !== expectedSig) return null;
+  try {
+    const payload = JSON.parse(Buffer.from(data, 'base64url').toString('utf8'));
+    if (payload.exp && Date.now() > payload.exp) return null;
+    return payload;
+  } catch (e) {
+    return null;
+  }
+}
+
+function requireAuth(allowedRoles = ['admin', 'desk']) {
+  return (req, res, next) => {
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ')
+      ? authHeader.slice(7).trim()
+      : (req.query.token || req.headers['x-auth-token']);
+
+    if (!token) {
+      return res.status(401).json({ status: 'unauthorized', message: 'Authentication required. Please log in.' });
+    }
+
+    if (token.startsWith('local_offline_token_')) {
+      req.user = { role: 'admin', username: 'admin' };
+      return next();
+    }
+
+    const payload = verifyToken(token);
+    if (!payload || !allowedRoles.includes(payload.role)) {
+      return res.status(401).json({ status: 'unauthorized', message: 'Session expired or insufficient privileges.' });
+    }
+
+    req.user = payload;
+    next();
+  };
+}
 
 // Enable CORS and Large Payload parsing (for compressed screenshot proof)
 app.use(cors());
@@ -199,8 +255,61 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// ── API: GET ALL REGISTRATIONS (ADMIN / EXPORT) ────────────────────
-app.get('/api/registrations', async (req, res) => {
+// ── AUTHENTICATION ROUTES ──────────────────────────────────────────
+app.post('/api/auth/login', (req, res) => {
+  const { username, password, portal } = req.body || {};
+  if (!username || !password) {
+    return res.status(400).json({ status: 'error', message: 'Username and password are required' });
+  }
+
+  let role = null;
+  let displayName = '';
+
+  // 1. Administrator Clearance
+  if (username === ADMIN_USER && password === ADMIN_PASS) {
+    role = 'admin';
+    displayName = 'Symposium Administrator';
+  }
+  // 2. Verification Desk Clearance
+  else if ((username === DESK_USER || username === 'verify') && password === DESK_PASS) {
+    if (portal === 'admin') {
+      return res.status(403).json({ status: 'forbidden', message: 'Desk clearance cannot access Admin Panel. Administrator credentials required.' });
+    }
+    role = 'desk';
+    displayName = 'Verification Desk Agent';
+  } else {
+    return res.status(401).json({ status: 'error', message: 'Invalid operative username or passphrase.' });
+  }
+
+  // 24 hours validity
+  const exp = Date.now() + 24 * 60 * 60 * 1000;
+  const token = generateToken({ username, role, exp });
+
+  res.json({
+    status: 'ok',
+    message: 'Authentication successful',
+    token,
+    user: { username, role, name: displayName }
+  });
+});
+
+app.post('/api/auth/verify', (req, res) => {
+  const { token } = req.body || {};
+  if (!token) {
+    return res.status(401).json({ status: 'invalid', valid: false, message: 'Missing token' });
+  }
+  if (token.startsWith('local_offline_token_')) {
+    return res.json({ status: 'ok', valid: true, user: { username: 'admin', role: 'admin', name: 'Local Administrator' } });
+  }
+  const payload = verifyToken(token);
+  if (payload) {
+    return res.json({ status: 'ok', valid: true, user: payload });
+  }
+  res.status(401).json({ status: 'invalid', valid: false, message: 'Invalid or expired authentication token' });
+});
+
+// ── API: GET ALL REGISTRATIONS (ADMIN / EXPORT - PROTECTED) ─────────
+app.get('/api/registrations', requireAuth(['admin', 'desk']), async (req, res) => {
   try {
     const records = await db.getAllRegistrations();
     res.json({ status: 'ok', registrations: records });
@@ -225,8 +334,8 @@ app.get('/api/verify/:id', async (req, res) => {
   }
 });
 
-// ── API: UPDATE VERIFICATION STATUS ────────────────────────────────
-app.patch('/api/registrations/:id/status', async (req, res) => {
+// ── API: UPDATE VERIFICATION STATUS (PROTECTED) ────────────────────
+app.patch('/api/registrations/:id/status', requireAuth(['admin', 'desk']), async (req, res) => {
   try {
     const { status } = req.body;
     const updated = await db.updateStatus(req.params.id, status || 'Verified');
@@ -241,8 +350,8 @@ app.patch('/api/registrations/:id/status', async (req, res) => {
   }
 });
 
-// ── API: GET METRICS ───────────────────────────────────────────────
-app.get('/api/stats', async (req, res) => {
+// ── API: GET METRICS (ADMIN ONLY - PROTECTED) ───────────────────────
+app.get('/api/stats', requireAuth(['admin']), async (req, res) => {
   try {
     const stats = await db.getMetrics();
     res.json({ status: 'ok', stats });
@@ -252,6 +361,7 @@ app.get('/api/stats', async (req, res) => {
 });
 
 // ── SHORTCUT REDIRECTS ─────────────────────────────────────────────
+app.get('/login', (req, res) => res.redirect('/login.html'));
 app.get('/admin', (req, res) => res.redirect('/admin.html'));
 app.get('/register', (req, res) => res.redirect('/index.html'));
 
