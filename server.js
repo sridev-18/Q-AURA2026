@@ -485,6 +485,17 @@ app.get('/api/stats', requireAuth(['admin']), async (req, res) => {
   }
 });
 
+// ── HEALTH & KEEP-ALIVE PING (PREVENTS RENDER FREE SLEEP MODE) ───
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    app: 'Q-AURA 2026',
+    uptimeSeconds: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString()
+  });
+});
+app.get('/ping', (req, res) => res.status(200).send('pong'));
+
 // ── SHORTCUT REDIRECTS ─────────────────────────────────────────────
 app.get('/login', (req, res) => res.redirect('/login.html'));
 app.get('/admin', (req, res) => res.redirect('/admin.html'));
@@ -866,6 +877,17 @@ async function start() {
       console.log(`📊 Admin Dashboard  : http://localhost:${PORT}/admin.html`);
       console.log(`🔍 Verification Desk: http://localhost:${PORT}/verify.html`);
       console.log('═══════════════════════════════════════════════════════════════');
+
+      // Keep Render instance awake by pinging its public URL every 8 minutes
+      const liveUrl = process.env.RENDER_EXTERNAL_URL || process.env.PUBLIC_URL;
+      if (liveUrl) {
+        console.log(`[Keep-Alive] Initializing 24/7 background pinger for ${liveUrl}`);
+        setInterval(() => {
+          fetch(`${liveUrl}/health`)
+            .then(res => console.log(`[Keep-Alive] Pinged ${liveUrl}/health -> ${res.status}`))
+            .catch(err => console.warn(`[Keep-Alive] Ping notice:`, err.message));
+        }, 8 * 60 * 1000); // 8 minutes (Render sleeps at 15 minutes)
+      }
     });
   } catch (err) {
     console.error('Fatal: Failed to connect to PostgreSQL database:', err);
