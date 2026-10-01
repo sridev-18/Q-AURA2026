@@ -743,6 +743,9 @@
       <div id="adminUserBadge" style="display:inline-flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(0,240,255,0.06);border:1px solid rgba(0,240,255,0.3);border-radius:6px;font-family:var(--font-mono);font-size:0.75rem;color:#fff;">
         <i class="fas fa-user-shield" style="color:var(--cyan);"></i> <span id="adminUsernameDisplay">ADMIN</span>
       </div>
+      <div id="keepAliveBadge" style="display:inline-flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(0,255,102,0.06);border:1px solid rgba(0,255,102,0.3);border-radius:6px;font-family:var(--font-mono);font-size:0.75rem;color:var(--neon-green);" title="24/7 Autonomous Keep-Alive Status">
+        <i class="fas fa-heartbeat" style="color:var(--neon-green);"></i> <span id="keepAliveText">24/7 AWAKE</span>
+      </div>
       <button class="cyber-btn cb-outline" style="border-color:var(--cyan);background:rgba(0,240,255,0.15);color:var(--cyan);font-weight:700;" onclick="location.href='verify.html'">
         <i class="fas fa-qrcode"></i> VERIFY DESK ➔
       </button>
@@ -1213,6 +1216,23 @@
         updateDbIndicator(false, 0);
         renderAllComponents();
       }
+
+      // Check 24/7 server keep-alive telemetry
+      try {
+        const apiBase = getApiBase();
+        const hRes = await fetch(apiBase ? `${apiBase}/health` : '/health', { cache: 'no-store' });
+        if (hRes.ok) {
+          const hData = await hRes.json();
+          const txt = document.getElementById('keepAliveText');
+          if (txt && hData.keepAlive) {
+            if (hData.keepAlive.enabled) {
+              txt.textContent = `24/7 AWAKE (${hData.keepAlive.totalPings} Pings)`;
+            } else {
+              txt.textContent = '24/7 ACTIVE';
+            }
+          }
+        }
+      } catch(e) {}
     }
 
     function persistData() {

@@ -485,13 +485,23 @@ app.get('/api/stats', requireAuth(['admin']), async (req, res) => {
   }
 });
 
-// ── HEALTH & KEEP-ALIVE PING (PREVENTS RENDER FREE SLEEP MODE) ───
+// ── HEALTH & KEEP-ALIVE PING TELEMETRY (PREVENTS RENDER SLEEP MODE) ──
+const keepAliveStats = {
+  enabled: false,
+  targetUrl: null,
+  totalPings: 0,
+  lastPingAt: null,
+  lastStatus: null,
+  intervalMinutes: 5
+};
+
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
     app: 'Q-AURA 2026',
     uptimeSeconds: Math.floor(process.uptime()),
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    keepAlive: keepAliveStats
   });
 });
 app.get('/ping', (req, res) => res.status(200).send('pong'));
@@ -878,21 +888,64 @@ async function start() {
       console.log(`🔍 Verification Desk: http://localhost:${PORT}/verify.html`);
       console.log('═══════════════════════════════════════════════════════════════');
 
-      // Keep Render instance awake by pinging its public URL every 8 minutes
-      const liveUrl = process.env.RENDER_EXTERNAL_URL || process.env.PUBLIC_URL;
-      if (liveUrl) {
-        console.log(`[Keep-Alive] Initializing 24/7 background pinger for ${liveUrl}`);
-        setInterval(() => {
-          fetch(`${liveUrl}/health`)
-            .then(res => console.log(`[Keep-Alive] Pinged ${liveUrl}/health -> ${res.status}`))
-            .catch(err => console.warn(`[Keep-Alive] Ping notice:`, err.message));
-        }, 8 * 60 * 1000); // 8 minutes (Render sleeps at 15 minutes)
-      }
+      // ── AUTONOMOUS 24/7 SELF-PING KEEP-ALIVE SYSTEM ──────────────
+      initKeepAlive();
     });
   } catch (err) {
     console.error('Fatal: Failed to connect to PostgreSQL database:', err);
     process.exit(1);
   }
+}
+
+function initKeepAlive() {
+  let targetUrl = (
+    process.env.RENDER_EXTERNAL_URL ||
+    process.env.PUBLIC_URL ||
+    process.env.APP_URL ||
+    process.env.BASE_URL ||
+    ''
+  ).trim();
+
+  if (!targetUrl && process.env.RENDER_EXTERNAL_HOSTNAME) {
+    targetUrl = `https://${process.env.RENDER_EXTERNAL_HOSTNAME.trim()}`;
+  }
+
+  if (!targetUrl) {
+    console.log('[Keep-Alive] Running in local offline mode (no external URL configured).');
+    return;
+  }
+
+  targetUrl = targetUrl.replace(/\/+$/, '');
+  const pingUrl = `${targetUrl}/health`;
+
+  keepAliveStats.enabled = true;
+  keepAliveStats.targetUrl = pingUrl;
+
+  console.log(`⚡ [Keep-Alive] 24/7 Autonomous Keep-Alive engine active for: ${pingUrl}`);
+  console.log(`⏱️ [Keep-Alive] Interval: Pinging every 5 minutes (prevents Render 15-minute idle sleep).`);
+
+  async function performPing() {
+    try {
+      const res = await fetch(pingUrl, {
+        headers: { 'User-Agent': 'QAURA-2026-KeepAlive-Engine/1.0' },
+        signal: AbortSignal.timeout(12000)
+      });
+      keepAliveStats.totalPings++;
+      keepAliveStats.lastPingAt = new Date().toISOString();
+      keepAliveStats.lastStatus = res.status;
+      const istTime = new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' });
+      console.log(`✓ [Keep-Alive #${keepAliveStats.totalPings}] Pinged ${pingUrl} -> HTTP ${res.status} [${istTime} IST]`);
+    } catch (err) {
+      keepAliveStats.lastStatus = 'failed: ' + err.message;
+      console.warn(`⚠️ [Keep-Alive] Ping notice: ${err.message}`);
+    }
+  }
+
+  // Initial ping 15 seconds after startup
+  setTimeout(performPing, 15 * 1000);
+
+  // Recurring ping every 5 minutes (Render sleep threshold is 15 minutes)
+  setInterval(performPing, 5 * 60 * 1000);
 }
 
 start();
