@@ -3010,7 +3010,7 @@ Food & Accommodation: Will NOT be provided.
             const apiBase = (typeof QAURA_CONFIG !== 'undefined' && QAURA_CONFIG.API_BASE_URL)
               ? QAURA_CONFIG.API_BASE_URL
               : (window.location.origin || 'http://localhost:5000');
-            const verifyUrl = `${apiBase}/verify?id=${encodeURIComponent(reg.regId)}`;
+            const verifyUrl = `${apiBase}/verify.html?id=${encodeURIComponent(reg.regId)}`;
 
             // Synchronously generate QR Code Data URL encoding the live verification URL
             let qrImgSrc = '';

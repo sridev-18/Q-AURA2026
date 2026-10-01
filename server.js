@@ -490,33 +490,26 @@ app.get('/login', (req, res) => res.redirect('/login.html'));
 app.get('/admin', (req, res) => res.redirect('/admin.html'));
 app.get('/register', (req, res) => res.redirect('/index.html'));
 
-// ── LIVE QR SCAN VERIFICATION ROUTE (SERVES MOBILE-OPTIMIZED HTML) ──
+// ── LIVE QR SCAN VERIFICATION ROUTE (REQUIRES AUTHENTICATION VIA VERIFY PORTAL) ──
 app.get('/verify', async (req, res) => {
   const queryId = (req.query.id || req.query.regId || '').trim();
   const format = (req.query.format || '').toLowerCase();
 
-  if (!queryId) {
-    return res.redirect('/verify.html');
-  }
-
-  try {
-    const record = await db.getRegistrationById(queryId);
-
-    if (format === 'json') {
+  if (format === 'json' && queryId) {
+    try {
+      const record = await db.getRegistrationById(queryId);
       return record 
         ? res.json({ status: 'ok', registration: record })
         : res.status(404).json({ status: 'not_found' });
+    } catch (err) {
+      return res.status(500).json({ status: 'error', message: err.message });
     }
-
-    if (record) {
-      res.send(renderVerificationHtml(record));
-    } else {
-      res.send(renderNotFoundHtml(queryId));
-    }
-  } catch (err) {
-    console.error('Verify route error:', err);
-    res.status(500).send('<h2>Database Connection Error: ' + err.message + '</h2>');
   }
+
+  if (queryId) {
+    return res.redirect(`/verify.html?id=${encodeURIComponent(queryId)}`);
+  }
+  return res.redirect('/verify.html');
 });
 
 // ── RENDER VERIFICATION HTML ───────────────────────────────────────

@@ -326,6 +326,11 @@
         <p style="font-family:var(--font-mono);color:var(--text-muted);font-size:0.75rem;margin-top:4px;">ENTER VOLUNTEER OR ADMIN CREDENTIALS TO UNLOCK</p>
       </div>
 
+      <div id="scannedPassNotice" style="display:none;margin-bottom:14px;padding:10px 14px;background:rgba(0,255,102,0.1);border:1px solid var(--neon-green);border-radius:8px;font-family:var(--font-mono);font-size:0.8rem;color:var(--neon-green);text-align:center;">
+        <i class="fas fa-qrcode"></i> SCANNED PASS: <strong id="scannedPassNoticeId" style="color:#fff;"></strong>
+        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:3px;">Authenticate below to unlock verification &amp; mark attendance</div>
+      </div>
+
       <div id="verifyAuthError" class="auth-gate-err">
         <i class="fas fa-exclamation-triangle"></i> <span id="verifyAuthErrMsg">Invalid username or passphrase</span>
       </div>
@@ -582,9 +587,17 @@
       checkDeskAuth();
       const urlParams = new URLSearchParams(window.location.search);
       const queryId = urlParams.get('id') || urlParams.get('regId');
-      if (queryId && isLoggedInDesk()) {
-        document.getElementById('passIdInput').value = queryId;
-        executeLookup();
+      if (queryId) {
+        const notice = document.getElementById('scannedPassNotice');
+        const noticeId = document.getElementById('scannedPassNoticeId');
+        if (notice && noticeId) {
+          noticeId.textContent = queryId;
+          notice.style.display = 'block';
+        }
+        if (isLoggedInDesk()) {
+          document.getElementById('passIdInput').value = queryId;
+          executeLookup();
+        }
       }
     });
 
