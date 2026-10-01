@@ -715,10 +715,10 @@ function renderVerificationHtml(r) {
       <div class="header-logo-divider"></div>
       <div class="header-logo-right">
         <img src="/assets/school_icon.png" alt="School Icon"/>
-        <div class="txt">School of Quantum Sciences,<br/>Computing &amp; AI</div>
+        <div class="txt">School of Quantum Science,<br/>Computing &amp; AI</div>
       </div>
     </div>
-    <div class="dept-bar">School of Quantum Science &amp; Computing AI &bull; Q-AURA 2026</div>
+    <div class="dept-bar">School of Quantum Science Computing &amp; AI &bull; Q-AURA 2026</div>
     <div class="badge-wrap">
       <div class="verified-badge"><i class="fas fa-database"></i> ✓ POSTGRESQL VERIFIED</div>
       <div class="reg-id-display">${r.reg_id}</div>
