@@ -982,10 +982,26 @@
   <script src="config.js"></script>
   <script>
     // ── AUTHENTICATION & DIRECT IN-PLACE LOGIN GUARD ─────────────────
+    // Always enforce fresh authentication on every visit (no persistent auto-login)
+    try {
+      localStorage.removeItem('qaura_auth_token');
+      localStorage.removeItem('qaura_auth_role');
+      localStorage.removeItem('qaura_auth_user');
+      sessionStorage.removeItem('qaura_auth_token');
+      sessionStorage.removeItem('qaura_auth_role');
+      sessionStorage.removeItem('qaura_auth_user');
+    } catch(e) {}
+
+    let currentAdminToken = null;
+    let currentAdminRole  = null;
+    let currentAdminUser  = null;
+
+    function getAdminAuthToken() {
+      return currentAdminToken || '';
+    }
+
     function isLoggedInAdmin() {
-      const token = localStorage.getItem('qaura_auth_token');
-      const role  = localStorage.getItem('qaura_auth_role');
-      return !!(token && role === 'admin');
+      return !!(currentAdminToken && currentAdminRole === 'admin');
     }
 
     function checkAdminAuth() {
@@ -993,17 +1009,21 @@
       if (isLoggedInAdmin()) {
         if (overlay) overlay.classList.add('hidden');
         try {
-          const u = JSON.parse(localStorage.getItem('qaura_auth_user') || '{}');
           const el = document.getElementById('adminUsernameDisplay');
-          if (el) el.textContent = (u.username || 'ADMIN').toUpperCase();
+          if (el && currentAdminUser) el.textContent = (currentAdminUser.username || 'ADMIN').toUpperCase();
         } catch(e) {}
         return true;
       } else {
         if (overlay) {
           overlay.classList.remove('hidden');
           setTimeout(() => {
+            const userInp = document.getElementById('adminUserInp');
             const passInp = document.getElementById('adminPassInp');
-            if (passInp) passInp.focus();
+            if (userInp && !userInp.value) {
+              userInp.focus();
+            } else if (passInp) {
+              passInp.focus();
+            }
           }, 100);
         }
         return false;
@@ -1054,12 +1074,12 @@
           if (userRole !== 'admin') {
             throw new Error('Access denied: Administrator clearance required for this console.');
           }
-          localStorage.setItem('qaura_auth_token', data.token);
-          localStorage.setItem('qaura_auth_role', userRole);
-          localStorage.setItem('qaura_auth_user', JSON.stringify(data.user || { username, role: userRole }));
+          currentAdminToken = data.token;
+          currentAdminRole  = userRole;
+          currentAdminUser  = data.user || { username, role: userRole };
 
           const el = document.getElementById('adminUsernameDisplay');
-          if (el) el.textContent = (data.user && data.user.username ? data.user.username : username).toUpperCase();
+          if (el) el.textContent = (currentAdminUser.username || username).toUpperCase();
 
           const overlay = document.getElementById('adminAuthOverlay');
           if (overlay) overlay.classList.add('hidden');
@@ -1086,9 +1106,17 @@
     }
 
     function logoutAdmin() {
-      localStorage.removeItem('qaura_auth_token');
-      localStorage.removeItem('qaura_auth_role');
-      localStorage.removeItem('qaura_auth_user');
+      currentAdminToken = null;
+      currentAdminRole  = null;
+      currentAdminUser  = null;
+      try {
+        localStorage.removeItem('qaura_auth_token');
+        localStorage.removeItem('qaura_auth_role');
+        localStorage.removeItem('qaura_auth_user');
+        sessionStorage.removeItem('qaura_auth_token');
+        sessionStorage.removeItem('qaura_auth_role');
+        sessionStorage.removeItem('qaura_auth_user');
+      } catch(e) {}
       const overlay = document.getElementById('adminAuthOverlay');
       if (overlay) {
         overlay.classList.remove('hidden');
@@ -1142,7 +1170,7 @@
         const res = await fetch(endpoint, {
           cache: 'no-store',
           headers: {
-            'Authorization': 'Bearer ' + (localStorage.getItem('qaura_auth_token') || '')
+            'Authorization': 'Bearer ' + getAdminAuthToken()
           }
         });
 
@@ -1199,7 +1227,7 @@
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + (localStorage.getItem('qaura_auth_token') || '')
+            'Authorization': 'Bearer ' + getAdminAuthToken()
           },
           body: JSON.stringify({ status: newStatus })
         });
@@ -1725,7 +1753,7 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + (localStorage.getItem('qaura_auth_token') || '')
+            'Authorization': 'Bearer ' + getAdminAuthToken()
           },
           body: JSON.stringify({
             targetUser: 'admin',
@@ -1778,7 +1806,7 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + (localStorage.getItem('qaura_auth_token') || '')
+            'Authorization': 'Bearer ' + getAdminAuthToken()
           },
           body: JSON.stringify({
             targetUser: 'desk',
