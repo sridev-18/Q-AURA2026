@@ -499,6 +499,12 @@
       color: var(--neon-pink);
       border: 1px solid var(--neon-pink);
     }
+    .status-inactive {
+      background: rgba(100, 116, 139, 0.2);
+      color: #94a3b8;
+      border: 1px solid #64748b;
+      text-decoration: line-through;
+    }
 
     .table-footer-bar {
       padding: 12px 18px;
@@ -815,10 +821,12 @@
         <option>None</option>
       </select>
       <select id="selStatus" class="filter-select" onchange="displayTable()">
-        <option value="">ALL VERIFICATION STATUSES</option>
-        <option>Pending Verification</option>
-        <option>Verified</option>
-        <option>Rejected</option>
+        <option value="">ALL ACTIVE OPERATIVES</option>
+        <option value="Pending Verification">Pending Verification</option>
+        <option value="Verified">Verified</option>
+        <option value="Rejected">Rejected</option>
+        <option value="Inactive">Inactive / Deactivated</option>
+        <option value="ALL">All (Including Inactive)</option>
       </select>
       <button class="cyber-btn cb-outline" onclick="reloadRegistrations()"><i class="fas fa-sync-alt"></i> REFRESH</button>
       <button class="cyber-btn cb-gold" onclick="exportVerifiedOnly()"><i class="fas fa-check-double"></i> VERIFIED ONLY</button>
@@ -877,7 +885,8 @@
       </div>
       <div id="modalDossierContent"></div>
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
-        <button class="cyber-btn cb-red" id="btnDeleteRecord"><i class="fas fa-trash"></i> DELETE</button>
+        <button class="cyber-btn cb-green" id="btnRestoreRecord" style="display:none;"><i class="fas fa-undo"></i> REACTIVATE ENTRY</button>
+        <button class="cyber-btn cb-red" id="btnDeleteRecord"><i class="fas fa-trash"></i> INACTIVATE / DELETE</button>
         <button class="cyber-btn cb-green" id="btnDownloadProof"><i class="fas fa-download"></i> PROOF IMAGE</button>
         <button class="cyber-btn cb-outline" onclick="closeOperativeModal()">DISMISS</button>
       </div>
@@ -1331,18 +1340,19 @@
 
     // Metrics Display
     function displayMetrics() {
-      const total = dataList.length;
-      const hackCount = dataList.filter(d => d.techEvent === 'Hackathon').length;
-      const uniqueColleges = new Set(dataList.map(d => d.college)).size;
-      const pending = dataList.filter(d => d.status === 'Pending Verification').length;
-      const verified = dataList.filter(d => d.status === 'Verified').length;
-      const synced = dataList.filter(d => d.syncedToSheet).length;
+      const activeList = dataList.filter(d => d.status !== 'Inactive' && d.isActive !== false);
+      const total = activeList.length;
+      const inactiveCount = dataList.filter(d => d.status === 'Inactive' || d.isActive === false).length;
+      const hackCount = activeList.filter(d => d.techEvent === 'Hackathon').length;
+      const uniqueColleges = new Set(activeList.map(d => d.college)).size;
+      const pending = activeList.filter(d => d.status === 'Pending Verification').length;
+      const verified = activeList.filter(d => d.status === 'Verified').length;
 
       document.getElementById('statsGrid').innerHTML = `
         <div class="stat-hud-box hud-panel">
           <div class="s-icon"><i class="fas fa-users"></i></div>
           <div class="s-num" style="color:var(--cyan);">${total}</div>
-          <div class="s-lbl">TOTAL REGISTRATIONS</div>
+          <div class="s-lbl">ACTIVE REGISTRATIONS</div>
         </div>
         <div class="stat-hud-box hud-panel">
           <div class="s-icon"><i class="fas fa-users-cog" style="color:var(--neon-orange);"></i></div>
@@ -1365,19 +1375,20 @@
           <div class="s-lbl">VERIFIED OPERATIVES</div>
         </div>
         <div class="stat-hud-box hud-panel">
-          <div class="s-icon"><i class="fas fa-file-download" style="color:var(--neon-green);"></i></div>
-          <div class="s-num" style="color:var(--neon-green);">${total}</div>
-          <div class="s-lbl">READY TO EXPORT</div>
+          <div class="s-icon"><i class="fas fa-user-slash" style="color:${inactiveCount > 0 ? 'var(--neon-pink)' : 'var(--text-muted)'};"></i></div>
+          <div class="s-num" style="color:${inactiveCount > 0 ? 'var(--neon-pink)' : 'var(--text-muted)'};">${inactiveCount}</div>
+          <div class="s-lbl">INACTIVE / DEACTIVATED</div>
         </div>
       `;
     }
 
     // Charts Rendering
     function displayCharts() {
+      const activeList = dataList.filter(d => d.status !== 'Inactive' && d.isActive !== false);
       const tMap = {}, ntMap = {};
-      dataList.forEach(r => {
-        tMap[r.techEvent] = (tMap[r.techEvent] || 0) + 1;
-        ntMap[r.nonTechEvent] = (ntMap[r.nonTechEvent] || 0) + 1;
+      activeList.forEach(r => {
+        if (r.techEvent) tMap[r.techEvent] = (tMap[r.techEvent] || 0) + 1;
+        if (r.nonTechEvent) ntMap[r.nonTechEvent] = (ntMap[r.nonTechEvent] || 0) + 1;
       });
       renderBarChart('techChartBars', tMap, ['#00f0ff', '#9d4edd', '#00ff66', '#ff7700']);
       renderBarChart('nonTechChartBars', ntMap, ['#ffd700', '#ff0055', '#00ff66']);
@@ -1411,11 +1422,24 @@
       const fs = document.getElementById('selStatus').value;
 
       return dataList.filter(row => {
+        const isRowInactive = row.status === 'Inactive' || row.isActive === false;
+        if (fs === '') {
+          // Default: show only active operatives
+          if (isRowInactive) return false;
+        } else if (fs === 'Inactive') {
+          // Show only inactive operatives
+          if (!isRowInactive) return false;
+        } else if (fs === 'ALL') {
+          // Show all including inactive
+        } else {
+          // Specific status (Pending Verification, Verified, Rejected)
+          if (row.status !== fs || isRowInactive) return false;
+        }
+
         const str = [row.firstName, row.lastName, row.email, row.mobile, row.college, row.regId, row.teamName, row.leaderName].join(' ').toLowerCase();
         return (!q || str.includes(q))
           && (!ft || row.techEvent === ft)
-          && (!fnt || row.nonTechEvent === fnt)
-          && (!fs || row.status === fs);
+          && (!fnt || row.nonTechEvent === fnt);
       });
     }
 
@@ -1431,24 +1455,31 @@
       tbody.innerHTML = filtered.map((row, i) => {
         const isHack = row.techEvent === 'Hackathon';
         const realIdx = dataList.indexOf(row);
-        const statusClass = row.status === 'Verified' ? 'status-verified' : row.status === 'Rejected' ? 'status-rejected' : 'status-pending';
+        const isRowInactive = row.status === 'Inactive' || row.isActive === false;
+        const statusClass = isRowInactive
+          ? 'status-inactive'
+          : row.status === 'Verified'
+            ? 'status-verified'
+            : row.status === 'Rejected'
+              ? 'status-rejected'
+              : 'status-pending';
         const proofElem = row.paymentScreenshot
           ? `<img src="${row.paymentScreenshot}" class="proof-thumbnail" onclick="triggerLightbox(${realIdx})" title="Click to inspect"/>`
           : '<span style="color:var(--text-muted);font-family:var(--font-mono);">N/A</span>';
 
         return `
-          <tr class="${isHack ? 'hack-row' : ''}">
+          <tr class="${isHack ? 'hack-row' : ''} ${isRowInactive ? 'inactive-row' : ''}">
             <td style="font-family:var(--font-mono);color:var(--text-muted);">${i + 1}</td>
             <td><span class="badge-reg">${row.regId || '—'}</span></td>
             <td style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">${row.timestamp || '—'}</td>
-            <td><strong>${row.firstName} ${row.lastName}</strong></td>
+            <td><strong style="${isRowInactive ? 'text-decoration:line-through;color:var(--text-muted);' : ''}">${row.firstName} ${row.lastName}</strong></td>
             <td style="font-family:var(--font-mono);">${row.mobile}</td>
             <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${row.college}">${row.college}</td>
             <td><span class="badge-event-t ${isHack ? 'hack' : ''}">${row.techEvent}</span></td>
             <td><span class="badge-event-nt">${row.nonTechEvent}</span></td>
             <td style="font-family:var(--font-mono);color:var(--neon-gold);">${row.fee || '₹250'}</td>
             <td>${proofElem}</td>
-            <td><span class="status-pill ${statusClass}" onclick="cycleStatus(${realIdx})" title="Click to toggle status">${row.status || 'Pending Verification'}</span></td>
+            <td><span class="status-pill ${statusClass}" onclick="cycleStatus(${realIdx})" title="${isRowInactive ? 'Click to reactivate' : 'Click to toggle status'}">${row.status || 'Pending Verification'}</span></td>
             <td style="white-space:nowrap;display:flex;gap:6px;">
               <button class="cyber-btn cb-outline" style="padding:4px 10px;font-size:0.75rem;" onclick="viewOperativeDossier(${realIdx})">DOSSIER</button>
               <a href="verify.html?id=${encodeURIComponent(row.regId || '')}" target="_blank" class="cyber-btn cb-outline" style="padding:4px 9px;font-size:0.75rem;color:var(--cyan);text-decoration:none;" title="Redirect to Verification Desk"><i class="fas fa-qrcode"></i></a>
@@ -1457,15 +1488,23 @@
         `;
       }).join('');
 
-      document.getElementById('tableCounter').innerHTML = `DISPATCHING <strong>${filtered.length}</strong> OF <strong>${dataList.length}</strong> OPERATIVES`;
+      const activeTotal = dataList.filter(d => d.status !== 'Inactive' && d.isActive !== false).length;
+      document.getElementById('tableCounter').innerHTML = `DISPATCHING <strong>${filtered.length}</strong> OF <strong>${activeTotal}</strong> ACTIVE OPERATIVES${dataList.length > activeTotal ? ` (${dataList.length - activeTotal} Inactive)` : ''}`;
     }
 
     // Status Cycler
     async function cycleStatus(idx) {
       const r = dataList[idx];
+      const isRowInactive = r.status === 'Inactive' || r.isActive === false;
+      if (isRowInactive) {
+        if (!confirm(`Operative [${r.regId}] is currently INACTIVE. Reactivate this record?`)) return;
+        await reactivateOperativeRecord(idx);
+        return;
+      }
       const cycle = ['Pending Verification', 'Verified', 'Rejected'];
       const next = (cycle.indexOf(r.status) + 1) % cycle.length;
       r.status = cycle[next];
+      r.isActive = true;
       persistData();
       renderAllComponents();
       adminNotify(`Status updated to: ${r.status}`, r.status === 'Verified' ? 'success' : r.status === 'Rejected' ? 'error' : 'info');
@@ -1538,6 +1577,7 @@
             <option ${r.status === 'Pending Verification' ? 'selected' : ''}>Pending Verification</option>
             <option ${r.status === 'Verified' ? 'selected' : ''}>Verified</option>
             <option ${r.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+            <option ${r.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
           </select>
           <button class="cyber-btn cb-outline" onclick="applyModalStatus(${idx})">UPDATE</button>
           <a href="verify.html?id=${encodeURIComponent(r.regId || '')}" target="_blank" class="cyber-btn cb-outline" style="border-color:var(--cyan);color:var(--cyan);text-decoration:none;"><i class="fas fa-qrcode"></i> VERIFY AT DESK ➔</a>
@@ -1545,7 +1585,20 @@
       `;
 
       document.getElementById('modalDossierContent').innerHTML = content;
-      document.getElementById('btnDeleteRecord').onclick = () => removeOperativeRecord(idx);
+      
+      const isRowInactive = r.status === 'Inactive' || r.isActive === false;
+      const btnDelete = document.getElementById('btnDeleteRecord');
+      const btnRestore = document.getElementById('btnRestoreRecord');
+      if (isRowInactive) {
+        btnDelete.style.display = 'none';
+        btnRestore.style.display = 'inline-flex';
+        btnRestore.onclick = () => reactivateOperativeRecord(idx);
+      } else {
+        btnRestore.style.display = 'none';
+        btnDelete.style.display = 'inline-flex';
+        btnDelete.onclick = () => removeOperativeRecord(idx);
+      }
+
       document.getElementById('btnDownloadProof').onclick = () => saveProofImage(idx);
       document.getElementById('btnDownloadProof').style.display = r.paymentScreenshot ? 'inline-flex' : 'none';
       document.getElementById('operativeModal').classList.add('show');
@@ -1559,22 +1612,104 @@
     async function applyModalStatus(idx) {
       const select = document.getElementById('modalStatusSelect');
       if (!select) return;
-      dataList[idx].status = select.value;
+      const newStatus = select.value;
+      const isInactive = newStatus === 'Inactive';
+      dataList[idx].status = newStatus;
+      dataList[idx].isActive = !isInactive;
       persistData();
       renderAllComponents();
-      adminNotify(`Status updated to: ${select.value}`, select.value === 'Verified' ? 'success' : select.value === 'Rejected' ? 'error' : 'info');
+      adminNotify(`Status updated to: ${newStatus}`, newStatus === 'Verified' ? 'success' : isInactive ? 'info' : newStatus === 'Rejected' ? 'error' : 'info');
+      closeOperativeModal();
       if (dataList[idx].regId) {
-        await updateRemoteStatus(dataList[idx].regId, select.value);
+        if (isInactive) {
+          const apiBase = getApiBase();
+          const endpoint = apiBase ? `${apiBase}/api/registrations/${encodeURIComponent(dataList[idx].regId)}` : `/api/registrations/${encodeURIComponent(dataList[idx].regId)}`;
+          await fetch(endpoint, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + getAdminAuthToken() }
+          }).catch(console.warn);
+        } else {
+          await updateRemoteStatus(dataList[idx].regId, newStatus);
+        }
       }
     }
 
-    function removeOperativeRecord(idx) {
-      if (!confirm('CONFIRM DELETION: Are you sure you want to permanently erase this registration record?')) return;
-      dataList.splice(idx, 1);
+    async function removeOperativeRecord(idx) {
+      const r = dataList[idx];
+      if (!r) return;
+      const regId = r.regId || r.reg_id;
+      if (!confirm(`CONFIRM DEACTIVATION: Mark operative [${regId || r.firstName}] as INACTIVE in database?`)) return;
+
+      r.status = 'Inactive';
+      r.isActive = false;
       persistData();
       renderAllComponents();
       closeOperativeModal();
-      adminNotify('Operative record removed.', 'error');
+      adminNotify(`Operative ${regId || ''} marked Inactive in database.`, 'info');
+
+      if (regId) {
+        try {
+          const apiBase = getApiBase();
+          const endpoint = apiBase ? `${apiBase}/api/registrations/${encodeURIComponent(regId)}` : `/api/registrations/${encodeURIComponent(regId)}`;
+          const res = await fetch(endpoint, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': 'Bearer ' + getAdminAuthToken()
+            }
+          });
+          if (res.ok) {
+            const json = await res.json();
+            if (json.registration) {
+              Object.assign(r, {
+                status: json.registration.status,
+                isActive: json.registration.isActive
+              });
+              persistData();
+              renderAllComponents();
+            }
+          }
+        } catch (err) {
+          console.warn('Deactivate API call notice:', err);
+        }
+      }
+    }
+
+    async function reactivateOperativeRecord(idx) {
+      const r = dataList[idx];
+      if (!r) return;
+      const regId = r.regId || r.reg_id;
+      r.status = 'Pending Verification';
+      r.isActive = true;
+      persistData();
+      renderAllComponents();
+      closeOperativeModal();
+      adminNotify(`Operative ${regId || ''} successfully reactivated!`, 'success');
+
+      if (regId) {
+        try {
+          const apiBase = getApiBase();
+          const endpoint = apiBase ? `${apiBase}/api/registrations/${encodeURIComponent(regId)}/activate` : `/api/registrations/${encodeURIComponent(regId)}/activate`;
+          const res = await fetch(endpoint, {
+            method: 'PATCH',
+            headers: {
+              'Authorization': 'Bearer ' + getAdminAuthToken()
+            }
+          });
+          if (res.ok) {
+            const json = await res.json();
+            if (json.registration) {
+              Object.assign(r, {
+                status: json.registration.status,
+                isActive: json.registration.isActive
+              });
+              persistData();
+              renderAllComponents();
+            }
+          }
+        } catch (err) {
+          console.warn('Reactivate API call notice:', err);
+        }
+      }
     }
 
     function saveProofImage(idx) {
@@ -1616,12 +1751,19 @@
     }
 
     function exportDataCSV() {
-      if (!dataList.length) {
+      const fs = document.getElementById('selStatus') ? document.getElementById('selStatus').value : '';
+      const listToExport = fs === 'ALL'
+        ? dataList
+        : fs === 'Inactive'
+          ? dataList.filter(d => d.status === 'Inactive' || d.isActive === false)
+          : dataList.filter(d => d.status !== 'Inactive' && d.isActive !== false);
+
+      if (!listToExport.length) {
         adminNotify('No records available to export.', 'error');
         return;
       }
-      triggerFileDownload(buildCSV(dataList), `QAURA2026_FullRoster_${new Date().toISOString().slice(0,10)}.csv`);
-      adminNotify('✓ Full CSV Roster Exported.', 'success');
+      triggerFileDownload(buildCSV(listToExport), `QAURA2026_FullRoster_${new Date().toISOString().slice(0,10)}.csv`);
+      adminNotify(`✓ CSV Roster (${listToExport.length} entries) Exported.`, 'success');
     }
 
     function exportVerifiedOnly() {

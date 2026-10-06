@@ -475,6 +475,50 @@ app.patch('/api/registrations/:id/status', requireAuth(['admin', 'desk']), async
   }
 });
 
+// ── API: DEACTIVATE / SOFT DELETE REGISTRATION (ADMIN ONLY) ─────────
+app.delete('/api/registrations/:id', requireAuth(['admin']), async (req, res) => {
+  try {
+    const updated = await db.deactivateRegistration(req.params.id);
+    if (updated) {
+      res.json({ status: 'ok', message: 'Registration marked Inactive in PostgreSQL database', registration: updated });
+    } else {
+      res.status(404).json({ status: 'not_found', message: 'Registration not found' });
+    }
+  } catch (err) {
+    console.error('Deactivate registration error:', err);
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+});
+
+app.patch('/api/registrations/:id/deactivate', requireAuth(['admin']), async (req, res) => {
+  try {
+    const updated = await db.deactivateRegistration(req.params.id);
+    if (updated) {
+      res.json({ status: 'ok', message: 'Registration marked Inactive in PostgreSQL database', registration: updated });
+    } else {
+      res.status(404).json({ status: 'not_found', message: 'Registration not found' });
+    }
+  } catch (err) {
+    console.error('Deactivate registration error:', err);
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+});
+
+// ── API: REACTIVATE REGISTRATION (ADMIN ONLY) ───────────────────────
+app.patch('/api/registrations/:id/activate', requireAuth(['admin']), async (req, res) => {
+  try {
+    const updated = await db.activateRegistration(req.params.id);
+    if (updated) {
+      res.json({ status: 'ok', message: 'Registration reactivated in PostgreSQL database', registration: updated });
+    } else {
+      res.status(404).json({ status: 'not_found', message: 'Registration not found' });
+    }
+  } catch (err) {
+    console.error('Activate registration error:', err);
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+});
+
 // ── API: GET METRICS (ADMIN ONLY - PROTECTED) ───────────────────────
 app.get('/api/stats', requireAuth(['admin']), async (req, res) => {
   try {
@@ -554,7 +598,18 @@ function renderVerificationHtml(r) {
     <img src="${r.payment_screenshot}" class="proof-img" alt="Payment Proof"/>
   ` : '';
 
-  const isVerified = r.status && r.status.toLowerCase().includes('verif');
+  const isInactive = r.is_active === false || (r.status && r.status.toLowerCase().includes('inact'));
+  const isVerified = !isInactive && r.status && r.status.toLowerCase().includes('verif');
+
+  const badgeHtml = isInactive
+    ? `<div class="verified-badge" style="background:#ff0055;color:#fff;"><i class="fas fa-ban"></i> ✕ PASS INACTIVE / REVOKED</div>`
+    : isVerified
+      ? `<div class="verified-badge"><i class="fas fa-database"></i> ✓ POSTGRESQL VERIFIED</div>`
+      : `<div class="verified-badge" style="background:#ff8c00;color:#000;"><i class="fas fa-hourglass-half"></i> PENDING VERIFICATION</div>`;
+
+  const tagHtml = isInactive
+    ? `<div class="db-tag" style="color:#ff0055;font-weight:bold;">⚠️ Registration marked Inactive in PostgreSQL Registry &bull; Entry Not Allowed</div>`
+    : `<div class="db-tag">⚡ Fetched Live from PostgreSQL Registry &bull; Status: ${r.status}</div>`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -737,9 +792,9 @@ function renderVerificationHtml(r) {
     </div>
     <div class="dept-bar">School of Quantum Science Computing &amp; AI &bull; Q-AURA 2026</div>
     <div class="badge-wrap">
-      <div class="verified-badge"><i class="fas fa-database"></i> ✓ POSTGRESQL VERIFIED</div>
+      ${badgeHtml}
       <div class="reg-id-display">${r.reg_id}</div>
-      <div class="db-tag">⚡ Fetched Live from PostgreSQL Registry &bull; Status: ${r.status}</div>
+      ${tagHtml}
     </div>
     <div class="body-wrap">
       <div class="sec-title">👤 PARTICIPANT CREDENTIALS</div>

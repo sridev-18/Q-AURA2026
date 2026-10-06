@@ -52,11 +52,16 @@ async function initDb() {
         payment_screenshot TEXT,
         status VARCHAR(50) DEFAULT 'Pending Verification',
         created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-        verified_at TIMESTAMPTZ
+        verified_at TIMESTAMPTZ,
+        is_active BOOLEAN DEFAULT TRUE
       );
+
+      ALTER TABLE registrations ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
+      UPDATE registrations SET is_active = TRUE WHERE is_active IS NULL;
 
       CREATE INDEX IF NOT EXISTS idx_registrations_reg_id ON registrations (reg_id);
       CREATE INDEX IF NOT EXISTS idx_registrations_mobile ON registrations (mobile);
+      CREATE INDEX IF NOT EXISTS idx_registrations_is_active ON registrations (is_active);
 
       CREATE TABLE IF NOT EXISTS portal_auth (
         username VARCHAR(50) PRIMARY KEY,
@@ -159,7 +164,7 @@ async function getAllRegistrations() {
       fee, team_name AS "teamName", leader_name AS "leaderName",
       leader_phone AS "leaderPhone", leader_email AS "leaderEmail",
       tm2, tm3, tm4, payment_screenshot AS "paymentScreenshot",
-      status, created_at AS "createdAt", verified_at AS "verifiedAt"
+      status, is_active AS "isActive", created_at AS "createdAt", verified_at AS "verifiedAt"
     FROM registrations
     ORDER BY created_at DESC;
   `;
@@ -170,27 +175,75 @@ async function getAllRegistrations() {
 // Update registration verification status
 async function updateStatus(regId, newStatus) {
   const isVerified = newStatus && newStatus.toLowerCase().includes('verif');
+  const isInactive = newStatus && newStatus.toLowerCase().includes('inact');
   const query = `
     UPDATE registrations 
     SET status = $1,
+        is_active = $2,
         verified_at = ${isVerified ? 'CURRENT_TIMESTAMP' : 'NULL'}
-    WHERE UPPER(REPLACE(reg_id, ' ', '')) = UPPER(REPLACE($2, ' ', ''))
-    RETURNING *;
+    WHERE UPPER(REPLACE(reg_id, ' ', '')) = UPPER(REPLACE($3, ' ', ''))
+    RETURNING 
+      id, reg_id AS "regId", first_name AS "firstName", last_name AS "lastName",
+      mobile, email, college, tech_event AS "techEvent", non_tech_event AS "nonTechEvent",
+      fee, team_name AS "teamName", leader_name AS "leaderName",
+      leader_phone AS "leaderPhone", leader_email AS "leaderEmail",
+      tm2, tm3, tm4, payment_screenshot AS "paymentScreenshot",
+      status, is_active AS "isActive", created_at AS "createdAt", verified_at AS "verifiedAt";
   `;
-  const res = await pool.query(query, [newStatus, regId]);
+  const res = await pool.query(query, [newStatus, !isInactive, regId]);
+  return res.rows[0] || null;
+}
+
+// Deactivate / Soft Delete registration
+async function deactivateRegistration(regId) {
+  const query = `
+    UPDATE registrations 
+    SET is_active = FALSE,
+        status = 'Inactive'
+    WHERE UPPER(REPLACE(reg_id, ' ', '')) = UPPER(REPLACE($1, ' ', ''))
+    RETURNING 
+      id, reg_id AS "regId", first_name AS "firstName", last_name AS "lastName",
+      mobile, email, college, tech_event AS "techEvent", non_tech_event AS "nonTechEvent",
+      fee, team_name AS "teamName", leader_name AS "leaderName",
+      leader_phone AS "leaderPhone", leader_email AS "leaderEmail",
+      tm2, tm3, tm4, payment_screenshot AS "paymentScreenshot",
+      status, is_active AS "isActive", created_at AS "createdAt", verified_at AS "verifiedAt";
+  `;
+  const res = await pool.query(query, [regId]);
+  return res.rows[0] || null;
+}
+
+// Reactivate registration
+async function activateRegistration(regId) {
+  const query = `
+    UPDATE registrations 
+    SET is_active = TRUE,
+        status = 'Pending Verification'
+    WHERE UPPER(REPLACE(reg_id, ' ', '')) = UPPER(REPLACE($1, ' ', ''))
+    RETURNING 
+      id, reg_id AS "regId", first_name AS "firstName", last_name AS "lastName",
+      mobile, email, college, tech_event AS "techEvent", non_tech_event AS "nonTechEvent",
+      fee, team_name AS "teamName", leader_name AS "leaderName",
+      leader_phone AS "leaderPhone", leader_email AS "leaderEmail",
+      tm2, tm3, tm4, payment_screenshot AS "paymentScreenshot",
+      status, is_active AS "isActive", created_at AS "createdAt", verified_at AS "verifiedAt";
+  `;
+  const res = await pool.query(query, [regId]);
   return res.rows[0] || null;
 }
 
 // Get metrics / stats
 async function getMetrics() {
-  const totalRes = await pool.query('SELECT COUNT(*) AS total FROM registrations;');
-  const verifiedRes = await pool.query("SELECT COUNT(*) AS verified FROM registrations WHERE status ILIKE '%verif%';");
-  const pendingRes = await pool.query("SELECT COUNT(*) AS pending FROM registrations WHERE status ILIKE '%pending%';");
-  const hackathonRes = await pool.query("SELECT COUNT(*) AS hackathon FROM registrations WHERE tech_event ILIKE '%hackathon%';");
-  const techRes = await pool.query('SELECT tech_event, COUNT(*) AS count FROM registrations GROUP BY tech_event;');
+  const totalRes = await pool.query('SELECT COUNT(*) AS total FROM registrations WHERE is_active = TRUE;');
+  const inactiveRes = await pool.query('SELECT COUNT(*) AS inactive FROM registrations WHERE is_active = FALSE;');
+  const verifiedRes = await pool.query("SELECT COUNT(*) AS verified FROM registrations WHERE is_active = TRUE AND status ILIKE '%verif%';");
+  const pendingRes = await pool.query("SELECT COUNT(*) AS pending FROM registrations WHERE is_active = TRUE AND status ILIKE '%pending%';");
+  const hackathonRes = await pool.query("SELECT COUNT(*) AS hackathon FROM registrations WHERE is_active = TRUE AND tech_event ILIKE '%hackathon%';");
+  const techRes = await pool.query('SELECT tech_event, COUNT(*) AS count FROM registrations WHERE is_active = TRUE GROUP BY tech_event;');
   
   return {
     total: parseInt(totalRes.rows[0].total, 10),
+    inactive: parseInt(inactiveRes.rows[0].inactive, 10),
     verified: parseInt(verifiedRes.rows[0].verified, 10),
     pending: parseInt(pendingRes.rows[0].pending, 10),
     hackathonTeams: parseInt(hackathonRes.rows[0].hackathon, 10),
@@ -234,6 +287,8 @@ module.exports = {
   getRegistrationById,
   getAllRegistrations,
   updateStatus,
+  deactivateRegistration,
+  activateRegistration,
   getMetrics,
   getAuthUser,
   updateAuthPassword
