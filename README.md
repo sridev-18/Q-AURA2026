@@ -128,7 +128,7 @@ The Admin Dashboard and On-Desk Verification Desk are guarded by role-based auth
 | **K. Ajithkumar** | Student Coordinator | `+91 63855 12473` |
 | **A. Mukesh** | Student Coordinator | `+91 82708 66217` |
 | **R. Jeyasimhaa** | Student Coordinator | `+91 99409 28677` |
-| **S. S. Surya Prakash** | Student Coordinator | `+91 80566 57572` |
+| **S. S. Surya Prakash** | Student Coordinator | `+91 80565 57572` |
 | **M. Dharun** | Student Coordinator | `+91 88703 11010` |
 
 ---

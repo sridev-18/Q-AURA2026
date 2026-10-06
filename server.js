@@ -762,7 +762,7 @@ function renderVerificationHtml(r) {
         &bull; <strong>Date:</strong> October 14, 2026 (Wednesday)<br/>
         &bull; <strong>Reporting Time:</strong> 09:00 AM IST<br/>
         &bull; <strong>Venue:</strong> Tower - C, Think Tank Theater, Rathinam Techzone Campus, Eachanari, Coimbatore – 641021<br/>
-        &bull; <strong>Student Coordinators:</strong> K. Ajithkumar: 6385512473 &bull; M. Dhanush: 8270866217 &bull; R. Jeyasimhaa: 99409 28677 &bull; S. S. Surya Prakash: 80566 57572 &bull; M. Dharun: 8870311010
+        &bull; <strong>Student Coordinators:</strong> K. Ajithkumar: 6385512473 &bull; M. Dhanush: 8270866217 &bull; R. Jeyasimhaa: 99409 28677 &bull; S. S. Surya Prakash: 80565 57572 &bull; M. Dharun: 8870311010
       </div>
 
       <!-- ON-DESK ATTENDANCE ACTION -->
@@ -865,7 +865,7 @@ function renderNotFoundHtml(queryId) {
     <div class="help-box">
       Please report to the registration helpdesk or contact student coordinators:<br/>
       <strong>K. Ajithkumar:</strong> 6385512473 &bull; <strong>M. Dhanush:</strong> 8270866217 &bull; <strong>R. Jeyasimhaa:</strong> 99409 28677<br/>
-      <strong>S. S. Surya Prakash:</strong> 80566 57572 &bull; <strong>M. Dharun:</strong> 8870311010<br/><br/>
+      <strong>S. S. Surya Prakash:</strong> 80565 57572 &bull; <strong>M. Dharun:</strong> 8870311010<br/><br/>
       <a href="/verify.html">Open Manual Search Desk</a> &bull; <a href="/index.html">Register Now</a>
     </div>
   </div>

@@ -32,7 +32,7 @@ function createQAURA2026GoogleForm() {
     "• K. Ajithkumar: +91 63855 12473\n" +
     "• A. Mukesh: +91 82708 66217\n" +
     "• R. Jeyasimhaa: +91 99409 28677\n" +
-    "• S. S. Surya Prakash: +91 80566 57572\n" +
+    "• S. S. Surya Prakash: +91 80565 57572\n" +
     "• M. Dharun: +91 88703 11010\n\n" +
     "📞 FACULTY COORDINATORS:\n" +
     "• Mr. P. Sukumar: +91 70103 03993\n" +
