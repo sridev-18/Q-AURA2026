@@ -1195,16 +1195,21 @@
       const badge = document.getElementById('pgStatusBadge');
       const txt = document.getElementById('pgStatusText');
       if (!badge || !txt) return;
+      const activeCount = dataList.filter(d => d.status !== 'Inactive' && d.isActive !== false).length;
+      const totalCount = dataList.length || count || 0;
+      const inactiveCount = totalCount - activeCount;
+      const label = inactiveCount > 0 ? `${activeCount} Active (${totalCount} Total)` : `${activeCount} Active Records`;
+
       if (connected) {
         badge.style.borderColor = '#00ff66';
         badge.style.color = '#00ff66';
         badge.style.background = 'rgba(0, 255, 102, 0.1)';
-        txt.innerHTML = `PostgreSQL 18: ONLINE (${count} Records)`;
+        txt.innerHTML = `PostgreSQL 18: ONLINE [${label}]`;
       } else {
         badge.style.borderColor = '#ffd700';
         badge.style.color = '#ffd700';
         badge.style.background = 'rgba(255, 215, 0, 0.1)';
-        txt.innerHTML = `Local Cache: ${count} Records (PG Offline)`;
+        txt.innerHTML = `Local Cache: [${label}] (PG Offline)`;
       }
     }
 
@@ -1543,7 +1548,7 @@
       const verified = activeList.filter(d => d.status === 'Verified').length;
 
       document.getElementById('statsGrid').innerHTML = `
-        <div class="stat-hud-box hud-panel">
+        <div class="stat-hud-box hud-panel" style="cursor:pointer;" onclick="filterByCardStatus('')" title="Click to filter: All Active Operatives">
           <div class="s-icon"><i class="fas fa-users"></i></div>
           <div class="s-num" style="color:var(--cyan);">${total}</div>
           <div class="s-lbl">ACTIVE REGISTRATIONS</div>
@@ -1558,22 +1563,30 @@
           <div class="s-num" style="color:var(--neon-purple);">${uniqueColleges}</div>
           <div class="s-lbl">COLLEGES REPRESENTED</div>
         </div>
-        <div class="stat-hud-box hud-panel">
+        <div class="stat-hud-box hud-panel" style="cursor:pointer;" onclick="filterByCardStatus('Pending Verification')" title="Click to filter: Pending Verification">
           <div class="s-icon"><i class="fas fa-hourglass-half" style="color:var(--neon-orange);"></i></div>
           <div class="s-num" style="color:var(--neon-orange);">${pending}</div>
           <div class="s-lbl">PENDING PROOFS</div>
         </div>
-        <div class="stat-hud-box hud-panel">
+        <div class="stat-hud-box hud-panel" style="cursor:pointer;" onclick="filterByCardStatus('Verified')" title="Click to filter: Verified">
           <div class="s-icon"><i class="fas fa-check-circle" style="color:var(--neon-green);"></i></div>
           <div class="s-num" style="color:var(--neon-green);">${verified}</div>
           <div class="s-lbl">VERIFIED OPERATIVES</div>
         </div>
-        <div class="stat-hud-box hud-panel">
+        <div class="stat-hud-box hud-panel" style="cursor:pointer;" onclick="filterByCardStatus('Inactive')" title="Click to filter: Inactive / Deactivated (${inactiveCount})">
           <div class="s-icon"><i class="fas fa-user-slash" style="color:${inactiveCount > 0 ? 'var(--neon-pink)' : 'var(--text-muted)'};"></i></div>
           <div class="s-num" style="color:${inactiveCount > 0 ? 'var(--neon-pink)' : 'var(--text-muted)'};">${inactiveCount}</div>
           <div class="s-lbl">INACTIVE / DEACTIVATED</div>
         </div>
       `;
+    }
+
+    function filterByCardStatus(statusVal) {
+      const sel = document.getElementById('selStatus');
+      if (sel) {
+        sel.value = statusVal;
+        displayTable();
+      }
     }
 
     // Charts Rendering
