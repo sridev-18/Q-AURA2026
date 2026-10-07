@@ -764,6 +764,9 @@
       <button class="cyber-btn cb-outline" style="border-color:var(--cyan);background:rgba(0,240,255,0.15);color:var(--cyan);font-weight:700;" onclick="location.href='verify.html'">
         <i class="fas fa-qrcode"></i> VERIFY DESK ➔
       </button>
+      <button class="cyber-btn cb-primary" id="btnSyncAllCloud" onclick="syncAllFromCloudAndDatabase()" title="Synchronize all registrations from Database and Google Sheet">
+        <i class="fas fa-sync-alt"></i> SYNC ALL
+      </button>
       <button class="cyber-btn cb-green" onclick="exportDataCSV()"><i class="fas fa-file-excel"></i> CSV</button>
       <button class="cyber-btn cb-gold" onclick="exportVerifiedOnly()"><i class="fas fa-check-double"></i> VERIFIED</button>
       <button class="cyber-btn cb-outline" style="border-color:var(--neon-gold);color:var(--neon-gold);background:rgba(255,215,0,0.08);" onclick="openPasswordModal()" title="Change Admin or Verification Desk Passwords">
@@ -1001,6 +1004,7 @@
 
   <!-- CONFIG & SCRIPTS -->
   <script src="config.js"></script>
+  <script src="registrations_data.js"></script>
   <script>
     // ── AUTHENTICATION & DIRECT IN-PLACE LOGIN GUARD ─────────────────
     // Always enforce fresh authentication on every visit (no persistent auto-login)
@@ -1211,6 +1215,9 @@
 
     async function initData() {
       if (!isLoggedInAdmin()) return;
+
+      let pulled = [];
+
       // 1. Try PostgreSQL API first
       try {
         const apiBase = getApiBase();
@@ -1229,58 +1236,84 @@
 
         if (res.ok) {
           const json = await res.json();
-          if (json.status === 'ok' && Array.isArray(json.registrations)) {
-            const freshCache = JSON.stringify(json.registrations);
-            if (freshCache !== lastDataCache) {
-              dataList = json.registrations;
-              lastDataCache = freshCache;
-              isPgConnected = true;
-              localStorage.setItem(STORAGE_KEY, freshCache);
-              updateDbIndicator(true, dataList.length);
-              renderAllComponents();
-            }
-            return;
+          if (json.status === 'ok' && Array.isArray(json.registrations) && json.registrations.length > 0) {
+            pulled.push(...json.registrations);
+            isPgConnected = true;
           }
         }
       } catch (err) {
-        console.warn('PostgreSQL fetch notice, using local cache:', err);
+        console.warn('PostgreSQL fetch notice:', err);
       }
 
-      // 2. Fallback to localStorage or all_registrations_backup.json
-      let loadedFromLocal = false;
+      // 2. Preloaded bundled dataset (guaranteed 52 records, works offline and on file://)
+      if (typeof QAURA_PRELOADED_REGISTRATIONS !== 'undefined' && Array.isArray(QAURA_PRELOADED_REGISTRATIONS)) {
+        pulled.push(...QAURA_PRELOADED_REGISTRATIONS);
+      }
+
+      // 3. Fallback to localStorage
       try {
         const cached = localStorage.getItem(STORAGE_KEY);
         if (cached && cached !== '[]') {
-          if (cached !== lastDataCache) {
-            dataList = JSON.parse(cached);
-            lastDataCache = cached;
-            isPgConnected = false;
-            updateDbIndicator(false, dataList.length);
-            renderAllComponents();
-          }
-          loadedFromLocal = true;
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed)) pulled.push(...parsed);
         }
       } catch (e) {}
 
-      if (!loadedFromLocal) {
+      // 4. Try fetching all_registrations_backup.json
+      if (pulled.length < 50) {
         try {
           const bRes = await fetch('all_registrations_backup.json', { cache: 'no-store' });
           if (bRes.ok) {
             const bData = await bRes.json();
-            if (Array.isArray(bData) && bData.length > 0) {
-              dataList = bData;
-              lastDataCache = JSON.stringify(bData);
-              localStorage.setItem(STORAGE_KEY, lastDataCache);
-              isPgConnected = false;
-              updateDbIndicator(false, dataList.length);
-              renderAllComponents();
-              loadedFromLocal = true;
-            }
+            if (Array.isArray(bData)) pulled.push(...bData);
           }
         } catch(bErr) {}
       }
 
-      if (!loadedFromLocal && dataList.length === 0) {
+      // Deduplicate all collected records by Reg ID or Mobile
+      const map = new Map();
+      for (const r of pulled) {
+        const idKey = (r.regId || r.reg_id || '').toString().toUpperCase().trim();
+        const phoneKey = String(r.mobile || '').trim();
+        const key = idKey || phoneKey;
+        if (key && !map.has(key)) {
+          map.set(key, {
+            id: r.id,
+            regId: r.regId || r.reg_id,
+            firstName: r.firstName || r.first_name || '',
+            lastName: r.lastName || r.last_name || '',
+            mobile: r.mobile,
+            email: r.email,
+            college: r.college,
+            techEvent: r.techEvent || r.tech_event || '',
+            nonTechEvent: r.nonTechEvent || r.non_tech_event || '',
+            fee: r.fee || '₹250',
+            teamName: r.teamName || r.team_name || '',
+            leaderName: r.leaderName || r.leader_name || '',
+            leaderPhone: r.leaderPhone || r.leader_phone || '',
+            leaderEmail: r.leaderEmail || r.leader_email || '',
+            tm2: r.tm2 || '',
+            tm3: r.tm3 || '',
+            tm4: r.tm4 || '',
+            paymentScreenshot: r.paymentScreenshot || r.payment_screenshot || '',
+            status: r.status || 'Pending Verification',
+            isActive: r.isActive !== undefined ? r.isActive : (r.is_active !== undefined ? r.is_active : true),
+            createdAt: r.createdAt || r.created_at || new Date().toISOString(),
+            verifiedAt: r.verifiedAt || r.verified_at || null
+          });
+        }
+      }
+
+      if (map.size > 0) {
+        dataList = Array.from(map.values());
+        const freshCache = JSON.stringify(dataList);
+        if (freshCache !== lastDataCache) {
+          lastDataCache = freshCache;
+          localStorage.setItem(STORAGE_KEY, freshCache);
+          updateDbIndicator(isPgConnected, dataList.length);
+          renderAllComponents();
+        }
+      } else {
         dataList = [];
         updateDbIndicator(false, 0);
         renderAllComponents();
@@ -1306,6 +1339,142 @@
 
     function persistData() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataList));
+    }
+
+    async function syncAllFromCloudAndDatabase() {
+      adminNotify('⚡ Synchronizing all registrations from Database and Google Sheets...', 'info');
+      const btn = document.getElementById('btnSyncAllCloud');
+      if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> SYNCING...';
+
+      let pulledRecords = [];
+
+      // 1. Backend API (/api/registrations)
+      try {
+        const apiBase = getApiBase();
+        const endpoint = apiBase ? `${apiBase}/api/registrations` : '/api/registrations';
+        const res = await fetch(endpoint, {
+          cache: 'no-store',
+          headers: { 'Authorization': 'Bearer ' + getAdminAuthToken() }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.status === 'ok' && Array.isArray(json.registrations) && json.registrations.length > 0) {
+            pulledRecords.push(...json.registrations);
+          }
+        }
+      } catch (e) {
+        console.warn('API sync notice:', e);
+      }
+
+      // 2. Preloaded dataset bundle (registrations_data.js)
+      if (typeof QAURA_PRELOADED_REGISTRATIONS !== 'undefined' && Array.isArray(QAURA_PRELOADED_REGISTRATIONS)) {
+        pulledRecords.push(...QAURA_PRELOADED_REGISTRATIONS);
+      }
+
+      // 3. Bundled backup file (all_registrations_backup.json)
+      try {
+        const bRes = await fetch('all_registrations_backup.json', { cache: 'no-store' });
+        if (bRes.ok) {
+          const bList = await bRes.json();
+          if (Array.isArray(bList)) pulledRecords.push(...bList);
+        }
+      } catch(e) {}
+
+      // 4. Live pull from Google Sheets Web App (?mode=read)
+      if (typeof QAURA_CONFIG !== 'undefined' && QAURA_CONFIG.APPS_SCRIPT_URL) {
+        try {
+          const gRes = await fetch(QAURA_CONFIG.APPS_SCRIPT_URL + '?mode=read');
+          if (gRes.ok) {
+            const gData = await gRes.json();
+            if (gData.status === 'ok' && Array.isArray(gData.registrations)) {
+              const formattedSheet = gData.registrations.map((r, i) => {
+                const isHack = (r['Technical Event'] || '').includes('Hackathon');
+                return {
+                  regId: r['Reg ID'] || ('QAURA-2026-' + (4000 + i)),
+                  firstName: r['First Name'] || '',
+                  lastName: r['Last Name'] || '',
+                  mobile: String(r['Mobile'] || ''),
+                  email: r['Email'] || '',
+                  college: r['College'] || '',
+                  techEvent: r['Technical Event'] || '',
+                  nonTechEvent: r['Non-Technical Event'] || '',
+                  fee: isHack ? '₹300 (Team)' : '₹250',
+                  teamName: r['Team Name'] || '',
+                  leaderName: r['Leader Name'] || '',
+                  leaderPhone: String(r['Leader Phone'] || ''),
+                  leaderEmail: r['Leader Email'] || '',
+                  tm2: r['Teammate 2'] || '',
+                  tm3: r['Teammate 3'] || '',
+                  tm4: r['Teammate 4'] || '',
+                  paymentScreenshot: '',
+                  status: 'Pending Verification',
+                  isActive: true,
+                  createdAt: r['Timestamp'] || new Date().toISOString()
+                };
+              });
+              pulledRecords.push(...formattedSheet);
+            }
+          }
+        } catch(e) {
+          console.warn('Google Sheet live pull notice:', e);
+        }
+      }
+
+      // 5. Existing local storage data
+      try {
+        const cached = localStorage.getItem(STORAGE_KEY);
+        if (cached && cached !== '[]') {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed)) pulledRecords.push(...parsed);
+        }
+      } catch(e) {}
+
+      // Deduplicate records by clean regId or mobile
+      const uniqueMap = new Map();
+      for (const r of pulledRecords) {
+        const idKey = (r.regId || r.reg_id || '').toString().toUpperCase().trim();
+        const phoneKey = String(r.mobile || '').trim();
+        const key = idKey || phoneKey;
+        if (key && !uniqueMap.has(key)) {
+          uniqueMap.set(key, {
+            id: r.id,
+            regId: r.regId || r.reg_id,
+            firstName: r.firstName || r.first_name || '',
+            lastName: r.lastName || r.last_name || '',
+            mobile: r.mobile,
+            email: r.email,
+            college: r.college,
+            techEvent: r.techEvent || r.tech_event || '',
+            nonTechEvent: r.nonTechEvent || r.non_tech_event || '',
+            fee: r.fee || '₹250',
+            teamName: r.teamName || r.team_name || '',
+            leaderName: r.leaderName || r.leader_name || '',
+            leaderPhone: r.leaderPhone || r.leader_phone || '',
+            leaderEmail: r.leaderEmail || r.leader_email || '',
+            tm2: r.tm2 || '',
+            tm3: r.tm3 || '',
+            tm4: r.tm4 || '',
+            paymentScreenshot: r.paymentScreenshot || r.payment_screenshot || '',
+            status: r.status || 'Pending Verification',
+            isActive: r.isActive !== undefined ? r.isActive : (r.is_active !== undefined ? r.is_active : true),
+            createdAt: r.createdAt || r.created_at || new Date().toISOString(),
+            verifiedAt: r.verifiedAt || r.verified_at || null
+          });
+        }
+      }
+
+      if (uniqueMap.size > 0) {
+        dataList = Array.from(uniqueMap.values());
+        lastDataCache = JSON.stringify(dataList);
+        localStorage.setItem(STORAGE_KEY, lastDataCache);
+        updateDbIndicator(isPgConnected, dataList.length);
+        renderAllComponents();
+        adminNotify(`✓ SYNC COMPLETE: Loaded all ${dataList.length} participant registrations!`, 'success');
+      } else {
+        adminNotify('Could not pull new records from registry.', 'error');
+      }
+
+      if (btn) btn.innerHTML = '<i class="fas fa-sync-alt"></i> SYNC ALL (' + dataList.length + ')';
     }
 
     async function updateRemoteStatus(regId, newStatus) {

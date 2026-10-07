@@ -19,6 +19,7 @@
   <script src="assets/qrcode.min.js"></script>
   <script src="assets/logo_base64.js"></script>
   <script src="config.js"></script>
+  <script src="registrations_data.js"></script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -704,7 +705,15 @@
         );
       }
 
-      // 2b. Check local backup json file
+      // 2b. Check preloaded bundle
+      if (!match && typeof QAURA_PRELOADED_REGISTRATIONS !== 'undefined' && Array.isArray(QAURA_PRELOADED_REGISTRATIONS)) {
+        match = QAURA_PRELOADED_REGISTRATIONS.find(r => 
+          (r.regId && r.regId.toUpperCase().replace(/\s+/g, '') === normTerm) ||
+          (r.mobile && String(r.mobile).trim() === term)
+        );
+      }
+
+      // 2c. Check local backup json file
       if (!match) {
         try {
           const bRes = await fetch('all_registrations_backup.json', { cache: 'no-store' });
