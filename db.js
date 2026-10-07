@@ -77,28 +77,39 @@ async function initDb() {
       ON CONFLICT (username) DO NOTHING;
     `);
 
-    // Auto-sync/seed all existing participant registrations from backup into database
+    // Purge test/dummy registrations and sync authentic 23 student registrations into database
     try {
       const fs = require('fs');
       const path = require('path');
-      let backupPath = path.join(__dirname, 'all_registrations_backup.json');
-      if (!fs.existsSync(backupPath)) {
-        backupPath = path.join(__dirname, 'initial_registrations_backup.json');
-      }
+      const backupPath = path.join(__dirname, 'all_registrations_backup.json');
       if (fs.existsSync(backupPath)) {
         const seedData = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
-        let added = 0;
+
+        // 1. Purge test registrations
+        await client.query(`
+          DELETE FROM registrations 
+          WHERE email LIKE '%example.com' 
+             OR email = 'test@gmail.com' 
+             OR email = 'test@gamil.com'
+             OR LOWER(first_name) LIKE 'test%'
+             OR LOWER(first_name) LIKE '%test'
+             OR LOWER(first_name) IN ('sri', 'ar', 'sridev', 'etst', 'tezt3', 'jey', 'abd', 'masskhduib');
+        `);
+
+        // 2. Upsert the authentic 23 student registrations
         for (const r of seedData) {
           const regId = r.regId || r.reg_id;
           if (!regId) continue;
-          const insRes = await client.query(`
+          await client.query(`
             INSERT INTO registrations (
               reg_id, first_name, last_name, mobile, email, college,
               tech_event, non_tech_event, fee,
               team_name, leader_name, leader_phone, leader_email,
               tm2, tm3, tm4, payment_screenshot, status, is_active, created_at, verified_at
             ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
-            ON CONFLICT (reg_id) DO NOTHING;
+            ON CONFLICT (reg_id) DO UPDATE SET
+              is_active = TRUE,
+              status = CASE WHEN registrations.status = 'Verified' THEN 'Verified' ELSE EXCLUDED.status END;
           `, [
             regId, r.firstName || r.first_name || '', r.lastName || r.last_name || '',
             r.mobile || '', r.email || '', r.college || '',
@@ -108,15 +119,12 @@ async function initDb() {
             r.leaderPhone || r.leader_phone || '', r.leaderEmail || r.leader_email || '',
             r.tm2 || '', r.tm3 || '', r.tm4 || '',
             r.paymentScreenshot || r.payment_screenshot || '',
-            r.status || 'Pending Verification', r.isActive !== false,
+            r.status || 'Pending Verification', true,
             r.createdAt || r.created_at || new Date().toISOString(),
             r.verifiedAt || r.verified_at || null
           ]);
-          if (insRes.rowCount > 0) added++;
         }
-        if (added > 0) {
-          console.log(`✓ Synchronized ${added} missing registrations from backup into database.`);
-        }
+        console.log(`✓ Synchronized ${seedData.length} authentic student registrations into database.`);
       }
     } catch (seedErr) {
       console.warn('Auto-seed / sync notice:', seedErr.message);
