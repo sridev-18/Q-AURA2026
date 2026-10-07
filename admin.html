@@ -1001,7 +1001,6 @@
 
   <!-- CONFIG & SCRIPTS -->
   <script src="config.js"></script>
-  <script src="registrations_data.js"></script>
   <script>
     // ── AUTHENTICATION & DIRECT IN-PLACE LOGIN GUARD ─────────────────
     // Always enforce fresh authentication on every visit (no persistent auto-login)
@@ -1293,9 +1292,7 @@
     async function initData() {
       if (!isLoggedInAdmin()) return;
 
-      let pulled = [];
-
-      // 1. PostgreSQL API
+      // 1. Live PostgreSQL Database API (Direct Source of Truth)
       try {
         const apiBase = getApiBase();
         const endpoint = apiBase ? `${apiBase}/api/registrations` : '/api/registrations';
@@ -1313,55 +1310,34 @@
 
         if (res.ok) {
           const json = await res.json();
-          if (json.status === 'ok' && Array.isArray(json.registrations) && json.registrations.length > 0) {
-            pulled.push(...json.registrations);
-            isPgConnected = true;
+          if (json.status === 'ok' && Array.isArray(json.registrations)) {
+            // Deduplicate only to prevent duplicate submissions from the same student
+            dataList = deduplicateOperativeRecords(json.registrations);
+            const freshCache = JSON.stringify(dataList);
+            if (freshCache !== lastDataCache) {
+              lastDataCache = freshCache;
+              localStorage.setItem(STORAGE_KEY, freshCache);
+              isPgConnected = true;
+              updateDbIndicator(true, dataList.length);
+              renderAllComponents();
+            }
+            return; // ⭐️ When database is online, rely 100% on database records!
           }
         }
       } catch (err) {
-        console.warn('PostgreSQL fetch notice:', err);
+        console.warn('PostgreSQL fetch notice, using local cache:', err);
       }
 
-      // 2. Preloaded bundled dataset (guarantees all registered students are available)
-      if (typeof QAURA_PRELOADED_REGISTRATIONS !== 'undefined' && Array.isArray(QAURA_PRELOADED_REGISTRATIONS)) {
-        pulled.push(...QAURA_PRELOADED_REGISTRATIONS);
-      }
-
-      // 3. Fallback to bundled backup file
-      try {
-        const bRes = await fetch('all_registrations_backup.json', { cache: 'no-store' });
-        if (bRes.ok) {
-          const bData = await bRes.json();
-          if (Array.isArray(bData)) pulled.push(...bData);
-        }
-      } catch(bErr) {}
-
-      // 4. Fallback to localStorage
+      // 2. Offline Fallback ONLY if PostgreSQL connection failed completely
       try {
         const cached = localStorage.getItem(STORAGE_KEY);
-        if (cached && cached !== '[]') {
-          const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed)) pulled.push(...parsed);
-        }
-      } catch (e) {}
-
-      // Deduplicate cleanly across all sources: no repeating names, single row per student
-      const cleaned = deduplicateOperativeRecords(pulled);
-
-      if (cleaned.length > 0) {
-        dataList = cleaned;
-        const freshCache = JSON.stringify(dataList);
-        if (freshCache !== lastDataCache) {
-          lastDataCache = freshCache;
-          localStorage.setItem(STORAGE_KEY, freshCache);
-          updateDbIndicator(isPgConnected, dataList.length);
+        if (cached && cached !== lastDataCache) {
+          dataList = JSON.parse(cached);
+          lastDataCache = cached;
+          updateDbIndicator(false, dataList.length);
           renderAllComponents();
         }
-      } else {
-        dataList = [];
-        updateDbIndicator(false, 0);
-        renderAllComponents();
-      }
+      } catch(e) {}
 
       // Check 24/7 server keep-alive telemetry
       try {
@@ -1406,21 +1382,7 @@
         console.warn('API sync notice:', e);
       }
 
-      // 2. Preloaded dataset bundle (registrations_data.js)
-      if (typeof QAURA_PRELOADED_REGISTRATIONS !== 'undefined' && Array.isArray(QAURA_PRELOADED_REGISTRATIONS)) {
-        pulledRecords.push(...QAURA_PRELOADED_REGISTRATIONS);
-      }
-
-      // 3. Bundled backup file (all_registrations_backup.json)
-      try {
-        const bRes = await fetch('all_registrations_backup.json', { cache: 'no-store' });
-        if (bRes.ok) {
-          const bList = await bRes.json();
-          if (Array.isArray(bList)) pulledRecords.push(...bList);
-        }
-      } catch(e) {}
-
-      // 4. Live pull from Google Sheets Web App (?mode=read)
+      // 2. Live pull from Google Sheets Web App (?mode=read)
       if (typeof QAURA_CONFIG !== 'undefined' && QAURA_CONFIG.APPS_SCRIPT_URL) {
         try {
           const gRes = await fetch(QAURA_CONFIG.APPS_SCRIPT_URL + '?mode=read');
@@ -1435,7 +1397,7 @@
         }
       }
 
-      // Deduplicate cleanly across all sources
+      // Deduplicate cleanly
       const cleaned = deduplicateOperativeRecords(pulledRecords);
 
       if (cleaned.length > 0) {
