@@ -1233,7 +1233,7 @@ window.QAURA_PRELOADED_REGISTRATIONS = [
     "email": "aditya.verma@example.com",
     "college": "Rathinam Technical Campus",
     "techEvent": "Hackathon (Strike Team)",
-    "nonTechEvent": "Gaming Arena",
+    "nonTechEvent": "Prompt Generating",
     "fee": "?300 (Team)",
     "teamName": "Quantum Pioneers",
     "leaderName": "Aditya Verma",

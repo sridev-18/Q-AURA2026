@@ -194,7 +194,7 @@ function validatePaymentText(rawText) {
     '5 hours of challenges', '6 exciting events', '1 unforgettable experience',
     'hours of challenges', 'exciting events', 'unforgettable experience',
     'cash prize for hackathon', 'cyber forge', 'cloud craft', 'ctf challenge',
-    'click n chill', 'cricket bidding', 'gaming arena', 'quiz competition',
+    'click n chill', 'prompt generating', 'quiz competition',
     'the next big thing is you', 'rules and regulations', 'organizing committee',
     'faculty coordinator', 'student coordinator', 'convenor', 'brochure'
   ];
