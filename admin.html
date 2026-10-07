@@ -709,7 +709,7 @@
           <label style="display:block;font-family:var(--font-mono);font-size:0.78rem;color:var(--cyan);margin-bottom:6px;">ADMIN USERNAME</label>
           <div style="position:relative;">
             <i class="fas fa-user-shield" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);"></i>
-            <input type="text" id="adminUserInp" class="search-input" style="width:100%;padding:12px 14px 12px 36px;font-size:0.9rem;" placeholder="admin" required autocomplete="username"/>
+            <input type="text" id="adminUserInp" class="search-input" style="width:100%;padding:12px 14px 12px 36px;font-size:0.9rem;" placeholder="Enter admin username" required autocomplete="username"/>
           </div>
         </div>
 
@@ -1210,13 +1210,87 @@
 
     let lastDataCache = '';
 
+    function cleanDigitsPhone(p) {
+      if (!p) return '';
+      const d = String(p).replace(/\D/g, '');
+      return d.length >= 10 ? d.slice(-10) : d;
+    }
+
+    function cleanNormStr(s) {
+      return (s || '').toString().toLowerCase().replace(/\s+/g, ' ').trim();
+    }
+
+    function deduplicateOperativeRecords(records) {
+      const deletedBlacklist = JSON.parse(localStorage.getItem('qaura2026_deleted_ids') || '[]');
+      const result = [];
+
+      for (const r of records) {
+        const id = (r.regId || r.reg_id || r['Reg ID'] || '').toString().toUpperCase().trim();
+        if (id && deletedBlacklist.includes(id)) continue;
+
+        const phone = cleanDigitsPhone(r.mobile || r.Mobile || r.leaderPhone || r['Leader Phone']);
+        const email = cleanNormStr(r.email || r.Email || r.leaderEmail || r['Leader Email']);
+        const fullName = cleanNormStr((r.firstName || r.first_name || r['First Name'] || '') + ' ' + (r.lastName || r.last_name || r['Last Name'] || ''));
+
+        // Match existing record by Reg ID, 10-digit Phone, Email, or Full Name
+        let matchIdx = -1;
+        for (let i = 0; i < result.length; i++) {
+          const ex = result[i];
+          const exId = (ex.regId || '').toUpperCase().trim();
+          const exPhone = cleanDigitsPhone(ex.mobile);
+          const exEmail = cleanNormStr(ex.email);
+          const exName = cleanNormStr((ex.firstName || '') + ' ' + (ex.lastName || ''));
+
+          // 1. Exact Reg ID match
+          if (id && exId && id === exId) { matchIdx = i; break; }
+          // 2. Same 10-digit mobile number
+          if (phone && exPhone && phone.length === 10 && phone === exPhone) { matchIdx = i; break; }
+          // 3. Same email address (non-empty)
+          if (email && exEmail && email.includes('@') && email === exEmail) { matchIdx = i; break; }
+          // 4. Same full name (>= 4 characters)
+          if (fullName && exName && fullName.length >= 4 && fullName.replace(/\s+/g, '') === exName.replace(/\s+/g, '')) { matchIdx = i; break; }
+        }
+
+        const formatted = {
+          id: r.id || (matchIdx >= 0 ? result[matchIdx].id : undefined),
+          regId: id || (matchIdx >= 0 ? result[matchIdx].regId : ''),
+          firstName: r.firstName || r.first_name || r['First Name'] || '',
+          lastName: r.lastName || r.last_name || r['Last Name'] || '',
+          mobile: String(r.mobile || r.Mobile || (matchIdx >= 0 ? result[matchIdx].mobile : '') || '').trim(),
+          email: r.email || r.Email || (matchIdx >= 0 ? result[matchIdx].email : '') || '',
+          college: r.college || r.College || (matchIdx >= 0 ? result[matchIdx].college : '') || '',
+          techEvent: r.techEvent || r.tech_event || r['Technical Event'] || (matchIdx >= 0 ? result[matchIdx].techEvent : '') || '',
+          nonTechEvent: r.nonTechEvent || r.non_tech_event || r['Non-Technical Event'] || (matchIdx >= 0 ? result[matchIdx].nonTechEvent : '') || '',
+          fee: r.fee || (matchIdx >= 0 ? result[matchIdx].fee : '₹250'),
+          teamName: r.teamName || r.team_name || r['Team Name'] || (matchIdx >= 0 ? result[matchIdx].teamName : '') || '',
+          leaderName: r.leaderName || r.leader_name || r['Leader Name'] || (matchIdx >= 0 ? result[matchIdx].leaderName : '') || '',
+          leaderPhone: String(r.leaderPhone || r.leader_phone || r['Leader Phone'] || (matchIdx >= 0 ? result[matchIdx].leaderPhone : '') || '').trim(),
+          leaderEmail: r.leaderEmail || r.leader_email || r['Leader Email'] || (matchIdx >= 0 ? result[matchIdx].leaderEmail : '') || '',
+          tm2: r.tm2 || r['Teammate 2'] || (matchIdx >= 0 ? result[matchIdx].tm2 : '') || '',
+          tm3: r.tm3 || r['Teammate 3'] || (matchIdx >= 0 ? result[matchIdx].tm3 : '') || '',
+          tm4: r.tm4 || r['Teammate 4'] || (matchIdx >= 0 ? result[matchIdx].tm4 : '') || '',
+          paymentScreenshot: r.paymentScreenshot || r.payment_screenshot || (matchIdx >= 0 ? result[matchIdx].paymentScreenshot : '') || '',
+          status: (r.status === 'Verified' || (matchIdx >= 0 && result[matchIdx].status === 'Verified')) ? 'Verified' : (r.status || (matchIdx >= 0 ? result[matchIdx].status : 'Pending Verification')),
+          isActive: r.isActive !== undefined ? r.isActive : (r.is_active !== undefined ? r.is_active : (matchIdx >= 0 ? result[matchIdx].isActive : true)),
+          createdAt: r.createdAt || r.created_at || r['Timestamp'] || (matchIdx >= 0 ? result[matchIdx].createdAt : new Date().toISOString()),
+          verifiedAt: r.verifiedAt || r.verified_at || (matchIdx >= 0 ? result[matchIdx].verifiedAt : null)
+        };
+
+        if (matchIdx >= 0) {
+          result[matchIdx] = formatted;
+        } else {
+          result.push(formatted);
+        }
+      }
+      return result;
+    }
+
     async function initData() {
       if (!isLoggedInAdmin()) return;
 
       let pulled = [];
-      let pgSuccess = false;
 
-      // 1. PRIMARY SOURCE: PostgreSQL API — if this works, it is the ONLY source
+      // 1. PostgreSQL API
       try {
         const apiBase = getApiBase();
         const endpoint = apiBase ? `${apiBase}/api/registrations` : '/api/registrations';
@@ -1235,8 +1309,7 @@
         if (res.ok) {
           const json = await res.json();
           if (json.status === 'ok' && Array.isArray(json.registrations) && json.registrations.length > 0) {
-            pulled = json.registrations; // Use ONLY the DB records — no merging
-            pgSuccess = true;
+            pulled.push(...json.registrations);
             isPgConnected = true;
           }
         }
@@ -1244,77 +1317,42 @@
         console.warn('PostgreSQL fetch notice:', err);
       }
 
-      // OFFLINE FALLBACK: Only used when PostgreSQL is unreachable
-      if (!pgSuccess) {
-        // 2. Preloaded bundled dataset (works offline/file://)
-        if (typeof QAURA_PRELOADED_REGISTRATIONS !== 'undefined' && Array.isArray(QAURA_PRELOADED_REGISTRATIONS)) {
-          pulled.push(...QAURA_PRELOADED_REGISTRATIONS);
-        }
-
-        // 3. Fallback to localStorage
-        try {
-          const cached = localStorage.getItem(STORAGE_KEY);
-          if (cached && cached !== '[]') {
-            const parsed = JSON.parse(cached);
-            if (Array.isArray(parsed)) pulled.push(...parsed);
-          }
-        } catch (e) {}
-
-        // 4. Try fetching all_registrations_backup.json
-        try {
-          const bRes = await fetch('all_registrations_backup.json', { cache: 'no-store' });
-          if (bRes.ok) {
-            const bData = await bRes.json();
-            if (Array.isArray(bData)) pulled.push(...bData);
-          }
-        } catch(bErr) {}
+      // 2. Preloaded bundled dataset (guarantees all registered students are available)
+      if (typeof QAURA_PRELOADED_REGISTRATIONS !== 'undefined' && Array.isArray(QAURA_PRELOADED_REGISTRATIONS)) {
+        pulled.push(...QAURA_PRELOADED_REGISTRATIONS);
       }
 
-      // Deduplicate and normalise records, excluding permanently deleted IDs
-      const deletedBlacklist = JSON.parse(localStorage.getItem('qaura2026_deleted_ids') || '[]');
-      const map = new Map();
-      for (const r of pulled) {
-        const idKey = (r.regId || r.reg_id || '').toString().toUpperCase().trim();
-        const phoneKey = String(r.mobile || '').trim();
-        const key = idKey || phoneKey;
-        if (key && !deletedBlacklist.includes(idKey) && !map.has(key)) {
-          map.set(key, {
-            id: r.id,
-            regId: r.regId || r.reg_id,
-            firstName: r.firstName || r.first_name || '',
-            lastName: r.lastName || r.last_name || '',
-            mobile: r.mobile,
-            email: r.email,
-            college: r.college,
-            techEvent: r.techEvent || r.tech_event || '',
-            nonTechEvent: r.nonTechEvent || r.non_tech_event || '',
-            fee: r.fee || '₹250',
-            teamName: r.teamName || r.team_name || '',
-            leaderName: r.leaderName || r.leader_name || '',
-            leaderPhone: r.leaderPhone || r.leader_phone || '',
-            leaderEmail: r.leaderEmail || r.leader_email || '',
-            tm2: r.tm2 || '',
-            tm3: r.tm3 || '',
-            tm4: r.tm4 || '',
-            paymentScreenshot: r.paymentScreenshot || r.payment_screenshot || '',
-            status: r.status || 'Pending Verification',
-            isActive: r.isActive !== undefined ? r.isActive : (r.is_active !== undefined ? r.is_active : true),
-            createdAt: r.createdAt || r.created_at || new Date().toISOString(),
-            verifiedAt: r.verifiedAt || r.verified_at || null
-          });
+      // 3. Fallback to bundled backup file
+      try {
+        const bRes = await fetch('all_registrations_backup.json', { cache: 'no-store' });
+        if (bRes.ok) {
+          const bData = await bRes.json();
+          if (Array.isArray(bData)) pulled.push(...bData);
         }
-      }
+      } catch(bErr) {}
 
-      if (map.size > 0) {
-        dataList = Array.from(map.values());
+      // 4. Fallback to localStorage
+      try {
+        const cached = localStorage.getItem(STORAGE_KEY);
+        if (cached && cached !== '[]') {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed)) pulled.push(...parsed);
+        }
+      } catch (e) {}
+
+      // Deduplicate cleanly across all sources: no repeating names, single row per student
+      const cleaned = deduplicateOperativeRecords(pulled);
+
+      if (cleaned.length > 0) {
+        dataList = cleaned;
         const freshCache = JSON.stringify(dataList);
         if (freshCache !== lastDataCache) {
           lastDataCache = freshCache;
-          if (!pgSuccess) localStorage.setItem(STORAGE_KEY, freshCache); // Only persist offline data
+          localStorage.setItem(STORAGE_KEY, freshCache);
           updateDbIndicator(isPgConnected, dataList.length);
           renderAllComponents();
         }
-      } else if (!pgSuccess) {
+      } else {
         dataList = [];
         updateDbIndicator(false, 0);
         renderAllComponents();
@@ -1328,11 +1366,7 @@
           const hData = await hRes.json();
           const txt = document.getElementById('keepAliveText');
           if (txt && hData.keepAlive) {
-            if (hData.keepAlive.enabled) {
-              txt.textContent = `24/7 AWAKE (${hData.keepAlive.totalPings} Pings)`;
-            } else {
-              txt.textContent = '24/7 ACTIVE';
-            }
+            txt.textContent = hData.keepAlive.enabled ? `24/7 AWAKE (${hData.keepAlive.totalPings} Pings)` : '24/7 ACTIVE';
           }
         }
       } catch(e) {}
@@ -1348,9 +1382,8 @@
       if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> SYNCING...';
 
       let pulledRecords = [];
-      let pgSyncSuccess = false;
 
-      // 1. Backend API (/api/registrations) — PRIMARY SOURCE
+      // 1. Backend API (/api/registrations)
       try {
         const apiBase = getApiBase();
         const endpoint = apiBase ? `${apiBase}/api/registrations` : '/api/registrations';
@@ -1361,122 +1394,52 @@
         if (res.ok) {
           const json = await res.json();
           if (json.status === 'ok' && Array.isArray(json.registrations) && json.registrations.length > 0) {
-            pulledRecords = json.registrations; // DB is the ONLY source when online
-            pgSyncSuccess = true;
+            pulledRecords.push(...json.registrations);
           }
         }
       } catch (e) {
         console.warn('API sync notice:', e);
       }
 
-      // OFFLINE FALLBACK: Only merge other sources if DB was unreachable
-      if (!pgSyncSuccess) {
-        // 2. Preloaded dataset bundle (registrations_data.js)
-        if (typeof QAURA_PRELOADED_REGISTRATIONS !== 'undefined' && Array.isArray(QAURA_PRELOADED_REGISTRATIONS)) {
-          pulledRecords.push(...QAURA_PRELOADED_REGISTRATIONS);
+      // 2. Preloaded dataset bundle (registrations_data.js)
+      if (typeof QAURA_PRELOADED_REGISTRATIONS !== 'undefined' && Array.isArray(QAURA_PRELOADED_REGISTRATIONS)) {
+        pulledRecords.push(...QAURA_PRELOADED_REGISTRATIONS);
+      }
+
+      // 3. Bundled backup file (all_registrations_backup.json)
+      try {
+        const bRes = await fetch('all_registrations_backup.json', { cache: 'no-store' });
+        if (bRes.ok) {
+          const bList = await bRes.json();
+          if (Array.isArray(bList)) pulledRecords.push(...bList);
         }
+      } catch(e) {}
 
-        // 3. Bundled backup file (all_registrations_backup.json)
+      // 4. Live pull from Google Sheets Web App (?mode=read)
+      if (typeof QAURA_CONFIG !== 'undefined' && QAURA_CONFIG.APPS_SCRIPT_URL) {
         try {
-          const bRes = await fetch('all_registrations_backup.json', { cache: 'no-store' });
-          if (bRes.ok) {
-            const bList = await bRes.json();
-            if (Array.isArray(bList)) pulledRecords.push(...bList);
-          }
-        } catch(e) {}
-
-        // 4. Live pull from Google Sheets Web App (?mode=read)
-        if (typeof QAURA_CONFIG !== 'undefined' && QAURA_CONFIG.APPS_SCRIPT_URL) {
-          try {
-            const gRes = await fetch(QAURA_CONFIG.APPS_SCRIPT_URL + '?mode=read');
-            if (gRes.ok) {
-              const gData = await gRes.json();
-              if (gData.status === 'ok' && Array.isArray(gData.registrations)) {
-                const formattedSheet = gData.registrations.map((r, i) => {
-                  const isHack = (r['Technical Event'] || '').includes('Hackathon');
-                  return {
-                    regId: r['Reg ID'] || ('QAURA-2026-' + (4000 + i)),
-                    firstName: r['First Name'] || '',
-                    lastName: r['Last Name'] || '',
-                    mobile: String(r['Mobile'] || ''),
-                    email: r['Email'] || '',
-                    college: r['College'] || '',
-                    techEvent: r['Technical Event'] || '',
-                    nonTechEvent: r['Non-Technical Event'] || '',
-                    fee: isHack ? '₹300 (Team)' : '₹250',
-                    teamName: r['Team Name'] || '',
-                    leaderName: r['Leader Name'] || '',
-                    leaderPhone: String(r['Leader Phone'] || ''),
-                    leaderEmail: r['Leader Email'] || '',
-                    tm2: r['Teammate 2'] || '',
-                    tm3: r['Teammate 3'] || '',
-                    tm4: r['Teammate 4'] || '',
-                    paymentScreenshot: '',
-                    status: 'Pending Verification',
-                    isActive: true,
-                    createdAt: r['Timestamp'] || new Date().toISOString()
-                  };
-                });
-                pulledRecords.push(...formattedSheet);
-              }
+          const gRes = await fetch(QAURA_CONFIG.APPS_SCRIPT_URL + '?mode=read');
+          if (gRes.ok) {
+            const gData = await gRes.json();
+            if (gData.status === 'ok' && Array.isArray(gData.registrations)) {
+              pulledRecords.push(...gData.registrations);
             }
-          } catch(e) {
-            console.warn('Google Sheet live pull notice:', e);
           }
-        }
-
-        // 5. Existing local storage data
-        try {
-          const cached = localStorage.getItem(STORAGE_KEY);
-          if (cached && cached !== '[]') {
-            const parsed = JSON.parse(cached);
-            if (Array.isArray(parsed)) pulledRecords.push(...parsed);
-          }
-        } catch(e) {}
-      }
-
-      // Deduplicate records by clean regId or mobile, excluding deleted records
-      const deletedBlacklist = JSON.parse(localStorage.getItem('qaura2026_deleted_ids') || '[]');
-      const uniqueMap = new Map();
-      for (const r of pulledRecords) {
-        const idKey = (r.regId || r.reg_id || '').toString().toUpperCase().trim();
-        const phoneKey = String(r.mobile || '').trim();
-        const key = idKey || phoneKey;
-        if (key && !deletedBlacklist.includes(idKey) && !uniqueMap.has(key)) {
-          uniqueMap.set(key, {
-            id: r.id,
-            regId: r.regId || r.reg_id,
-            firstName: r.firstName || r.first_name || '',
-            lastName: r.lastName || r.last_name || '',
-            mobile: r.mobile,
-            email: r.email,
-            college: r.college,
-            techEvent: r.techEvent || r.tech_event || '',
-            nonTechEvent: r.nonTechEvent || r.non_tech_event || '',
-            fee: r.fee || '₹250',
-            teamName: r.teamName || r.team_name || '',
-            leaderName: r.leaderName || r.leader_name || '',
-            leaderPhone: r.leaderPhone || r.leader_phone || '',
-            leaderEmail: r.leaderEmail || r.leader_email || '',
-            tm2: r.tm2 || '',
-            tm3: r.tm3 || '',
-            tm4: r.tm4 || '',
-            paymentScreenshot: r.paymentScreenshot || r.payment_screenshot || '',
-            status: r.status || 'Pending Verification',
-            isActive: r.isActive !== undefined ? r.isActive : (r.is_active !== undefined ? r.is_active : true),
-            createdAt: r.createdAt || r.created_at || new Date().toISOString(),
-            verifiedAt: r.verifiedAt || r.verified_at || null
-          });
+        } catch(e) {
+          console.warn('Google Sheet live pull notice:', e);
         }
       }
 
-      if (uniqueMap.size > 0) {
-        dataList = Array.from(uniqueMap.values());
+      // Deduplicate cleanly across all sources
+      const cleaned = deduplicateOperativeRecords(pulledRecords);
+
+      if (cleaned.length > 0) {
+        dataList = cleaned;
         lastDataCache = JSON.stringify(dataList);
         localStorage.setItem(STORAGE_KEY, lastDataCache);
         updateDbIndicator(isPgConnected, dataList.length);
         renderAllComponents();
-        adminNotify(`✓ SYNC COMPLETE: Loaded all ${dataList.length} participant registrations!`, 'success');
+        adminNotify(`✓ SYNC COMPLETE: Loaded all ${dataList.length} participant registrations without duplicates!`, 'success');
       } else {
         adminNotify('Could not pull new records from registry.', 'error');
       }

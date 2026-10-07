@@ -77,38 +77,49 @@ async function initDb() {
       ON CONFLICT (username) DO NOTHING;
     `);
 
-    // Check if registrations table is empty; if so, auto-seed existing registrations from backup
-    const countRes = await client.query('SELECT COUNT(*) AS total FROM registrations;');
-    if (parseInt(countRes.rows[0].total, 10) === 0) {
-      try {
-        const fs = require('fs');
-        const path = require('path');
-        const backupPath = path.join(__dirname, 'initial_registrations_backup.json');
-        if (fs.existsSync(backupPath)) {
-          const seedData = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
-          for (const r of seedData) {
-            await client.query(`
-              INSERT INTO registrations (
-                reg_id, first_name, last_name, mobile, email, college,
-                tech_event, non_tech_event, fee,
-                team_name, leader_name, leader_phone, leader_email,
-                tm2, tm3, tm4, payment_screenshot, status, is_active, created_at, verified_at
-              ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
-              ON CONFLICT (reg_id) DO NOTHING;
-            `, [
-              r.regId, r.firstName || '', r.lastName || '', r.mobile || '', r.email || '', r.college || '',
-              r.techEvent || '', r.nonTechEvent || '', r.fee || '₹250',
-              r.teamName || '', r.leaderName || '', r.leaderPhone || '', r.leaderEmail || '',
-              r.tm2 || '', r.tm3 || '', r.tm4 || '', r.paymentScreenshot || '',
-              r.status || 'Pending Verification', r.isActive !== false,
-              r.createdAt || new Date().toISOString(), r.verifiedAt || null
-            ]);
-          }
-          console.log(`✓ Auto-seeded ${seedData.length} existing participant registrations into new database.`);
-        }
-      } catch (seedErr) {
-        console.warn('Auto-seed notice:', seedErr.message);
+    // Auto-sync/seed all existing participant registrations from backup into database
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      let backupPath = path.join(__dirname, 'all_registrations_backup.json');
+      if (!fs.existsSync(backupPath)) {
+        backupPath = path.join(__dirname, 'initial_registrations_backup.json');
       }
+      if (fs.existsSync(backupPath)) {
+        const seedData = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
+        let added = 0;
+        for (const r of seedData) {
+          const regId = r.regId || r.reg_id;
+          if (!regId) continue;
+          const insRes = await client.query(`
+            INSERT INTO registrations (
+              reg_id, first_name, last_name, mobile, email, college,
+              tech_event, non_tech_event, fee,
+              team_name, leader_name, leader_phone, leader_email,
+              tm2, tm3, tm4, payment_screenshot, status, is_active, created_at, verified_at
+            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
+            ON CONFLICT (reg_id) DO NOTHING;
+          `, [
+            regId, r.firstName || r.first_name || '', r.lastName || r.last_name || '',
+            r.mobile || '', r.email || '', r.college || '',
+            r.techEvent || r.tech_event || '', r.nonTechEvent || r.non_tech_event || '',
+            r.fee || '₹250',
+            r.teamName || r.team_name || '', r.leaderName || r.leader_name || '',
+            r.leaderPhone || r.leader_phone || '', r.leaderEmail || r.leader_email || '',
+            r.tm2 || '', r.tm3 || '', r.tm4 || '',
+            r.paymentScreenshot || r.payment_screenshot || '',
+            r.status || 'Pending Verification', r.isActive !== false,
+            r.createdAt || r.created_at || new Date().toISOString(),
+            r.verifiedAt || r.verified_at || null
+          ]);
+          if (insRes.rowCount > 0) added++;
+        }
+        if (added > 0) {
+          console.log(`✓ Synchronized ${added} missing registrations from backup into database.`);
+        }
+      }
+    } catch (seedErr) {
+      console.warn('Auto-seed / sync notice:', seedErr.message);
     }
 
     console.log('✓ PostgreSQL: Database schema & portal credentials verified in qaura2026_db');
