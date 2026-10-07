@@ -722,10 +722,6 @@
               <i class="fas fa-eye" id="adminPassEye"></i>
             </button>
           </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:0.72rem;font-family:var(--font-mono);color:var(--text-muted);">
-            <span>Default: <code style="color:var(--cyan);cursor:pointer;" onclick="document.getElementById('adminPassInp').value='admin@qaura2026';">admin@qaura2026</code></span>
-            <span>Alternate: <code style="color:var(--cyan);cursor:pointer;" onclick="document.getElementById('adminPassInp').value='admin123';">admin123</code></span>
-          </div>
         </div>
 
         <button type="submit" id="btnAdminAuth" class="cyber-btn cb-primary" style="width:100%;padding:13px;font-size:0.88rem;letter-spacing:1.5px;display:flex;align-items:center;justify-content:center;gap:8px;">
@@ -1218,8 +1214,9 @@
       if (!isLoggedInAdmin()) return;
 
       let pulled = [];
+      let pgSuccess = false;
 
-      // 1. Try PostgreSQL API first
+      // 1. PRIMARY SOURCE: PostgreSQL API — if this works, it is the ONLY source
       try {
         const apiBase = getApiBase();
         const endpoint = apiBase ? `${apiBase}/api/registrations` : '/api/registrations';
@@ -1238,7 +1235,8 @@
         if (res.ok) {
           const json = await res.json();
           if (json.status === 'ok' && Array.isArray(json.registrations) && json.registrations.length > 0) {
-            pulled.push(...json.registrations);
+            pulled = json.registrations; // Use ONLY the DB records — no merging
+            pgSuccess = true;
             isPgConnected = true;
           }
         }
@@ -1246,22 +1244,23 @@
         console.warn('PostgreSQL fetch notice:', err);
       }
 
-      // 2. Preloaded bundled dataset (guaranteed 52 records, works offline and on file://)
-      if (typeof QAURA_PRELOADED_REGISTRATIONS !== 'undefined' && Array.isArray(QAURA_PRELOADED_REGISTRATIONS)) {
-        pulled.push(...QAURA_PRELOADED_REGISTRATIONS);
-      }
-
-      // 3. Fallback to localStorage
-      try {
-        const cached = localStorage.getItem(STORAGE_KEY);
-        if (cached && cached !== '[]') {
-          const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed)) pulled.push(...parsed);
+      // OFFLINE FALLBACK: Only used when PostgreSQL is unreachable
+      if (!pgSuccess) {
+        // 2. Preloaded bundled dataset (works offline/file://)
+        if (typeof QAURA_PRELOADED_REGISTRATIONS !== 'undefined' && Array.isArray(QAURA_PRELOADED_REGISTRATIONS)) {
+          pulled.push(...QAURA_PRELOADED_REGISTRATIONS);
         }
-      } catch (e) {}
 
-      // 4. Try fetching all_registrations_backup.json
-      if (pulled.length < 50) {
+        // 3. Fallback to localStorage
+        try {
+          const cached = localStorage.getItem(STORAGE_KEY);
+          if (cached && cached !== '[]') {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed)) pulled.push(...parsed);
+          }
+        } catch (e) {}
+
+        // 4. Try fetching all_registrations_backup.json
         try {
           const bRes = await fetch('all_registrations_backup.json', { cache: 'no-store' });
           if (bRes.ok) {
@@ -1271,7 +1270,7 @@
         } catch(bErr) {}
       }
 
-      // Deduplicate all collected records by Reg ID or Mobile, excluding deleted IDs
+      // Deduplicate and normalise records, excluding permanently deleted IDs
       const deletedBlacklist = JSON.parse(localStorage.getItem('qaura2026_deleted_ids') || '[]');
       const map = new Map();
       for (const r of pulled) {
@@ -1311,11 +1310,11 @@
         const freshCache = JSON.stringify(dataList);
         if (freshCache !== lastDataCache) {
           lastDataCache = freshCache;
-          localStorage.setItem(STORAGE_KEY, freshCache);
+          if (!pgSuccess) localStorage.setItem(STORAGE_KEY, freshCache); // Only persist offline data
           updateDbIndicator(isPgConnected, dataList.length);
           renderAllComponents();
         }
-      } else {
+      } else if (!pgSuccess) {
         dataList = [];
         updateDbIndicator(false, 0);
         renderAllComponents();
@@ -1349,8 +1348,9 @@
       if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> SYNCING...';
 
       let pulledRecords = [];
+      let pgSyncSuccess = false;
 
-      // 1. Backend API (/api/registrations)
+      // 1. Backend API (/api/registrations) — PRIMARY SOURCE
       try {
         const apiBase = getApiBase();
         const endpoint = apiBase ? `${apiBase}/api/registrations` : '/api/registrations';
@@ -1361,75 +1361,79 @@
         if (res.ok) {
           const json = await res.json();
           if (json.status === 'ok' && Array.isArray(json.registrations) && json.registrations.length > 0) {
-            pulledRecords.push(...json.registrations);
+            pulledRecords = json.registrations; // DB is the ONLY source when online
+            pgSyncSuccess = true;
           }
         }
       } catch (e) {
         console.warn('API sync notice:', e);
       }
 
-      // 2. Preloaded dataset bundle (registrations_data.js)
-      if (typeof QAURA_PRELOADED_REGISTRATIONS !== 'undefined' && Array.isArray(QAURA_PRELOADED_REGISTRATIONS)) {
-        pulledRecords.push(...QAURA_PRELOADED_REGISTRATIONS);
-      }
-
-      // 3. Bundled backup file (all_registrations_backup.json)
-      try {
-        const bRes = await fetch('all_registrations_backup.json', { cache: 'no-store' });
-        if (bRes.ok) {
-          const bList = await bRes.json();
-          if (Array.isArray(bList)) pulledRecords.push(...bList);
+      // OFFLINE FALLBACK: Only merge other sources if DB was unreachable
+      if (!pgSyncSuccess) {
+        // 2. Preloaded dataset bundle (registrations_data.js)
+        if (typeof QAURA_PRELOADED_REGISTRATIONS !== 'undefined' && Array.isArray(QAURA_PRELOADED_REGISTRATIONS)) {
+          pulledRecords.push(...QAURA_PRELOADED_REGISTRATIONS);
         }
-      } catch(e) {}
 
-      // 4. Live pull from Google Sheets Web App (?mode=read)
-      if (typeof QAURA_CONFIG !== 'undefined' && QAURA_CONFIG.APPS_SCRIPT_URL) {
+        // 3. Bundled backup file (all_registrations_backup.json)
         try {
-          const gRes = await fetch(QAURA_CONFIG.APPS_SCRIPT_URL + '?mode=read');
-          if (gRes.ok) {
-            const gData = await gRes.json();
-            if (gData.status === 'ok' && Array.isArray(gData.registrations)) {
-              const formattedSheet = gData.registrations.map((r, i) => {
-                const isHack = (r['Technical Event'] || '').includes('Hackathon');
-                return {
-                  regId: r['Reg ID'] || ('QAURA-2026-' + (4000 + i)),
-                  firstName: r['First Name'] || '',
-                  lastName: r['Last Name'] || '',
-                  mobile: String(r['Mobile'] || ''),
-                  email: r['Email'] || '',
-                  college: r['College'] || '',
-                  techEvent: r['Technical Event'] || '',
-                  nonTechEvent: r['Non-Technical Event'] || '',
-                  fee: isHack ? '₹300 (Team)' : '₹250',
-                  teamName: r['Team Name'] || '',
-                  leaderName: r['Leader Name'] || '',
-                  leaderPhone: String(r['Leader Phone'] || ''),
-                  leaderEmail: r['Leader Email'] || '',
-                  tm2: r['Teammate 2'] || '',
-                  tm3: r['Teammate 3'] || '',
-                  tm4: r['Teammate 4'] || '',
-                  paymentScreenshot: '',
-                  status: 'Pending Verification',
-                  isActive: true,
-                  createdAt: r['Timestamp'] || new Date().toISOString()
-                };
-              });
-              pulledRecords.push(...formattedSheet);
-            }
+          const bRes = await fetch('all_registrations_backup.json', { cache: 'no-store' });
+          if (bRes.ok) {
+            const bList = await bRes.json();
+            if (Array.isArray(bList)) pulledRecords.push(...bList);
           }
-        } catch(e) {
-          console.warn('Google Sheet live pull notice:', e);
-        }
-      }
+        } catch(e) {}
 
-      // 5. Existing local storage data
-      try {
-        const cached = localStorage.getItem(STORAGE_KEY);
-        if (cached && cached !== '[]') {
-          const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed)) pulledRecords.push(...parsed);
+        // 4. Live pull from Google Sheets Web App (?mode=read)
+        if (typeof QAURA_CONFIG !== 'undefined' && QAURA_CONFIG.APPS_SCRIPT_URL) {
+          try {
+            const gRes = await fetch(QAURA_CONFIG.APPS_SCRIPT_URL + '?mode=read');
+            if (gRes.ok) {
+              const gData = await gRes.json();
+              if (gData.status === 'ok' && Array.isArray(gData.registrations)) {
+                const formattedSheet = gData.registrations.map((r, i) => {
+                  const isHack = (r['Technical Event'] || '').includes('Hackathon');
+                  return {
+                    regId: r['Reg ID'] || ('QAURA-2026-' + (4000 + i)),
+                    firstName: r['First Name'] || '',
+                    lastName: r['Last Name'] || '',
+                    mobile: String(r['Mobile'] || ''),
+                    email: r['Email'] || '',
+                    college: r['College'] || '',
+                    techEvent: r['Technical Event'] || '',
+                    nonTechEvent: r['Non-Technical Event'] || '',
+                    fee: isHack ? '₹300 (Team)' : '₹250',
+                    teamName: r['Team Name'] || '',
+                    leaderName: r['Leader Name'] || '',
+                    leaderPhone: String(r['Leader Phone'] || ''),
+                    leaderEmail: r['Leader Email'] || '',
+                    tm2: r['Teammate 2'] || '',
+                    tm3: r['Teammate 3'] || '',
+                    tm4: r['Teammate 4'] || '',
+                    paymentScreenshot: '',
+                    status: 'Pending Verification',
+                    isActive: true,
+                    createdAt: r['Timestamp'] || new Date().toISOString()
+                  };
+                });
+                pulledRecords.push(...formattedSheet);
+              }
+            }
+          } catch(e) {
+            console.warn('Google Sheet live pull notice:', e);
+          }
         }
-      } catch(e) {}
+
+        // 5. Existing local storage data
+        try {
+          const cached = localStorage.getItem(STORAGE_KEY);
+          if (cached && cached !== '[]') {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed)) pulledRecords.push(...parsed);
+          }
+        } catch(e) {}
+      }
 
       // Deduplicate records by clean regId or mobile, excluding deleted records
       const deletedBlacklist = JSON.parse(localStorage.getItem('qaura2026_deleted_ids') || '[]');
