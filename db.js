@@ -248,6 +248,18 @@ async function deactivateRegistration(regId) {
   return res.rows[0] || null;
 }
 
+// Permanently delete registration
+async function deleteRegistration(regId) {
+  if (!regId) return null;
+  const query = `
+    DELETE FROM registrations 
+    WHERE UPPER(REPLACE(reg_id, ' ', '')) = UPPER(REPLACE($1, ' ', ''))
+    RETURNING id, reg_id AS "regId", first_name AS "firstName", last_name AS "lastName";
+  `;
+  const res = await pool.query(query, [regId]);
+  return res.rows[0] || null;
+}
+
 // Reactivate registration
 async function activateRegistration(regId) {
   const query = `
@@ -324,6 +336,7 @@ module.exports = {
   updateStatus,
   deactivateRegistration,
   activateRegistration,
+  deleteRegistration,
   getMetrics,
   getAuthUser,
   updateAuthPassword

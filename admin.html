@@ -822,7 +822,8 @@
       </select>
       <select id="selNonTech" class="filter-select" onchange="displayTable()">
         <option value="">ALL NON-TECHNICAL ARENAS</option>
-        <option>Prompt Generating</option>
+        <option>Cricket Bidding</option>
+        <option>Gaming Arena</option>
         <option>Click N Chill (Photography)</option>
         <option>Quiz Competition</option>
         <option>None</option>
@@ -891,9 +892,10 @@
         <button class="modal-close-x" onclick="closeOperativeModal()">&times;</button>
       </div>
       <div id="modalDossierContent"></div>
-      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap;">
         <button class="cyber-btn cb-green" id="btnRestoreRecord" style="display:none;"><i class="fas fa-undo"></i> REACTIVATE ENTRY</button>
-        <button class="cyber-btn cb-red" id="btnDeleteRecord"><i class="fas fa-trash"></i> INACTIVATE / DELETE</button>
+        <button class="cyber-btn cb-outline" id="btnInactivateRecord" style="border-color:var(--neon-orange);color:var(--neon-orange);"><i class="fas fa-user-slash"></i> MARK INACTIVE</button>
+        <button class="cyber-btn cb-red" id="btnDeleteRecord"><i class="fas fa-trash-alt"></i> DELETE RECORD</button>
         <button class="cyber-btn cb-green" id="btnDownloadProof"><i class="fas fa-download"></i> PROOF IMAGE</button>
         <button class="cyber-btn cb-outline" onclick="closeOperativeModal()">DISMISS</button>
       </div>
@@ -1270,13 +1272,14 @@
         } catch(bErr) {}
       }
 
-      // Deduplicate all collected records by Reg ID or Mobile
+      // Deduplicate all collected records by Reg ID or Mobile, excluding deleted IDs
+      const deletedBlacklist = JSON.parse(localStorage.getItem('qaura2026_deleted_ids') || '[]');
       const map = new Map();
       for (const r of pulled) {
         const idKey = (r.regId || r.reg_id || '').toString().toUpperCase().trim();
         const phoneKey = String(r.mobile || '').trim();
         const key = idKey || phoneKey;
-        if (key && !map.has(key)) {
+        if (key && !deletedBlacklist.includes(idKey) && !map.has(key)) {
           map.set(key, {
             id: r.id,
             regId: r.regId || r.reg_id,
@@ -1429,13 +1432,14 @@
         }
       } catch(e) {}
 
-      // Deduplicate records by clean regId or mobile
+      // Deduplicate records by clean regId or mobile, excluding deleted records
+      const deletedBlacklist = JSON.parse(localStorage.getItem('qaura2026_deleted_ids') || '[]');
       const uniqueMap = new Map();
       for (const r of pulledRecords) {
         const idKey = (r.regId || r.reg_id || '').toString().toUpperCase().trim();
         const phoneKey = String(r.mobile || '').trim();
         const key = idKey || phoneKey;
-        if (key && !uniqueMap.has(key)) {
+        if (key && !deletedBlacklist.includes(idKey) && !uniqueMap.has(key)) {
           uniqueMap.set(key, {
             id: r.id,
             regId: r.regId || r.reg_id,
@@ -1707,6 +1711,7 @@
             <td style="white-space:nowrap;display:flex;gap:6px;">
               <button class="cyber-btn cb-outline" style="padding:4px 10px;font-size:0.75rem;" onclick="viewOperativeDossier(${realIdx})">DOSSIER</button>
               <a href="verify.html?id=${encodeURIComponent(row.regId || '')}" target="_blank" class="cyber-btn cb-outline" style="padding:4px 9px;font-size:0.75rem;color:var(--cyan);text-decoration:none;" title="Redirect to Verification Desk"><i class="fas fa-qrcode"></i></a>
+              <button class="cyber-btn cb-outline" style="padding:4px 9px;font-size:0.75rem;color:var(--neon-pink);border-color:var(--neon-pink);" onclick="deleteRegistrationPermanently(${realIdx})" title="Permanently Delete Registration"><i class="fas fa-trash-alt"></i></button>
             </td>
           </tr>
         `;
@@ -1812,15 +1817,25 @@
       
       const isRowInactive = r.status === 'Inactive' || r.isActive === false;
       const btnDelete = document.getElementById('btnDeleteRecord');
+      const btnInactivate = document.getElementById('btnInactivateRecord');
       const btnRestore = document.getElementById('btnRestoreRecord');
       if (isRowInactive) {
-        btnDelete.style.display = 'none';
-        btnRestore.style.display = 'inline-flex';
-        btnRestore.onclick = () => reactivateOperativeRecord(idx);
+        if (btnInactivate) btnInactivate.style.display = 'none';
+        if (btnRestore) {
+          btnRestore.style.display = 'inline-flex';
+          btnRestore.onclick = () => reactivateOperativeRecord(idx);
+        }
       } else {
-        btnRestore.style.display = 'none';
+        if (btnRestore) btnRestore.style.display = 'none';
+        if (btnInactivate) {
+          btnInactivate.style.display = 'inline-flex';
+          btnInactivate.onclick = () => inactivateOperativeRecord(idx);
+        }
+      }
+
+      if (btnDelete) {
         btnDelete.style.display = 'inline-flex';
-        btnDelete.onclick = () => removeOperativeRecord(idx);
+        btnDelete.onclick = () => deleteRegistrationPermanently(idx);
       }
 
       document.getElementById('btnDownloadProof').onclick = () => saveProofImage(idx);
@@ -1847,9 +1862,9 @@
       if (dataList[idx].regId) {
         if (isInactive) {
           const apiBase = getApiBase();
-          const endpoint = apiBase ? `${apiBase}/api/registrations/${encodeURIComponent(dataList[idx].regId)}` : `/api/registrations/${encodeURIComponent(dataList[idx].regId)}`;
+          const endpoint = apiBase ? `${apiBase}/api/registrations/${encodeURIComponent(dataList[idx].regId)}/deactivate` : `/api/registrations/${encodeURIComponent(dataList[idx].regId)}/deactivate`;
           await fetch(endpoint, {
-            method: 'DELETE',
+            method: 'PATCH',
             headers: { 'Authorization': 'Bearer ' + getAdminAuthToken() }
           }).catch(console.warn);
         } else {
@@ -1858,11 +1873,56 @@
       }
     }
 
-    async function removeOperativeRecord(idx) {
+    async function deleteRegistrationPermanently(idx) {
       const r = dataList[idx];
       if (!r) return;
       const regId = r.regId || r.reg_id;
-      if (!confirm(`CONFIRM DEACTIVATION: Mark operative [${regId || r.firstName}] as INACTIVE in database?`)) return;
+      const studentName = `${r.firstName || ''} ${r.lastName || ''}`.trim() || 'Operative';
+
+      if (!confirm(`⚠️ CONFIRM PERMANENT DELETION\n\nAre you sure you want to permanently delete registration [${regId || 'N/A'}] for "${studentName}"?\n\nThis will permanently remove the record from the dashboard, database, and all reports.`)) {
+        return;
+      }
+
+      // 1. Blacklist in localStorage so polling or bundle never resurrects this deleted ID
+      if (regId) {
+        try {
+          const deletedList = JSON.parse(localStorage.getItem('qaura2026_deleted_ids') || '[]');
+          const cleanKey = regId.toUpperCase().trim();
+          if (!deletedList.includes(cleanKey)) {
+            deletedList.push(cleanKey);
+            localStorage.setItem('qaura2026_deleted_ids', JSON.stringify(deletedList));
+          }
+        } catch(e) {}
+      }
+
+      // 2. Remove immediately from dataList in UI
+      dataList.splice(idx, 1);
+      lastDataCache = JSON.stringify(dataList);
+      persistData();
+      renderAllComponents();
+      closeOperativeModal();
+      adminNotify(`🗑️ Operative [${regId || ''}] permanently deleted and removed.`, 'success');
+
+      // 3. Call backend API to delete from PostgreSQL and clean up JSON files
+      if (regId) {
+        try {
+          const apiBase = getApiBase();
+          const endpoint = apiBase ? `${apiBase}/api/registrations/${encodeURIComponent(regId)}` : `/api/registrations/${encodeURIComponent(regId)}`;
+          await fetch(endpoint, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + getAdminAuthToken() }
+          });
+        } catch (err) {
+          console.warn('Backend delete notification notice:', err);
+        }
+      }
+    }
+
+    async function inactivateOperativeRecord(idx) {
+      const r = dataList[idx];
+      if (!r) return;
+      const regId = r.regId || r.reg_id;
+      if (!confirm(`Mark operative [${regId || r.firstName}] as INACTIVE in database?`)) return;
 
       r.status = 'Inactive';
       r.isActive = false;
@@ -1874,24 +1934,11 @@
       if (regId) {
         try {
           const apiBase = getApiBase();
-          const endpoint = apiBase ? `${apiBase}/api/registrations/${encodeURIComponent(regId)}` : `/api/registrations/${encodeURIComponent(regId)}`;
-          const res = await fetch(endpoint, {
-            method: 'DELETE',
-            headers: {
-              'Authorization': 'Bearer ' + getAdminAuthToken()
-            }
+          const endpoint = apiBase ? `${apiBase}/api/registrations/${encodeURIComponent(regId)}/deactivate` : `/api/registrations/${encodeURIComponent(regId)}/deactivate`;
+          await fetch(endpoint, {
+            method: 'PATCH',
+            headers: { 'Authorization': 'Bearer ' + getAdminAuthToken() }
           });
-          if (res.ok) {
-            const json = await res.json();
-            if (json.registration) {
-              Object.assign(r, {
-                status: json.registration.status,
-                isActive: json.registration.isActive
-              });
-              persistData();
-              renderAllComponents();
-            }
-          }
         } catch (err) {
           console.warn('Deactivate API call notice:', err);
         }

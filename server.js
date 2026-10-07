@@ -194,7 +194,7 @@ function validatePaymentText(rawText) {
     '5 hours of challenges', '6 exciting events', '1 unforgettable experience',
     'hours of challenges', 'exciting events', 'unforgettable experience',
     'cash prize for hackathon', 'cyber forge', 'cloud craft', 'ctf challenge',
-    'click n chill', 'prompt generating', 'quiz competition',
+    'click n chill', 'cricket bidding', 'gaming arena', 'quiz competition',
     'the next big thing is you', 'rules and regulations', 'organizing committee',
     'faculty coordinator', 'student coordinator', 'convenor', 'brochure'
   ];
@@ -530,17 +530,38 @@ app.patch('/api/registrations/:id/status', requireAuth(['admin', 'desk']), async
   }
 });
 
-// ── API: DEACTIVATE / SOFT DELETE REGISTRATION (ADMIN ONLY) ─────────
+// ── API: PERMANENTLY DELETE REGISTRATION (ADMIN ONLY) ─────────────
 app.delete('/api/registrations/:id', requireAuth(['admin']), async (req, res) => {
+  const regId = (req.params.id || '').trim();
   try {
-    const updated = await db.deactivateRegistration(req.params.id);
-    if (updated) {
-      res.json({ status: 'ok', message: 'Registration marked Inactive in PostgreSQL database', registration: updated });
-    } else {
-      res.status(404).json({ status: 'not_found', message: 'Registration not found' });
+    const deleted = await db.deleteRegistration(regId);
+
+    // Also remove from all_registrations_backup.json
+    try {
+      const backupPath = path.join(__dirname, 'all_registrations_backup.json');
+      if (fs.existsSync(backupPath)) {
+        let bList = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
+        const cleanId = regId.toUpperCase().replace(/\s+/g, '');
+        bList = bList.filter(r => (r.regId || r.reg_id || '').toUpperCase().replace(/\s+/g, '') !== cleanId);
+        fs.writeFileSync(backupPath, JSON.stringify(bList, null, 2), 'utf8');
+
+        // Also update registrations_data.js
+        const dataJsPath = path.join(__dirname, 'registrations_data.js');
+        if (fs.existsSync(dataJsPath)) {
+          fs.writeFileSync(dataJsPath, '// Auto-generated offline & standalone registration roster bundle\nwindow.QAURA_PRELOADED_REGISTRATIONS = ' + JSON.stringify(bList, null, 2) + ';\n', 'utf8');
+        }
+      }
+    } catch(bErr) {
+      console.warn('Backup file update on delete notice:', bErr.message);
     }
+
+    res.json({
+      status: 'ok',
+      message: 'Registration permanently deleted from database and records',
+      deleted
+    });
   } catch (err) {
-    console.error('Deactivate registration error:', err);
+    console.error('Delete registration error:', err);
     res.status(500).json({ status: 'error', message: err.message });
   }
 });
