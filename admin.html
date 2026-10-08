@@ -1081,7 +1081,6 @@
 
       const username = (userInp ? userInp.value.trim() : '') || 'admin';
       const password = (passInp ? passInp.value : '').trim();
-      const acceptedPasswords = ['admin@qaura2026', 'admin123', 'admin', 'qaura2026'];
 
       try {
         const apiBase = getApiBase();
@@ -1097,7 +1096,7 @@
           });
           data = await res.json();
         } catch (fetchErr) {
-          console.warn('API server unreachable, evaluating local master credentials...', fetchErr);
+          console.warn('API server unreachable:', fetchErr);
         }
 
         if (res && res.ok && data && data.status === 'ok' && data.token) {
@@ -1121,25 +1120,11 @@
           return;
         }
 
-        // If backend was unreachable or returned an error, BUT entered password matches valid admin password:
-        if (acceptedPasswords.includes(password)) {
-          currentAdminToken = 'local_offline_token_' + Date.now();
-          currentAdminRole  = 'admin';
-          currentAdminUser  = { username: username || 'admin', role: 'admin', name: 'Symposium Administrator' };
-
-          const el = document.getElementById('adminUsernameDisplay');
-          if (el) el.textContent = (username || 'ADMIN').toUpperCase();
-
-          const overlay = document.getElementById('adminAuthOverlay');
-          if (overlay) overlay.classList.add('hidden');
-
-          if (passInp) passInp.value = '';
-          adminNotify('✓ CLEARANCE GRANTED: Admin Console Unlocked', 'success');
-          initData();
-          return;
+        if (res) {
+          throw new Error(data && data.message ? data.message : 'Invalid administrator credentials');
         }
 
-        throw new Error(data && data.message ? data.message : 'Invalid administrator credentials');
+        throw new Error('Backend server is unreachable. Please ensure the server is online.');
       } catch (err) {
         if (errBox && errMsg) {
           errMsg.textContent = err.message || 'Authentication failed';

@@ -30,4 +30,5 @@ extract_proofs.js
 generate_csv.js
 parse_sheet.js
 sync_sheet_to_render_db.js
+.auth_cache.json
 

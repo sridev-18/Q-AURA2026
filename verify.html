@@ -507,7 +507,6 @@
 
       const username = (userInp ? userInp.value.trim() : '') || 'desk';
       const password = (passInp ? passInp.value : '').trim();
-      const acceptedDeskPasswords = ['verify@qaura2026', 'desk123', 'desk', 'admin@qaura2026', 'admin123'];
 
       try {
         const apiBase = (typeof QAURA_CONFIG !== 'undefined' && QAURA_CONFIG.API_BASE_URL) ? QAURA_CONFIG.API_BASE_URL : '';
@@ -523,7 +522,7 @@
           });
           data = await res.json();
         } catch (fetchErr) {
-          console.warn('API server unreachable, checking local clearance credentials...', fetchErr);
+          console.warn('API server unreachable:', fetchErr);
         }
 
         if (res && res.ok && data && data.status === 'ok' && data.token) {
@@ -553,30 +552,11 @@
           return;
         }
 
-        // Offline / Graceful Fallback if server down
-        if (acceptedDeskPasswords.includes(password)) {
-          currentDeskToken = 'local_offline_token_' + Date.now();
-          currentDeskRole  = 'desk';
-          currentDeskUser  = { username: username || 'desk', role: 'desk', name: 'Verification Desk Agent' };
-
-          const el = document.getElementById('deskUserDisplay');
-          if (el) el.textContent = (username || 'DESK').toUpperCase();
-
-          const overlay = document.getElementById('verifyAuthOverlay');
-          if (overlay) overlay.classList.add('hidden');
-
-          if (passInp) passInp.value = '';
-
-          const urlParams = new URLSearchParams(window.location.search);
-          const queryId = urlParams.get('id') || urlParams.get('regId');
-          if (queryId) {
-            document.getElementById('passIdInput').value = queryId;
-            executeLookup();
-          }
-          return;
+        if (res) {
+          throw new Error(data && data.message ? data.message : 'Invalid clearance credentials');
         }
 
-        throw new Error(data && data.message ? data.message : 'Invalid clearance credentials');
+        throw new Error('Backend server is unreachable. Please ensure the server is online.');
       } catch (err) {
         if (errBox && errMsg) {
           errMsg.textContent = err.message || 'Authentication failed';

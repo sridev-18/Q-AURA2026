@@ -324,18 +324,15 @@ app.post('/api/auth/login', async (req, res) => {
     return res.status(400).json({ status: 'error', message: 'Username and password are required' });
   }
 
-  const normUser = username.trim().toLowerCase();
+  const normUser = (username || 'admin').trim().toLowerCase();
   const rawPass = typeof password === 'string' ? password.trim() : '';
-  const cred = await getCredentialForUser(normUser);
-
-  const validAdminPasswords = ['admin@qaura2026', 'admin123', 'admin', 'qaura2026'];
-  const validDeskPasswords  = ['verify@qaura2026', 'desk123', 'desk', 'admin@qaura2026', 'admin123'];
+  const cred = await getCredentialForUser(normUser === 'verify' ? 'desk' : normUser);
 
   let role = null;
   let userObj = null;
 
   if (normUser === 'admin') {
-    const isMatch = (cred && cred.password === rawPass) || validAdminPasswords.includes(rawPass);
+    const isMatch = cred && cred.password === rawPass;
     if (!isMatch) {
       return res.status(401).json({ status: 'error', message: 'Invalid operative username or passphrase.' });
     }
@@ -345,20 +342,14 @@ app.post('/api/auth/login', async (req, res) => {
     if (portal === 'admin') {
       return res.status(403).json({ status: 'forbidden', message: 'Desk clearance cannot access Admin Panel. Administrator credentials required.' });
     }
-    const isMatch = (cred && cred.password === rawPass) || validDeskPasswords.includes(rawPass);
+    const isMatch = cred && cred.password === rawPass;
     if (!isMatch) {
       return res.status(401).json({ status: 'error', message: 'Invalid operative username or passphrase.' });
     }
     role = 'desk';
     userObj = { username: 'desk', role: 'desk', name: 'Verification Desk Agent' };
   } else {
-    // If username doesn't match standard names, check if password matches admin
-    if (validAdminPasswords.includes(rawPass) && portal !== 'desk') {
-      role = 'admin';
-      userObj = { username: 'admin', role: 'admin', name: 'Symposium Administrator' };
-    } else {
-      return res.status(401).json({ status: 'error', message: 'Invalid operative username or passphrase.' });
-    }
+    return res.status(401).json({ status: 'error', message: 'Invalid operative username or passphrase.' });
   }
 
   // 24 hours validity
