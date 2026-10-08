@@ -25,3 +25,9 @@ Desktop.ini
 # Temporary data exports
 extracted_payment_proofs/
 google_sheet_registrations.json
+export_52.js
+extract_proofs.js
+generate_csv.js
+parse_sheet.js
+sync_sheet_to_render_db.js
+

@@ -1226,67 +1226,60 @@
       return (s || '').toString().toLowerCase().replace(/\s+/g, ' ').trim();
     }
 
+    const TEST_REG_IDS = new Set([
+      'QAURA-2026-4048', 'QAURA-2026-7589', 'QAURA-2026-4128', 'QAURA-2026-5351',
+      'QAURA-2026-1206', 'QAURA-2026-4075', 'QAURA-2026-6857', 'QAURA-2026-7195',
+      'QAURA-2026-2377', 'QAURA-2026-1158', 'QAURA-2026-1193', 'QAURA-2026-3803',
+      'QAURA-2026-5415', 'QAURA-2026-8758', 'QAURA-2026-1865', 'QAURA-2026-4081',
+      'QAURA-2026-5498', 'QAURA-2026-5958', 'QAURA-2026-8161', 'QAURA-2026-1701',
+      'QAURA-2026-5482'
+    ]);
+
+    function isTestRecord(r) {
+      const id = (r.regId || r.reg_id || r['Reg ID'] || '').toString().toUpperCase().trim();
+      if (TEST_REG_IDS.has(id)) return true;
+      const email = cleanNormStr(r.email || r.Email || r.leaderEmail || r['Leader Email']);
+      if (email.endsWith('@example.com') || email === 'test@gmail.com' || email === 'test@gamil.com') return true;
+      const fullName = cleanNormStr((r.firstName || r.first_name || r['First Name'] || '') + ' ' + (r.lastName || r.last_name || r['Last Name'] || ''));
+      if (fullName.includes('test operative') || fullName.startsWith('test ') || fullName.endsWith(' test') || fullName === 'test' || fullName.includes('masskhduib')) return true;
+      return false;
+    }
+
     function deduplicateOperativeRecords(records) {
-      const deletedBlacklist = JSON.parse(localStorage.getItem('qaura2026_deleted_ids') || '[]');
       const result = [];
+      const seenIds = new Set();
 
       for (const r of records) {
+        if (isTestRecord(r)) continue;
         const id = (r.regId || r.reg_id || r['Reg ID'] || '').toString().toUpperCase().trim();
-        if (id && deletedBlacklist.includes(id)) continue;
-
-        const phone = cleanDigitsPhone(r.mobile || r.Mobile || r.leaderPhone || r['Leader Phone']);
-        const email = cleanNormStr(r.email || r.Email || r.leaderEmail || r['Leader Email']);
-        const fullName = cleanNormStr((r.firstName || r.first_name || r['First Name'] || '') + ' ' + (r.lastName || r.last_name || r['Last Name'] || ''));
-
-        // Match existing record by Reg ID, 10-digit Phone, Email, or Full Name
-        let matchIdx = -1;
-        for (let i = 0; i < result.length; i++) {
-          const ex = result[i];
-          const exId = (ex.regId || '').toUpperCase().trim();
-          const exPhone = cleanDigitsPhone(ex.mobile);
-          const exEmail = cleanNormStr(ex.email);
-          const exName = cleanNormStr((ex.firstName || '') + ' ' + (ex.lastName || ''));
-
-          // 1. Exact Reg ID match
-          if (id && exId && id === exId) { matchIdx = i; break; }
-          // 2. Same 10-digit mobile number
-          if (phone && exPhone && phone.length === 10 && phone === exPhone) { matchIdx = i; break; }
-          // 3. Same email address (non-empty)
-          if (email && exEmail && email.includes('@') && email === exEmail) { matchIdx = i; break; }
-          // 4. Same full name (>= 4 characters)
-          if (fullName && exName && fullName.length >= 4 && fullName.replace(/\s+/g, '') === exName.replace(/\s+/g, '')) { matchIdx = i; break; }
-        }
+        if (id && seenIds.has(id)) continue;
+        if (id) seenIds.add(id);
 
         const formatted = {
-          id: r.id || (matchIdx >= 0 ? result[matchIdx].id : undefined),
-          regId: id || (matchIdx >= 0 ? result[matchIdx].regId : ''),
+          id: r.id,
+          regId: id,
           firstName: r.firstName || r.first_name || r['First Name'] || '',
           lastName: r.lastName || r.last_name || r['Last Name'] || '',
-          mobile: String(r.mobile || r.Mobile || (matchIdx >= 0 ? result[matchIdx].mobile : '') || '').trim(),
-          email: r.email || r.Email || (matchIdx >= 0 ? result[matchIdx].email : '') || '',
-          college: r.college || r.College || (matchIdx >= 0 ? result[matchIdx].college : '') || '',
-          techEvent: r.techEvent || r.tech_event || r['Technical Event'] || (matchIdx >= 0 ? result[matchIdx].techEvent : '') || '',
-          nonTechEvent: r.nonTechEvent || r.non_tech_event || r['Non-Technical Event'] || (matchIdx >= 0 ? result[matchIdx].nonTechEvent : '') || '',
-          fee: r.fee || (matchIdx >= 0 ? result[matchIdx].fee : '₹250'),
-          teamName: r.teamName || r.team_name || r['Team Name'] || (matchIdx >= 0 ? result[matchIdx].teamName : '') || '',
-          leaderName: r.leaderName || r.leader_name || r['Leader Name'] || (matchIdx >= 0 ? result[matchIdx].leaderName : '') || '',
-          leaderPhone: String(r.leaderPhone || r.leader_phone || r['Leader Phone'] || (matchIdx >= 0 ? result[matchIdx].leaderPhone : '') || '').trim(),
-          leaderEmail: r.leaderEmail || r.leader_email || r['Leader Email'] || (matchIdx >= 0 ? result[matchIdx].leaderEmail : '') || '',
-          tm2: r.tm2 || r['Teammate 2'] || (matchIdx >= 0 ? result[matchIdx].tm2 : '') || '',
-          tm3: r.tm3 || r['Teammate 3'] || (matchIdx >= 0 ? result[matchIdx].tm3 : '') || '',
-          tm4: r.tm4 || r['Teammate 4'] || (matchIdx >= 0 ? result[matchIdx].tm4 : '') || '',
-          paymentScreenshot: r.paymentScreenshot || r.payment_screenshot || (matchIdx >= 0 ? result[matchIdx].paymentScreenshot : '') || '',
-          status: (r.status === 'Verified' || (matchIdx >= 0 && result[matchIdx].status === 'Verified')) ? 'Verified' : (r.status || (matchIdx >= 0 ? result[matchIdx].status : 'Pending Verification')),
-          isActive: r.isActive !== undefined ? r.isActive : (r.is_active !== undefined ? r.is_active : (matchIdx >= 0 ? result[matchIdx].isActive : true)),
-          createdAt: r.createdAt || r.created_at || r['Timestamp'] || (matchIdx >= 0 ? result[matchIdx].createdAt : new Date().toISOString()),
-          verifiedAt: r.verifiedAt || r.verified_at || (matchIdx >= 0 ? result[matchIdx].verifiedAt : null)
+          mobile: String(r.mobile || r.Mobile || '').trim(),
+          email: r.email || r.Email || '',
+          college: r.college || r.College || '',
+          techEvent: r.techEvent || r.tech_event || r['Technical Event'] || '',
+          nonTechEvent: r.nonTechEvent || r.non_tech_event || r['Non-Technical Event'] || 'None',
+          fee: r.fee || '₹250',
+          teamName: r.teamName || r.team_name || r['Team Name'] || '',
+          leaderName: r.leaderName || r.leader_name || r['Leader Name'] || '',
+          leaderPhone: String(r.leaderPhone || r.leader_phone || r['Leader Phone'] || '').trim(),
+          leaderEmail: r.leaderEmail || r.leader_email || r['Leader Email'] || '',
+          tm2: r.tm2 || r['Teammate 2'] || '',
+          tm3: r.tm3 || r['Teammate 3'] || '',
+          tm4: r.tm4 || r['Teammate 4'] || '',
+          paymentScreenshot: r.paymentScreenshot || r.payment_screenshot || '',
+          status: r.status || 'Pending Verification',
+          isActive: r.isActive !== undefined ? r.isActive : (r.is_active !== undefined ? r.is_active : true),
+          createdAt: r.createdAt || r.created_at || r['Timestamp'] || new Date().toISOString(),
+          verifiedAt: r.verifiedAt || r.verified_at || null
         };
-
-        if (matchIdx >= 0) {
-          result[matchIdx] = formatted;
-        } else {
-          result.push(formatted);
-        }
+        result.push(formatted);
       }
       return result;
     }
@@ -1434,6 +1427,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      try { localStorage.removeItem('qaura2026_deleted_ids'); } catch(e) {}
       checkAdminAuth();
       const saved = localStorage.getItem(URL_KEY) || '';
       if (saved && document.getElementById('sheetSyncUrl')) document.getElementById('sheetSyncUrl').value = saved;

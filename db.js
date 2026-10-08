@@ -86,6 +86,14 @@ async function initDb() {
         const seedData = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
 
         // 1. Purge test registrations
+        const testIds = [
+          'QAURA-2026-4048', 'QAURA-2026-7589', 'QAURA-2026-4128', 'QAURA-2026-5351',
+          'QAURA-2026-1206', 'QAURA-2026-4075', 'QAURA-2026-6857', 'QAURA-2026-7195',
+          'QAURA-2026-2377', 'QAURA-2026-1158', 'QAURA-2026-1193', 'QAURA-2026-3803',
+          'QAURA-2026-5415', 'QAURA-2026-8758', 'QAURA-2026-1865', 'QAURA-2026-4081',
+          'QAURA-2026-5498', 'QAURA-2026-5958', 'QAURA-2026-8161', 'QAURA-2026-1701',
+          'QAURA-2026-5482'
+        ];
         await client.query(`
           DELETE FROM registrations 
           WHERE email LIKE '%example.com' 
@@ -93,8 +101,9 @@ async function initDb() {
              OR email = 'test@gamil.com'
              OR LOWER(first_name) LIKE 'test%'
              OR LOWER(first_name) LIKE '%test'
-             OR LOWER(first_name) IN ('sri', 'ar', 'sridev', 'etst', 'tezt3', 'jey', 'abd', 'masskhduib');
-        `);
+             OR LOWER(first_name) IN ('sri', 'ar', 'sridev', 'etst', 'tezt3', 'jey', 'abd', 'masskhduib')
+             OR reg_id = ANY($1::varchar[]);
+        `, [testIds]);
 
         // 2. Upsert the authentic 23 student registrations
         for (const r of seedData) {
