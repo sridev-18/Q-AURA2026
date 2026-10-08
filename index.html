@@ -721,29 +721,55 @@
       background: rgba(0, 240, 255, 0.12);
       box-shadow: 0 0 18px rgba(0, 240, 255, 0.2);
     }
-    .cyber-event-option input[type="radio"] { display: none; }
+    .cyber-event-option input[type="radio"],
+    .cyber-event-option input[type="checkbox"] { display: none; }
     
-    .cyber-radio-indicator {
+    .cyber-checkbox-indicator {
       width: 22px;
       height: 22px;
       border: 2px solid rgba(0, 240, 255, 0.4);
-      border-radius: 50%;
+      border-radius: 6px;
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: all 0.2s ease;
+      color: transparent;
+      font-size: 0.75rem;
+      background: rgba(0, 0, 0, 0.4);
     }
-    .cyber-event-option.selected .cyber-radio-indicator {
+    .cyber-event-option.selected .cyber-checkbox-indicator {
       border-color: var(--cyan);
       background: var(--cyan);
+      color: #000;
       box-shadow: 0 0 10px var(--cyan);
     }
-    .cyber-event-option.selected .cyber-radio-indicator::after {
-      content: '';
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #000;
+    .cyber-event-option.hack-card.selected {
+      border-color: var(--neon-orange) !important;
+      background: rgba(255, 119, 0, 0.12) !important;
+      box-shadow: 0 0 18px rgba(255, 119, 0, 0.25) !important;
+    }
+    .cyber-event-option.hack-card.selected .cyber-checkbox-indicator {
+      border-color: var(--neon-orange) !important;
+      background: var(--neon-orange) !important;
+      color: #000 !important;
+      box-shadow: 0 0 10px var(--neon-orange) !important;
+    }
+    .cyber-event-option.disabled {
+      opacity: 0.38 !important;
+      pointer-events: none !important;
+      filter: grayscale(0.7) !important;
+      cursor: not-allowed !important;
+      border-color: rgba(255, 255, 255, 0.08) !important;
+      background: rgba(12, 17, 26, 0.3) !important;
+    }
+    .disabled-reason {
+      font-size: 0.72rem;
+      color: var(--neon-pink);
+      font-family: var(--font-mono);
+      display: inline-block;
+      margin-left: 8px;
+      font-weight: 600;
     }
     .ev-meta-text h4 {
       font-family: var(--font-cyber);
@@ -1808,63 +1834,49 @@
           <span class="err-text" id="err-college">Please enter your college name.</span>
         </div>
 
-        <!-- TECHNICAL EVENT SELECTION (SPACIOUS OPTIONS) -->
+        <!-- UNIFIED EVENT SELECTION -->
         <div class="sub-section-title">
-          <i class="fas fa-terminal"></i> <span>02. SELECT TECHNICAL EVENT (OPTIONAL / CHOOSE 1)</span>
+          <i class="fas fa-layer-group"></i> <span>02. SELECT EVENTS &amp; PARTICIPATION TRACK</span>
         </div>
-        <p style="color:var(--text-muted);font-size:0.83rem;margin:-10px 0 16px 0;font-family:var(--font-mono);">
-          ℹ️ Select 1 Technical Event, or choose "None" if you are only attending a Non-Technical event.
-        </p>
 
-        <div class="cyber-selector-grid" id="techGrid">
-          <div class="cyber-event-option" onclick="selectCyberEvent(this, 'tech')">
-            <input type="radio" name="tech" value="Cyber Forge (Workshop)"/>
-            <div class="cyber-radio-indicator"></div>
-            <div class="ev-meta-text">
-              <h4>01 · Cyber Forge</h4>
-              <p>Technical Workshop &bull; Practical Hands-on Cybersecurity</p>
-            </div>
-            <span class="ev-timing-tag">10:00 AM – 12:00 PM</span>
+        <!-- SELECTION RULES BANNER -->
+        <div class="event-selection-rules-card hud-panel" style="margin-bottom:24px;padding:18px 22px;border-left:4px solid var(--cyan);background:rgba(0,240,255,0.03);border-radius:10px;">
+          <div style="font-family:var(--font-orbitron);font-size:0.86rem;color:var(--cyan);letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+            <i class="fas fa-shield-alt"></i> OFFICIAL PARTICIPATION DIRECTIVES &amp; TRACKS:
           </div>
-
-          <div class="cyber-event-option" onclick="selectCyberEvent(this, 'tech')">
-            <input type="radio" name="tech" value="Cloud Craft (Workshop)"/>
-            <div class="cyber-radio-indicator"></div>
-            <div class="ev-meta-text">
-              <h4>02 · Cloud Craft</h4>
-              <p>Technical Workshop &bull; AWS Cloud Services &amp; Architecture</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:12px;font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);">
+            <div style="padding:10px 14px;background:rgba(255,119,0,0.08);border:1px solid rgba(255,119,0,0.25);border-radius:6px;">
+              <strong style="color:var(--neon-orange);"><i class="fas fa-trophy"></i> TRACK 1: HACKATHON ALONE</strong><br/>
+              Exclusive 5-Hour Prototype Sprint (10:00 AM – 3:00 PM). ₹300 / Team (3 Members). Cannot pair with any other event.
             </div>
-            <span class="ev-timing-tag">10:00 AM – 12:00 PM</span>
+            <div style="padding:10px 14px;background:rgba(0,255,102,0.08);border:1px solid rgba(0,255,102,0.25);border-radius:6px;">
+              <strong style="color:var(--neon-green);"><i class="fas fa-bolt"></i> TRACK 2: 1 WORKSHOP + 1 EVENT</strong><br/>
+              Choose 1 Technical Workshop + 1 Event (CTF, Prompt, Photo, or Quiz). ₹250 / Student.
+            </div>
+            <div style="padding:10px 14px;background:rgba(0,240,255,0.08);border:1px solid rgba(0,240,255,0.25);border-radius:6px;">
+              <strong style="color:var(--cyan);"><i class="fas fa-dice-d20"></i> TRACK 3: UP TO 2 EVENTS</strong><br/>
+              Choose 2 Events from CTF, Prompt, Photo, or Quiz (No Workshop &amp; No Hackathon). ₹250 / Student.
+            </div>
           </div>
-
-          <div class="cyber-event-option" onclick="selectCyberEvent(this, 'tech')">
-            <input type="radio" name="tech" value="CTF Challenge"/>
-            <div class="cyber-radio-indicator"></div>
-            <div class="ev-meta-text">
-              <h4>03 · CTF Challenge</h4>
-              <p>Capture The Flag &bull; Exploitation, Defense &amp; Flag Hunting</p>
+          <div style="margin-top:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div id="selectionStatusPill" style="padding:7px 16px;border-radius:20px;font-family:var(--font-mono);font-size:0.82rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);color:var(--text-bright);transition:all 0.3s ease;">
+              ℹ️ Status: Click any event card below to choose your track
             </div>
-            <span class="ev-timing-tag">10:00 AM – 1:30 PM</span>
           </div>
+        </div>
 
-          <div class="cyber-event-option" onclick="selectCyberEvent(this, 'tech')">
-            <input type="radio" name="tech" value="Hackathon"/>
-            <div class="cyber-radio-indicator"></div>
+        <!-- GROUP 1: HACKATHON (EXCLUSIVE SPRINT) -->
+        <div style="margin:24px 0 10px 0;font-family:var(--font-orbitron);font-size:0.85rem;color:var(--neon-orange);letter-spacing:1px;display:flex;align-items:center;gap:8px;">
+          <i class="fas fa-trophy"></i> TRACK 1 · HACKATHON (STANDALONE SPRINT)
+        </div>
+        <div class="cyber-selector-grid" id="hackGrid">
+          <div class="cyber-event-option hack-card" data-event-type="hackathon" data-event-name="Hackathon" onclick="toggleEventSelection(this)">
+            <div class="cyber-checkbox-indicator"><i class="fas fa-check"></i></div>
             <div class="ev-meta-text">
-              <h4>04 · Hackathon 🏆</h4>
-              <p>Team Prototype Sprint (3 Members) &bull; Top 3 Cash Bounties</p>
+              <h4 style="color:var(--neon-orange);">04 · Hackathon (5 Hours) 🏆</h4>
+              <p>Team Prototype Sprint (Strictly 3 Members) &bull; Top 3 Cash Bounties &bull; ₹300 / Team</p>
             </div>
-            <span class="ev-timing-tag" style="border-color:var(--neon-orange);color:var(--neon-orange);">5 Hours (10:00 AM – 3:00 PM)</span>
-          </div>
-
-          <div class="cyber-event-option" onclick="selectCyberEvent(this, 'tech')">
-            <input type="radio" name="tech" value="None"/>
-            <div class="cyber-radio-indicator"></div>
-            <div class="ev-meta-text">
-              <h4>None / Skip Technical Event</h4>
-              <p>Participating in Non-Technical Event only</p>
-            </div>
-            <span class="ev-timing-tag" style="border-color:rgba(255,255,255,0.25);color:var(--text-muted);">Optional</span>
+            <span class="ev-timing-tag" style="border-color:var(--neon-orange);color:var(--neon-orange);">10:00 AM – 3:00 PM (Exclusive)</span>
           </div>
         </div>
 
@@ -1919,57 +1931,80 @@
           </div>
         </div>
 
-        <!-- NON-TECHNICAL EVENT SELECTION -->
-        <div class="sub-section-title">
-          <i class="fas fa-palette"></i> <span>03. SELECT NON-TECHNICAL EVENT (OPTIONAL / CHOOSE 1)</span>
+        <!-- GROUP 2: TECHNICAL WORKSHOPS (MAX 1) -->
+        <div style="margin:28px 0 10px 0;font-family:var(--font-orbitron);font-size:0.85rem;color:var(--cyan);letter-spacing:1px;display:flex;align-items:center;gap:8px;">
+          <i class="fas fa-tools"></i> TRACK 2 · TECHNICAL WORKSHOPS (CHOOSE AT MOST 1)
         </div>
-        <p style="color:var(--text-muted);font-size:0.83rem;margin:-10px 0 16px 0;font-family:var(--font-mono);">
-          ℹ️ Select 1 Non-Technical Event, or choose "None" if you are only attending a Technical event.
+        <p style="color:var(--text-muted);font-size:0.8rem;margin:-6px 0 14px 0;font-family:var(--font-mono);">
+          Workshops run in parallel from 10:00 AM – 12:00 PM. Choose 1 Workshop, then pair it with 1 Event below.
         </p>
+        <div class="cyber-selector-grid" id="workshopGrid">
+          <div class="cyber-event-option" data-event-type="workshop" data-event-name="Cyber Forge (Workshop)" onclick="toggleEventSelection(this)">
+            <div class="cyber-checkbox-indicator"><i class="fas fa-check"></i></div>
+            <div class="ev-meta-text">
+              <h4>01 · Cyber Forge</h4>
+              <p>Technical Workshop &bull; Practical Hands-on Cybersecurity &bull; ₹250 / Student</p>
+            </div>
+            <span class="ev-timing-tag">10:00 AM – 12:00 PM</span>
+          </div>
 
-        <div class="cyber-selector-grid" id="nonTechGrid">
-          <div class="cyber-event-option" onclick="selectCyberEvent(this, 'nontech')">
-            <input type="radio" name="nontech" value="Prompt Generating"/>
-            <div class="cyber-radio-indicator"></div>
+          <div class="cyber-event-option" data-event-type="workshop" data-event-name="Cloud Craft (Workshop)" onclick="toggleEventSelection(this)">
+            <div class="cyber-checkbox-indicator"><i class="fas fa-check"></i></div>
+            <div class="ev-meta-text">
+              <h4>02 · Cloud Craft</h4>
+              <p>Technical Workshop &bull; AWS Cloud Services &amp; Architecture &bull; ₹250 / Student</p>
+            </div>
+            <span class="ev-timing-tag">10:00 AM – 12:00 PM</span>
+          </div>
+        </div>
+
+        <!-- GROUP 3: SYMPOSIUM COMPETITIONS & EVENTS -->
+        <div style="margin:28px 0 10px 0;font-family:var(--font-orbitron);font-size:0.85rem;color:var(--neon-green);letter-spacing:1px;display:flex;align-items:center;gap:8px;">
+          <i class="fas fa-gamepad"></i> TRACK 3 · COMPETITIONS &amp; ARENAS (PAIR WITH WORKSHOP OR PICK 2)
+        </div>
+        <p style="color:var(--text-muted);font-size:0.8rem;margin:-6px 0 14px 0;font-family:var(--font-mono);">
+          Pair 1 event with your chosen Workshop, OR pick up to 2 events from this group (No Workshop &amp; No Hackathon).
+        </p>
+        <div class="cyber-selector-grid" id="eventsGrid">
+          <div class="cyber-event-option" data-event-type="event" data-event-name="CTF Challenge" onclick="toggleEventSelection(this)">
+            <div class="cyber-checkbox-indicator"><i class="fas fa-check"></i></div>
+            <div class="ev-meta-text">
+              <h4>03 · CTF Challenge</h4>
+              <p>Capture The Flag Battlefield &bull; Exploitation &amp; Flag Hunting</p>
+            </div>
+            <span class="ev-timing-tag">10:00 AM – 1:30 PM</span>
+          </div>
+
+          <div class="cyber-event-option" data-event-type="event" data-event-name="Prompt Generating" onclick="toggleEventSelection(this)">
+            <div class="cyber-checkbox-indicator"><i class="fas fa-check"></i></div>
             <div class="ev-meta-text">
               <h4>05 · Prompt Generating</h4>
-              <p>AI Creative Synthesis &bull; Visual Prompting Challenge</p>
+              <p>AI Creative Synthesis &bull; Visual Prompting Speed Challenge</p>
             </div>
             <span class="ev-timing-tag">1:30 PM – 3:00 PM</span>
           </div>
 
-          <div class="cyber-event-option" onclick="selectCyberEvent(this, 'nontech')">
-            <input type="radio" name="nontech" value="Click N Chill (Photography)"/>
-            <div class="cyber-radio-indicator"></div>
+          <div class="cyber-event-option" data-event-type="event" data-event-name="Click N Chill (Photography)" onclick="toggleEventSelection(this)">
+            <div class="cyber-checkbox-indicator"><i class="fas fa-check"></i></div>
             <div class="ev-meta-text">
               <h4>06 · Click N Chill</h4>
-              <p>Visual Storytelling &bull; On-Campus Lens Competition</p>
+              <p>Visual Storytelling &bull; On-Campus Lens &amp; Aesthetic Competition</p>
             </div>
             <span class="ev-timing-tag">1:30 PM – 3:00 PM</span>
           </div>
 
-          <div class="cyber-event-option" onclick="selectCyberEvent(this, 'nontech')">
-            <input type="radio" name="nontech" value="Quiz Competition"/>
-            <div class="cyber-radio-indicator"></div>
+          <div class="cyber-event-option" data-event-type="event" data-event-name="Quiz Competition" onclick="toggleEventSelection(this)">
+            <div class="cyber-checkbox-indicator"><i class="fas fa-check"></i></div>
             <div class="ev-meta-text">
               <h4>07 · Quiz Competition</h4>
               <p>Speed &amp; Logic Showdown &bull; Technical &amp; General Trivia</p>
             </div>
             <span class="ev-timing-tag">2:00 PM – 3:00 PM</span>
           </div>
-
-          <div class="cyber-event-option" onclick="selectCyberEvent(this, 'nontech')">
-            <input type="radio" name="nontech" value="None"/>
-            <div class="cyber-radio-indicator"></div>
-            <div class="ev-meta-text">
-              <h4>None / Skip Non-Technical Event</h4>
-              <p>Participating in Technical Event only</p>
-            </div>
-            <span class="ev-timing-tag" style="border-color:rgba(255,255,255,0.25);color:var(--text-muted);">Optional</span>
-          </div>
         </div>
-        <span class="err-text" id="err-events" style="margin-top:10px;font-size:0.9rem;padding:8px 12px;background:rgba(255,0,85,0.12);border-left:3px solid var(--neon-pink);border-radius:4px;">
-          ⚠️ Please select at least ONE event (Technical or Non-Technical) to register.
+
+        <span class="err-text" id="err-events" style="margin-top:14px;font-size:0.9rem;padding:10px 14px;background:rgba(255,0,85,0.12);border-left:3px solid var(--neon-pink);border-radius:4px;">
+          ⚠️ Please select at least ONE event or workshop to proceed with registration.
         </span>
 
         <!-- PAYMENT VERIFICATION -->
@@ -2695,43 +2730,204 @@
       }, 2500);
     }
 
-    // ─── EVENT SELECTOR LOGIC ───────────────────────────────────────
-    function selectCyberEvent(element, group) {
-      const isAlreadySelected = element.classList.contains('selected');
-      const selectorId = group === 'tech' ? '#techGrid' : '#nonTechGrid';
+    // ─── EVENT SELECTOR LOGIC (3-TRACK SYSTEM) ──────────────────────
+    function toggleEventSelection(element) {
+      if (element.classList.contains('disabled')) return;
+      element.classList.toggle('selected');
+      evaluateEventSelections();
+      hideError('err-events');
+    }
 
-      if (isAlreadySelected) {
-        element.classList.remove('selected');
-        const radio = element.querySelector('input[type="radio"]');
-        if (radio) radio.checked = false;
-        if (group === 'tech') {
-          const hackPanel = document.getElementById('hackathon-team-panel');
-          if (hackPanel) hackPanel.classList.remove('show');
-          clearHackErrors();
+    function evaluateEventSelections() {
+      const allCards = Array.from(document.querySelectorAll('.cyber-event-option[data-event-type]'));
+      const hackCard = document.querySelector('.cyber-event-option[data-event-type="hackathon"]');
+      const workshopCards = Array.from(document.querySelectorAll('.cyber-event-option[data-event-type="workshop"]'));
+      const eventCards = Array.from(document.querySelectorAll('.cyber-event-option[data-event-type="event"]'));
+
+      const isHackSelected = hackCard && hackCard.classList.contains('selected');
+      const selectedWorkshops = workshopCards.filter(c => c.classList.contains('selected'));
+      const selectedEvents = eventCards.filter(c => c.classList.contains('selected'));
+
+      const numWorkshops = selectedWorkshops.length;
+      const numEvents = selectedEvents.length;
+      const totalNonHack = numWorkshops + numEvents;
+
+      // 1. Reset all disabled states
+      allCards.forEach(card => {
+        card.classList.remove('disabled');
+        const badge = card.querySelector('.disabled-reason');
+        if (badge) badge.remove();
+      });
+
+      const hackPanel = document.getElementById('hackathon-team-panel');
+      const pill = document.getElementById('selectionStatusPill');
+      const qrBadge = document.getElementById('qrFeeBadge');
+
+      function markDisabled(card, reason) {
+        if (!card.classList.contains('selected')) {
+          card.classList.add('disabled');
+          let badge = card.querySelector('.disabled-reason');
+          if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'disabled-reason';
+            badge.textContent = `(${reason})`;
+            const meta = card.querySelector('.ev-meta-text');
+            if (meta) meta.appendChild(badge);
+          }
         }
+      }
+
+      // ── RULE 1: HACKATHON ALONE ──
+      if (isHackSelected) {
+        if (hackPanel) hackPanel.classList.add('show');
+        if (qrBadge) qrBadge.textContent = '₹300 / TEAM';
+
+        // Disable all workshops and all events
+        workshopCards.forEach(c => markDisabled(c, 'Hackathon is Standalone'));
+        eventCards.forEach(c => markDisabled(c, 'Hackathon is Standalone'));
+
+        if (pill) {
+          pill.style.borderColor = 'var(--neon-orange)';
+          pill.style.color = 'var(--neon-orange)';
+          pill.style.background = 'rgba(255,119,0,0.12)';
+          pill.innerHTML = '🏆 <strong>TRACK 1 ACTIVE:</strong> Hackathon Alone Selected (5-Hour Prototype Sprint | ₹300 / Team)';
+        }
+        hideError('err-events');
         return;
       }
 
-      document.querySelectorAll(selectorId + ' .cyber-event-option').forEach(opt => {
-        opt.classList.remove('selected');
-      });
-      element.classList.add('selected');
-      const radio = element.querySelector('input[type="radio"]');
-      if (radio) radio.checked = true;
-
-      if (group === 'tech') {
-        const val = radio.value;
-        const hackPanel = document.getElementById('hackathon-team-panel');
-        if (val === 'Hackathon') {
-          hackPanel.classList.add('show');
-        } else {
-          hackPanel.classList.remove('show');
-          clearHackErrors();
-        }
+      // Hackathon not selected
+      if (hackPanel) {
+        hackPanel.classList.remove('show');
+        clearHackErrors();
       }
-      hideError('err-events');
-      hideError('err-tech');
-      hideError('err-nontech');
+      if (qrBadge) qrBadge.textContent = '₹250 / STUDENT';
+
+      // If any non-hackathon event/workshop is selected, disable Hackathon
+      if (totalNonHack > 0 && hackCard) {
+        markDisabled(hackCard, 'Cannot combine with other events');
+      }
+
+      // ── RULE 2: 1 WORKSHOP + 1 EVENT (OTHER THAN HACKATHON) ──
+      if (numWorkshops === 1) {
+        // Disable other workshop
+        workshopCards.forEach(c => {
+          if (!c.classList.contains('selected')) markDisabled(c, 'Max 1 Workshop allowed');
+        });
+
+        if (numEvents >= 1) {
+          // 1 workshop + 1 event reached: disable other events
+          eventCards.forEach(c => {
+            if (!c.classList.contains('selected')) markDisabled(c, 'Max 1 Event with Workshop');
+          });
+          if (pill) {
+            pill.style.borderColor = 'var(--neon-green)';
+            pill.style.color = 'var(--neon-green)';
+            pill.style.background = 'rgba(0,255,102,0.12)';
+            pill.innerHTML = `⚡ <strong>TRACK 2 ACTIVE:</strong> 1 Workshop (${selectedWorkshops[0].dataset.eventName}) + 1 Event (${selectedEvents[0].dataset.eventName}) Selected (₹250 / Student)`;
+          }
+        } else {
+          // 1 workshop selected, 0 events: can choose 1 more event from Track 3
+          if (pill) {
+            pill.style.borderColor = 'var(--cyan)';
+            pill.style.color = 'var(--cyan)';
+            pill.style.background = 'rgba(0,240,255,0.12)';
+            pill.innerHTML = `⚡ <strong>TRACK 2 IN PROGRESS:</strong> 1 Workshop Selected (${selectedWorkshops[0].dataset.eventName}). You can choose 1 more Event from Track 3.`;
+          }
+        }
+        hideError('err-events');
+        return;
+      }
+
+      // ── RULE 3: UP TO 2 EVENTS (EXCEPT HACKATHON & WORKSHOP) ──
+      if (numWorkshops === 0) {
+        if (numEvents === 2) {
+          // 2 events selected: disable all workshops and remaining events
+          workshopCards.forEach(c => markDisabled(c, 'Max 2 Events selected'));
+          eventCards.forEach(c => {
+            if (!c.classList.contains('selected')) markDisabled(c, 'Max 2 Events reached');
+          });
+          if (pill) {
+            pill.style.borderColor = 'var(--cyan)';
+            pill.style.color = 'var(--cyan)';
+            pill.style.background = 'rgba(0,240,255,0.12)';
+            pill.innerHTML = `🎯 <strong>TRACK 3 ACTIVE:</strong> 2 Events Selected (${selectedEvents.map(e => e.dataset.eventName).join(' + ')}) (₹250 / Student)`;
+          }
+        } else if (numEvents === 1) {
+          // 1 event selected: can pick 1 workshop OR 1 more event
+          if (pill) {
+            pill.style.borderColor = 'var(--cyan)';
+            pill.style.color = 'var(--cyan)';
+            pill.style.background = 'rgba(0,240,255,0.12)';
+            pill.innerHTML = `🎯 1 Event Selected (${selectedEvents[0].dataset.eventName}). You can choose 1 Workshop OR 1 more Event.`;
+          }
+        } else {
+          // 0 selected
+          if (pill) {
+            pill.style.borderColor = 'rgba(255,255,255,0.18)';
+            pill.style.color = 'var(--text-bright)';
+            pill.style.background = 'rgba(255,255,255,0.05)';
+            pill.innerHTML = 'ℹ️ Status: Click any event card below to choose your track';
+          }
+        }
+        return;
+      }
+    }
+
+    function getSelectedEventValues() {
+      const hackCard = document.querySelector('.cyber-event-option[data-event-type="hackathon"].selected');
+      const selectedWorkshops = Array.from(document.querySelectorAll('.cyber-event-option[data-event-type="workshop"].selected')).map(el => el.dataset.eventName);
+      const selectedEvents = Array.from(document.querySelectorAll('.cyber-event-option[data-event-type="event"].selected')).map(el => el.dataset.eventName);
+
+      if (hackCard) {
+        return {
+          techEvent: 'Hackathon',
+          nonTechEvent: 'None',
+          isHack: true,
+          allEvents: ['Hackathon']
+        };
+      }
+
+      const allPicked = [...selectedWorkshops, ...selectedEvents];
+      if (allPicked.length === 0) {
+        return {
+          techEvent: 'None',
+          nonTechEvent: 'None',
+          isHack: false,
+          allEvents: []
+        };
+      }
+
+      if (selectedWorkshops.length > 0) {
+        const workshop = selectedWorkshops[0];
+        const otherEvent = selectedEvents.length > 0 ? selectedEvents[0] : 'None';
+        return {
+          techEvent: workshop,
+          nonTechEvent: otherEvent,
+          isHack: false,
+          allEvents: selectedEvents.length > 0 ? [workshop, otherEvent] : [workshop]
+        };
+      }
+
+      // No workshop: 1 or 2 events from Track 3
+      const hasCtf = selectedEvents.includes('CTF Challenge');
+      if (hasCtf) {
+        const other = selectedEvents.find(e => e !== 'CTF Challenge') || 'None';
+        return {
+          techEvent: 'CTF Challenge',
+          nonTechEvent: other,
+          isHack: false,
+          allEvents: selectedEvents
+        };
+      }
+
+      // Non-technical events only
+      return {
+        techEvent: selectedEvents.length > 1 ? selectedEvents[0] : 'None',
+        nonTechEvent: selectedEvents.length > 1 ? selectedEvents[1] : (selectedEvents[0] || 'None'),
+        isHack: false,
+        allEvents: selectedEvents
+      };
     }
 
     function clearHackErrors() {
@@ -2741,6 +2937,9 @@
         hideError('err-' + id);
       });
     }
+
+    // Initialize event selection state
+    evaluateEventSelections();
 
     // ─── VALIDATION HELPERS ─────────────────────────────────────────
     function getVal(id) {
@@ -2815,15 +3014,13 @@
         if (!isValidEmail(getVal('email')))    { showError('err-email',     'email');       isValid = false; } else { hideError('err-email',     'email'); }
         if (!getVal('college'))                { showError('err-college',   'college');     isValid = false; } else { hideError('err-college',   'college'); }
 
-        // Technical & Non-Technical event selection
-        const techChoice = document.querySelector('input[name="tech"]:checked');
-        const nonTechChoice = document.querySelector('input[name="nontech"]:checked');
-
-        const techVal = (techChoice && techChoice.value !== 'None') ? techChoice.value : 'None';
-        const nonTechVal = (nonTechChoice && nonTechChoice.value !== 'None') ? nonTechChoice.value : 'None';
+        // Technical & Non-Technical event selection via 3-Track system
+        const { techEvent, nonTechEvent, isHack, allEvents } = getSelectedEventValues();
+        const techVal = techEvent;
+        const nonTechVal = nonTechEvent;
 
         // Student must choose AT LEAST ONE valid event
-        if (techVal === 'None' && nonTechVal === 'None') {
+        if (allEvents.length === 0) {
           showError('err-events');
           isValid = false;
         } else {
@@ -2831,7 +3028,6 @@
         }
 
         // Hackathon-specific fields
-        const isHack = techVal === 'Hackathon';
         if (isHack) {
           if (!getVal('teamName'))                  { showError('err-teamName',    'teamName');    isValid = false; } else { hideError('err-teamName',    'teamName'); }
           if (!getVal('leaderName'))                { showError('err-leaderName',  'leaderName');  isValid = false; } else { hideError('err-leaderName',  'leaderName'); }
@@ -3462,7 +3658,11 @@ Food & Accommodation: Will NOT be provided.
     function closeSuccessModal() {
       document.getElementById('success-modal-overlay').classList.remove('show');
       document.getElementById('cyberRegForm').reset();
-      document.querySelectorAll('.cyber-event-option').forEach(o => o.classList.remove('selected'));
+      document.querySelectorAll('.cyber-event-option').forEach(o => {
+        o.classList.remove('selected');
+        o.classList.remove('disabled');
+      });
+      evaluateEventSelections();
       document.getElementById('hackathon-team-panel').classList.remove('show');
       document.querySelectorAll('.cyber-input').forEach(i => i.classList.remove('error'));
       document.querySelectorAll('.err-text').forEach(e => e.classList.remove('show'));
