@@ -145,6 +145,28 @@ async function initDb() {
   }
 }
 
+const HACKATHON_MAX_SLOTS = 65;
+
+// Fetch live hackathon count
+async function getHackathonCount() {
+  const res = await pool.query("SELECT COUNT(*) AS count FROM registrations WHERE is_active = TRUE AND tech_event ILIKE '%hackathon%';");
+  return parseInt(res.rows[0].count, 10);
+}
+
+// Fetch live hackathon slot status
+async function getHackathonSlotStatus() {
+  const count = await getHackathonCount();
+  const max = HACKATHON_MAX_SLOTS;
+  const remaining = Math.max(0, max - count);
+  const isFull = count >= max;
+  return {
+    count,
+    max,
+    remaining,
+    isFull
+  };
+}
+
 // Create a new registration
 async function createRegistration(data) {
   const query = `
@@ -198,6 +220,40 @@ async function createRegistration(data) {
     data.status || 'Pending Verification'
   ];
 
+  if (isHack) {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      // Concurrency lock: serializes concurrent hackathon registration transactions
+      await client.query('SELECT pg_advisory_xact_lock(20261014)');
+
+      const countRes = await client.query("SELECT COUNT(*) AS count FROM registrations WHERE is_active = TRUE AND tech_event ILIKE '%hackathon%';");
+      const currentHackCount = parseInt(countRes.rows[0].count, 10);
+
+      // Check if this is an update to an existing registration
+      const existingRes = await client.query("SELECT id FROM registrations WHERE UPPER(REPLACE(reg_id, ' ', '')) = UPPER(REPLACE($1, ' ', '')) AND is_active = TRUE;", [data.regId]);
+      const isExisting = existingRes.rows.length > 0;
+
+      if (!isExisting && currentHackCount >= HACKATHON_MAX_SLOTS) {
+        await client.query('ROLLBACK');
+        const err = new Error('Hackathon Slots Are Full! All 65 slots have been filled. Please register for another available event.');
+        err.code = 'HACKATHON_SLOTS_FULL';
+        err.status = 409;
+        throw err;
+      }
+
+      const res = await client.query(query, values);
+      await client.query('COMMIT');
+      return res.rows[0];
+    } catch (err) {
+      try { await client.query('ROLLBACK'); } catch(_) {}
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
+
+  // Non-hackathon registration (unrestricted)
   const res = await pool.query(query, values);
   return res.rows[0];
 }
@@ -358,6 +414,9 @@ async function updateAuthPassword(username, newPassword) {
 module.exports = {
   pool,
   initDb,
+  HACKATHON_MAX_SLOTS,
+  getHackathonCount,
+  getHackathonSlotStatus,
   createRegistration,
   getRegistrationById,
   getAllRegistrations,

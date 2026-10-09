@@ -1361,6 +1361,78 @@
       flex-shrink: 0;
     }
 
+    /* ── HACKATHON SLOTS FULL POPUP MODAL & BADGES ── */
+    #hackathon-full-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 6, 12, 0.94);
+      backdrop-filter: blur(12px);
+      z-index: 10001;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    #hackathon-full-modal-overlay.show { display: flex; }
+    .hackathon-full-hud-card {
+      max-width: 520px;
+      width: 100%;
+      background: #0d121c;
+      border: 2px solid #ff7700;
+      border-radius: 14px;
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: 0 0 50px rgba(255, 119, 0, 0.45);
+      animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .hackathon-full-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(255, 119, 0, 0.15);
+      border: 2px solid #ff7700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 2.2rem;
+      color: #ff7700;
+      animation: pulseAlert 1.5s infinite;
+    }
+    .hack-slot-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      padding: 3px 10px;
+      border-radius: 4px;
+      background: rgba(255, 119, 0, 0.14);
+      border: 1px solid rgba(255, 119, 0, 0.4);
+      color: var(--neon-orange);
+      letter-spacing: 0.5px;
+      font-weight: 700;
+    }
+    .hack-slot-badge.full {
+      background: rgba(255, 0, 85, 0.16) !important;
+      border-color: #ff0055 !important;
+      color: #ff0055 !important;
+      animation: pulseAlert 1.5s infinite;
+    }
+    .cyber-event-option.hack-card.slots-full {
+      border-color: rgba(255, 0, 85, 0.45) !important;
+      background: rgba(255, 0, 85, 0.05) !important;
+      cursor: not-allowed !important;
+      pointer-events: auto !important;
+    }
+    .cyber-event-option.hack-card.slots-full .cyber-checkbox-indicator {
+      border-color: #ff0055 !important;
+      background: rgba(255, 0, 85, 0.2) !important;
+      color: #ff0055 !important;
+    }
+
     /* ── SCANNING & VERIFIED BADGES ── */
     #payment-scan-indicator {
       display: none;
@@ -1708,19 +1780,19 @@
       </div>
 
       <!-- 04 Hackathon -->
-      <div class="event-hud-card hud-panel" style="border-color:rgba(255,119,0,0.5);">
+      <div class="event-hud-card hud-panel" id="hackathonShowcaseCard" style="border-color:rgba(255,119,0,0.5);">
         <div>
           <div class="event-top-row">
             <span class="event-number" style="color:var(--neon-orange);">04</span>
-            <span class="event-badge-tag badge-hack">5 Hours &bull; 3 Per Team 🏆</span>
+            <span class="event-badge-tag badge-hack" id="hackathonShowcaseBadge">5 Hours &bull; 3 Per Team &bull; <strong id="hackRemainingHeader">5 Slots Left</strong> 🏆</span>
           </div>
           <h3 class="event-title">Hackathon (5 Hours)</h3>
           <p class="event-desc">
             5-hour rapid prototyping marathon (10:00 AM – 3:00 PM). Build innovative solutions in 5 hours. Work in teams of 3, turn ideas into real projects. Top 3 teams win sovereign cash bounties!
           </p>
         </div>
-        <div class="event-timing-box" style="color:var(--neon-orange);border-color:rgba(255,119,0,0.3);">
-          <i class="fas fa-clock"></i> 10:00 AM – 3:00 PM (5 Hours) &bull; 3 Per Team
+        <div class="event-timing-box" id="hackathonShowcaseTiming" style="color:var(--neon-orange);border-color:rgba(255,119,0,0.3);">
+          <i class="fas fa-clock"></i> 10:00 AM – 3:00 PM (5 Hours) &bull; <span id="hackathonSlotTextShowcase"><strong>60/65 Registered</strong> (5 Slots Left)</span>
         </div>
       </div>
 
@@ -1870,13 +1942,16 @@
           <i class="fas fa-trophy"></i> TRACK 1 · HACKATHON (STANDALONE SPRINT)
         </div>
         <div class="cyber-selector-grid" id="hackGrid">
-          <div class="cyber-event-option hack-card" data-event-type="hackathon" data-event-name="Hackathon" onclick="toggleEventSelection(this)">
-            <div class="cyber-checkbox-indicator"><i class="fas fa-check"></i></div>
+          <div class="cyber-event-option hack-card" id="hackCardOption" data-event-type="hackathon" data-event-name="Hackathon" onclick="toggleEventSelection(this)">
+            <div class="cyber-checkbox-indicator"><i class="fas fa-check" id="hackCardCheckIcon"></i></div>
             <div class="ev-meta-text">
-              <h4 style="color:var(--neon-orange);">04 · Hackathon (5 Hours) 🏆</h4>
-              <p>Team Prototype Sprint (Strictly 3 Members) &bull; Top 3 Cash Bounties &bull; ₹300 / Team</p>
+              <h4 style="color:var(--neon-orange);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <span>04 · Hackathon (5 Hours) 🏆</span>
+                <span id="hackSlotBadge" class="hack-slot-badge"><i class="fas fa-fire"></i> 60/65 FILLED • <span style="color:#00ff66;">5 SLOTS LEFT</span></span>
+              </h4>
+              <p id="hackCardSubtext">Team Prototype Sprint (Strictly 3 Members) &bull; Top 3 Cash Bounties &bull; ₹300 / Team</p>
             </div>
-            <span class="ev-timing-tag" style="border-color:var(--neon-orange);color:var(--neon-orange);">10:00 AM – 3:00 PM (Exclusive)</span>
+            <span class="ev-timing-tag" id="hackTimingTag" style="border-color:var(--neon-orange);color:var(--neon-orange);">10:00 AM – 3:00 PM (Exclusive)</span>
           </div>
         </div>
 
@@ -2434,6 +2509,40 @@
     </div>
   </div>
 
+  <!-- HACKATHON SLOTS FULL POPUP MODAL (REQUESTED) -->
+  <div id="hackathon-full-modal-overlay">
+    <div class="hackathon-full-hud-card">
+      <div class="hackathon-full-icon">
+        <i class="fas fa-ban"></i>
+      </div>
+      <h2 style="font-family:var(--font-orbitron);color:#ff7700;font-size:1.45rem;letter-spacing:1px;margin-bottom:10px;">
+        Hackathon Slots Are Full!
+      </h2>
+      <p style="font-family:var(--font-mono);font-size:0.95rem;color:var(--text-bright);line-height:1.6;margin-bottom:20px;">
+        All 65 slots have been filled. Please register for another available event.
+      </p>
+
+      <div style="background:rgba(255,119,0,0.08);border:1px solid rgba(255,119,0,0.3);border-radius:8px;padding:14px 18px;margin-bottom:24px;text-align:left;font-family:var(--font-mono);font-size:0.84rem;color:#cbd5e1;">
+        <div style="color:var(--neon-orange);font-weight:700;margin-bottom:6px;">
+          <i class="fas fa-info-circle"></i> ALTERNATIVE TRACKS AVAILABLE:
+        </div>
+        <div style="margin-left:14px;line-height:1.7;">
+          • <strong>Track 2:</strong> 1 Technical Workshop (Cyber Forge / Cloud Craft) + 1 Event<br/>
+          • <strong>Track 3:</strong> Up to 2 Competitions (CTF Challenge, Prompt Generating, Click N Chill, Quiz Competition)
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <button type="button" class="cyber-btn cb-primary" style="justify-content:center;padding:13px 24px;font-size:0.9rem;" onclick="exploreOtherEvents()">
+          <i class="fas fa-compass"></i> EXPLORE OTHER EVENTS
+        </button>
+        <button type="button" class="cyber-btn cb-outline" style="justify-content:center;padding:13px 20px;font-size:0.85rem;" onclick="closeHackathonFullModal()">
+          CLOSE
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- SPINNER -->
   <div id="cyber-spinner">
     <div class="spinner-hud-ring"></div>
@@ -2730,8 +2839,140 @@
       }, 2500);
     }
 
+    // ─── HACKATHON LIVE CAPACITY & SLOT LIMIT STATE ─────────────────
+    let hackathonSlotState = {
+      count: 60,
+      max: 65,
+      remaining: 5,
+      isFull: false
+    };
+
+    function showHackathonFullModal() {
+      const modal = document.getElementById('hackathon-full-modal-overlay');
+      if (modal) modal.classList.add('show');
+    }
+
+    function closeHackathonFullModal() {
+      const modal = document.getElementById('hackathon-full-modal-overlay');
+      if (modal) modal.classList.remove('show');
+    }
+
+    function exploreOtherEvents() {
+      closeHackathonFullModal();
+      const hackCard = document.querySelector('.cyber-event-option[data-event-type="hackathon"]');
+      if (hackCard) hackCard.classList.remove('selected');
+      const hackPanel = document.getElementById('hackathon-team-panel');
+      if (hackPanel) hackPanel.classList.remove('show');
+      clearHackErrors();
+      evaluateEventSelections();
+
+      const target = document.getElementById('workshopGrid') || document.getElementById('eventsGrid');
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      const pill = document.getElementById('selectionStatusPill');
+      if (pill) {
+        pill.style.borderColor = 'var(--cyan)';
+        pill.style.color = 'var(--cyan)';
+        pill.style.background = 'rgba(0,240,255,0.12)';
+        pill.innerHTML = '👉 <strong>EXPLORE AVAILABLE TRACKS:</strong> Select 1 Workshop + 1 Event (Track 2) OR up to 2 Competitions (Track 3)';
+      }
+    }
+
+    async function fetchHackathonSlotStatus() {
+      try {
+        const apiBase = (typeof QAURA_CONFIG !== 'undefined' && QAURA_CONFIG.API_BASE_URL)
+          ? QAURA_CONFIG.API_BASE_URL
+          : '';
+        const endpoint = apiBase ? `${apiBase}/api/hackathon-status` : '/api/hackathon-status';
+        const res = await fetch(endpoint, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.status === 'ok') {
+            hackathonSlotState = {
+              count: typeof data.count === 'number' ? data.count : 60,
+              max: typeof data.max === 'number' ? data.max : 65,
+              remaining: typeof data.remaining === 'number' ? data.remaining : 5,
+              isFull: !!data.isFull
+            };
+            applyHackathonSlotStateToUI();
+          }
+        }
+      } catch (err) {
+        console.warn('Hackathon slot status notice:', err.message);
+      }
+    }
+
+    function applyHackathonSlotStateToUI() {
+      const { count, max, remaining, isFull } = hackathonSlotState;
+
+      // 1. Selector Badge on registration card
+      const badge = document.getElementById('hackSlotBadge');
+      const card = document.getElementById('hackCardOption');
+      const timingTag = document.getElementById('hackTimingTag');
+      const checkIcon = document.getElementById('hackCardCheckIcon');
+
+      if (badge) {
+        if (isFull) {
+          badge.className = 'hack-slot-badge full';
+          badge.innerHTML = '<i class="fas fa-ban"></i> SLOTS FULL (65/65)';
+        } else {
+          badge.className = 'hack-slot-badge';
+          badge.innerHTML = `<i class="fas fa-fire"></i> ${count}/${max} FILLED • <span style="color:#00ff66;">${remaining} SLOTS LEFT</span>`;
+        }
+      }
+
+      if (card) {
+        if (isFull) {
+          card.classList.add('slots-full');
+          if (timingTag) {
+            timingTag.style.borderColor = '#ff0055';
+            timingTag.style.color = '#ff0055';
+            timingTag.textContent = 'SLOTS FULL';
+          }
+          if (checkIcon) {
+            checkIcon.className = 'fas fa-times';
+          }
+        } else {
+          card.classList.remove('slots-full');
+          if (timingTag) {
+            timingTag.style.borderColor = 'var(--neon-orange)';
+            timingTag.style.color = 'var(--neon-orange)';
+            timingTag.textContent = '10:00 AM – 3:00 PM (Exclusive)';
+          }
+          if (checkIcon) {
+            checkIcon.className = 'fas fa-check';
+          }
+        }
+      }
+
+      // 2. Event Showcase Card 04
+      const showcaseText = document.getElementById('hackathonSlotTextShowcase');
+      const showcaseBadge = document.getElementById('hackathonShowcaseBadge');
+      const remHeader = document.getElementById('hackRemainingHeader');
+      if (showcaseText) {
+        showcaseText.innerHTML = isFull
+          ? '<strong style="color:#ff0055;">SLOTS FULL (65/65)</strong>'
+          : `<strong>${count}/${max} Registered</strong> (${remaining} Slots Left)`;
+      }
+      if (showcaseBadge) {
+        showcaseBadge.innerHTML = isFull
+          ? '<span style="color:#ff0055;">SLOTS FULL 🚫</span>'
+          : `5 Hours • 3 Per Team • <strong>${remaining} Left</strong> 🏆`;
+      }
+      if (remHeader) {
+        remHeader.textContent = isFull ? 'Slots Full' : `${remaining} Slots Left`;
+      }
+
+      evaluateEventSelections();
+    }
+
     // ─── EVENT SELECTOR LOGIC (3-TRACK SYSTEM) ──────────────────────
     function toggleEventSelection(element) {
+      if (element.dataset.eventType === 'hackathon' && hackathonSlotState.isFull) {
+        showHackathonFullModal();
+        return;
+      }
       if (element.classList.contains('disabled')) return;
       element.classList.toggle('selected');
       evaluateEventSelections();
@@ -2777,8 +3018,19 @@
         }
       }
 
+      // ── SLOTS FULL CHECK: DISABLE ONLY HACKATHON IF LIMIT REACHED ──
+      if (hackathonSlotState.isFull && hackCard) {
+        if (hackCard.classList.contains('selected')) {
+          hackCard.classList.remove('selected');
+          if (hackPanel) hackPanel.classList.remove('show');
+          clearHackErrors();
+        }
+        hackCard.classList.add('slots-full');
+        markDisabled(hackCard, 'Slots Full - 65/65');
+      }
+
       // ── RULE 1: HACKATHON ALONE ──
-      if (isHackSelected) {
+      if (isHackSelected && !hackathonSlotState.isFull) {
         if (hackPanel) hackPanel.classList.add('show');
         if (qrBadge) qrBadge.textContent = '₹300 / TEAM';
 
@@ -3058,6 +3310,12 @@
           return;
         }
 
+        // Enforce Hackathon slot limit: block registration if capacity reached
+        if (isHack && hackathonSlotState.isFull) {
+          showHackathonFullModal();
+          return;
+        }
+
         // Build registration record
         const regId = createRegId();
         const reg = {
@@ -3092,8 +3350,9 @@
         const pgEndpoint = apiBase ? `${apiBase}/api/register` : '/api/register';
 
         let pgResult = null;
+        let res = null;
         try {
-          const res = await fetch(pgEndpoint, {
+          res = await fetch(pgEndpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(reg)
@@ -3104,6 +3363,27 @@
         }
 
         if (spinner) spinner.style.display = 'none';
+
+        // If backend reports Hackathon slots full (or HTTP 409)
+        if ((res && res.status === 409) || (pgResult && pgResult.status === 'slots_full')) {
+          hackathonSlotState.isFull = true;
+          hackathonSlotState.count = 65;
+          hackathonSlotState.remaining = 0;
+          applyHackathonSlotStateToUI();
+          showHackathonFullModal();
+          return;
+        }
+
+        // Update live slot state if returned by backend
+        if (pgResult && pgResult.hackathonStatus) {
+          hackathonSlotState = {
+            count: pgResult.hackathonStatus.count,
+            max: pgResult.hackathonStatus.max,
+            remaining: pgResult.hackathonStatus.remaining,
+            isFull: pgResult.hackathonStatus.isFull
+          };
+          applyHackathonSlotStateToUI();
+        }
 
         // ── 2. Save to localStorage backup ───────────────────────────
         saveRegistration(reg);
@@ -3663,6 +3943,7 @@ Food & Accommodation: Will NOT be provided.
         o.classList.remove('disabled');
       });
       evaluateEventSelections();
+      applyHackathonSlotStateToUI();
       document.getElementById('hackathon-team-panel').classList.remove('show');
       document.querySelectorAll('.cyber-input').forEach(i => i.classList.remove('error'));
       document.querySelectorAll('.err-text').forEach(e => e.classList.remove('show'));
@@ -3679,6 +3960,14 @@ Food & Accommodation: Will NOT be provided.
         input.classList.remove('error');
         hideError('err-' + input.id);
       });
+    });
+
+    // ─── LIVE HACKATHON SLOT TELEMETRY INITIALIZER ──────────────────
+    fetchHackathonSlotStatus();
+    setInterval(fetchHackathonSlotStatus, 15000);
+    window.addEventListener('focus', fetchHackathonSlotStatus);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) fetchHackathonSlotStatus();
     });
 
 

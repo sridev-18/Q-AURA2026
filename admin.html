@@ -1518,7 +1518,9 @@
       const activeList = dataList.filter(d => d.status !== 'Inactive' && d.isActive !== false);
       const total = activeList.length;
       const inactiveCount = dataList.filter(d => d.status === 'Inactive' || d.isActive === false).length;
-      const hackCount = activeList.filter(d => d.techEvent === 'Hackathon').length;
+      const hackCount = activeList.filter(d => (d.techEvent || '').includes('Hackathon')).length;
+      const hackRemaining = Math.max(0, 65 - hackCount);
+      const isHackFull = hackCount >= 65;
       const uniqueColleges = new Set(activeList.map(d => d.college)).size;
       const pending = activeList.filter(d => d.status === 'Pending Verification').length;
       const verified = activeList.filter(d => d.status === 'Verified').length;
@@ -1529,10 +1531,13 @@
           <div class="s-num" style="color:var(--cyan);">${total}</div>
           <div class="s-lbl">ACTIVE REGISTRATIONS</div>
         </div>
-        <div class="stat-hud-box hud-panel">
-          <div class="s-icon"><i class="fas fa-users-cog" style="color:var(--neon-orange);"></i></div>
-          <div class="s-num" style="color:var(--neon-orange);">${hackCount}</div>
-          <div class="s-lbl">HACKATHON TEAMS</div>
+        <div class="stat-hud-box hud-panel" style="cursor:pointer;position:relative;" onclick="filterByTechEventCard('Hackathon')" title="Click to filter: Hackathon (${hackCount}/65 Slots)">
+          <div class="s-icon"><i class="fas fa-trophy" style="color:${isHackFull ? 'var(--neon-pink)' : 'var(--neon-orange)'};"></i></div>
+          <div class="s-num" style="color:${isHackFull ? 'var(--neon-pink)' : 'var(--neon-orange)'};">${hackCount} / 65</div>
+          <div class="s-lbl">${isHackFull ? 'HACKATHON (SLOTS FULL)' : `HACKATHON (${hackRemaining} SLOTS LEFT)`}</div>
+          <div style="font-family:var(--font-mono);font-size:0.7rem;margin-top:4px;color:${isHackFull ? '#ff0055' : '#00ff66'};letter-spacing:0.5px;">
+            ${isHackFull ? '🔴 65/65 CAPACITY REACHED' : `🟢 ${hackRemaining} OF 65 SLOTS REMAINING`}
+          </div>
         </div>
         <div class="stat-hud-box hud-panel">
           <div class="s-icon"><i class="fas fa-university"></i></div>
@@ -1562,6 +1567,16 @@
       if (sel) {
         sel.value = statusVal;
         displayTable();
+      }
+    }
+
+    function filterByTechEventCard(techName) {
+      const selTech = document.getElementById('selTech');
+      if (selTech) {
+        selTech.value = techName;
+        displayTable();
+        const tableSec = document.getElementById('operativeTable');
+        if (tableSec) tableSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
 

@@ -295,6 +295,26 @@ app.post('/api/validate-payment-proof', async (req, res) => {
   }
 });
 
+// ── API: HACKATHON LIVE CAPACITY & SLOT TELEMETRY ──────────────────
+app.get('/api/hackathon-status', async (req, res) => {
+  try {
+    const status = await db.getHackathonSlotStatus();
+    res.json({
+      status: 'ok',
+      ...status
+    });
+  } catch (err) {
+    console.warn('DB hackathon slot status notice:', err.message);
+    res.json({
+      status: 'ok',
+      count: 60,
+      max: db.HACKATHON_MAX_SLOTS || 65,
+      remaining: 5,
+      isFull: false
+    });
+  }
+});
+
 // ── API: REGISTER STUDENT INTO POSTGRESQL ──────────────────────────
 app.post('/api/register', async (req, res) => {
   try {
@@ -305,13 +325,26 @@ app.post('/api/register', async (req, res) => {
 
     // Optional payment screenshot
     const record = await db.createRegistration(data);
+    const hackStatus = await db.getHackathonSlotStatus();
+
     res.json({
       status: 'ok',
       message: 'Registered successfully in PostgreSQL',
       regId: record.reg_id,
-      registration: record
+      registration: record,
+      hackathonStatus: hackStatus
     });
   } catch (err) {
+    if (err.code === 'HACKATHON_SLOTS_FULL') {
+      return res.status(409).json({
+        status: 'slots_full',
+        code: 'HACKATHON_SLOTS_FULL',
+        title: 'Hackathon Slots Are Full!',
+        message: 'All 65 slots have been filled. Please register for another available event.',
+        max: 65,
+        remaining: 0
+      });
+    }
     console.error('Registration error:', err);
     res.status(500).json({ status: 'error', message: err.message });
   }
