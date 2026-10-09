@@ -447,12 +447,49 @@ app.post('/api/auth/verify', (req, res) => {
   res.status(401).json({ status: 'invalid', valid: false, message: 'Invalid or expired authentication token' });
 });
 
+// ── API: SERVE PAYMENT PROOF IMAGE (LIGHTWEIGHT HIGH-PERFORMANCE ASSET) ──
+app.get('/api/registrations/:id/proof', async (req, res) => {
+  try {
+    const record = await db.getRegistrationById(req.params.id);
+    if (!record || !record.payment_screenshot) {
+      return res.status(404).send('No payment proof attachment available');
+    }
+    const raw = record.payment_screenshot;
+    if (typeof raw === 'string' && raw.startsWith('data:image')) {
+      const match = raw.match(/^data:(image\/[a-zA-Z0-9\+\-\.]+);base64,(.+)$/);
+      if (match) {
+        const mimeType = match[1];
+        const buffer = Buffer.from(match[2], 'base64');
+        res.setHeader('Content-Type', mimeType);
+        res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+        return res.send(buffer);
+      }
+    }
+    if (typeof raw === 'string' && raw.startsWith('http')) {
+      return res.redirect(raw);
+    }
+    res.status(404).send('Invalid proof format');
+  } catch (err) {
+    res.status(500).send('Error retrieving proof: ' + err.message);
+  }
+});
+
 // ── API: GET ALL REGISTRATIONS (ADMIN / EXPORT - PROTECTED) ─────────
 app.get('/api/registrations', requireAuth(['admin', 'desk']), async (req, res) => {
   try {
     const records = await db.getAllRegistrations();
     if (records && records.length > 0) {
-      return res.json({ status: 'ok', registrations: records });
+      const sanitized = records.map(r => {
+        const regId = r.regId || r.reg_id;
+        const rawProof = r.paymentScreenshot || r.payment_screenshot;
+        const hasProof = !!rawProof;
+        return {
+          ...r,
+          paymentScreenshot: hasProof ? `/api/registrations/${encodeURIComponent(regId)}/proof` : '',
+          hasProof: hasProof
+        };
+      });
+      return res.json({ status: 'ok', registrations: sanitized, total: sanitized.length });
     }
   } catch (err) {
     console.warn('DB fetch registrations notice:', err.message);
@@ -463,13 +500,23 @@ app.get('/api/registrations', requireAuth(['admin', 'desk']), async (req, res) =
     const backupPath = path.join(__dirname, 'all_registrations_backup.json');
     if (fs.existsSync(backupPath)) {
       const backup = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
-      return res.json({ status: 'ok', registrations: backup, source: 'backup' });
+      const sanitized = backup.map(r => {
+        const regId = r.regId || r.reg_id;
+        const rawProof = r.paymentScreenshot || r.payment_screenshot;
+        const hasProof = !!rawProof;
+        return {
+          ...r,
+          paymentScreenshot: hasProof ? `/api/registrations/${encodeURIComponent(regId)}/proof` : '',
+          hasProof: hasProof
+        };
+      });
+      return res.json({ status: 'ok', registrations: sanitized, source: 'backup', total: sanitized.length });
     }
   } catch (bErr) {
     console.warn('Backup registrations read error:', bErr.message);
   }
 
-  res.json({ status: 'ok', registrations: [] });
+  res.json({ status: 'ok', registrations: [], total: 0 });
 });
 
 // ── API: VERIFY LOOKUP (JSON API) ──────────────────────────────────
@@ -478,7 +525,17 @@ app.get('/api/verify/:id', async (req, res) => {
   try {
     const record = await db.getRegistrationById(term);
     if (record) {
-      return res.json({ status: 'ok', registration: record });
+      const regId = record.reg_id || record.regId;
+      const rawProof = record.payment_screenshot || record.paymentScreenshot;
+      const hasProof = !!rawProof;
+      return res.json({
+        status: 'ok',
+        registration: {
+          ...record,
+          paymentScreenshot: hasProof ? `/api/registrations/${encodeURIComponent(regId)}/proof` : '',
+          hasProof: hasProof
+        }
+      });
     }
   } catch (err) {
     console.warn('DB verify lookup notice:', err.message);
@@ -495,7 +552,18 @@ app.get('/api/verify/:id', async (req, res) => {
         (r.mobile && String(r.mobile).trim() === term)
       );
       if (match) {
-        return res.json({ status: 'ok', registration: match, source: 'backup' });
+        const regId = match.regId || match.reg_id;
+        const rawProof = match.paymentScreenshot || match.payment_screenshot;
+        const hasProof = !!rawProof;
+        return res.json({
+          status: 'ok',
+          registration: {
+            ...match,
+            paymentScreenshot: hasProof ? `/api/registrations/${encodeURIComponent(regId)}/proof` : '',
+            hasProof: hasProof
+          },
+          source: 'backup'
+        });
       }
     }
   } catch (bErr) {

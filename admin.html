@@ -1003,21 +1003,21 @@
   <script src="config.js"></script>
   <script>
     // ── AUTHENTICATION & DIRECT IN-PLACE LOGIN GUARD ─────────────────
-    // Always enforce fresh authentication on every visit (no persistent auto-login)
-    try {
-      localStorage.removeItem('qaura_auth_token');
-      localStorage.removeItem('qaura_auth_role');
-      localStorage.removeItem('qaura_auth_user');
-      localStorage.removeItem('qaura2026_deleted_ids');
-      localStorage.removeItem('qaura2026_registrations');
-      sessionStorage.removeItem('qaura_auth_token');
-      sessionStorage.removeItem('qaura_auth_role');
-      sessionStorage.removeItem('qaura_auth_user');
-    } catch(e) {}
-
     let currentAdminToken = null;
     let currentAdminRole  = null;
     let currentAdminUser  = null;
+
+    // Restore active clearance from sessionStorage across page reloads
+    try {
+      const savedToken = sessionStorage.getItem('qaura_auth_token');
+      const savedRole  = sessionStorage.getItem('qaura_auth_role');
+      const savedUser  = sessionStorage.getItem('qaura_auth_user');
+      if (savedToken && savedRole === 'admin') {
+        currentAdminToken = savedToken;
+        currentAdminRole  = savedRole;
+        try { currentAdminUser = JSON.parse(savedUser); } catch(e) { currentAdminUser = { username: 'admin', role: 'admin' }; }
+      }
+    } catch(e) {}
 
     function getAdminAuthToken() {
       return currentAdminToken || '';
@@ -1108,6 +1108,12 @@
           currentAdminRole  = userRole;
           currentAdminUser  = data.user || { username, role: userRole };
 
+          try {
+            sessionStorage.setItem('qaura_auth_token', currentAdminToken);
+            sessionStorage.setItem('qaura_auth_role', currentAdminRole);
+            sessionStorage.setItem('qaura_auth_user', JSON.stringify(currentAdminUser));
+          } catch(e) {}
+
           const el = document.getElementById('adminUsernameDisplay');
           if (el) el.textContent = (currentAdminUser.username || username).toUpperCase();
 
@@ -1195,7 +1201,7 @@
         badge.style.borderColor = '#ffd700';
         badge.style.color = '#ffd700';
         badge.style.background = 'rgba(255, 215, 0, 0.1)';
-        txt.innerHTML = `Local Cache: [${label}] (PG Offline)`;
+        txt.innerHTML = totalCount > 0 ? `Local Cache: [${label}] (PG Reconnecting...)` : `PostgreSQL 18: Reconnecting...`;
       }
     }
 
@@ -1269,19 +1275,39 @@
       return result;
     }
 
+    let isFetchingData = false;
+
     async function initData() {
-      if (!isLoggedInAdmin()) return;
+      if (!isLoggedInAdmin()) {
+        checkAdminAuth();
+        const badge = document.getElementById('pgStatusBadge');
+        const txt = document.getElementById('pgStatusText');
+        if (txt) txt.textContent = 'Clearance Required: Please Log In';
+        if (badge) {
+          badge.style.borderColor = '#ffd700';
+          badge.style.color = '#ffd700';
+        }
+        return;
+      }
+
+      if (isFetchingData) return;
+      isFetchingData = true;
 
       // 1. Live PostgreSQL Database API (Direct Source of Truth)
       try {
         const apiBase = getApiBase();
         const endpoint = apiBase ? `${apiBase}/api/registrations` : '/api/registrations';
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
         const res = await fetch(endpoint, {
           cache: 'no-store',
           headers: {
             'Authorization': 'Bearer ' + getAdminAuthToken()
-          }
+          },
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
 
         if (res.status === 401 || res.status === 403) {
           logoutAdmin();
@@ -1294,30 +1320,37 @@
             // Deduplicate only to prevent duplicate submissions from the same student
             dataList = deduplicateOperativeRecords(json.registrations);
             const freshCache = JSON.stringify(dataList);
+            isPgConnected = true;
+            updateDbIndicator(true, dataList.length);
             if (freshCache !== lastDataCache) {
               lastDataCache = freshCache;
-              localStorage.setItem(STORAGE_KEY, freshCache);
-              isPgConnected = true;
-              updateDbIndicator(true, dataList.length);
+              try { localStorage.setItem(STORAGE_KEY, freshCache); } catch(e) {}
               renderAllComponents();
             }
             return; // ⭐️ When database is online, rely 100% on database records!
           }
         }
+        throw new Error('Database response error: ' + (res ? res.status : 'offline'));
       } catch (err) {
-        console.warn('PostgreSQL fetch notice, using local cache:', err);
-      }
-
-      // 2. Offline Fallback ONLY if PostgreSQL connection failed completely
-      try {
-        const cached = localStorage.getItem(STORAGE_KEY);
-        if (cached && cached !== lastDataCache) {
-          dataList = JSON.parse(cached);
-          lastDataCache = cached;
-          updateDbIndicator(false, dataList.length);
-          renderAllComponents();
+        console.warn('PostgreSQL fetch notice:', err.message);
+        isPgConnected = false;
+        // 2. Offline Fallback ONLY if PostgreSQL connection failed completely
+        try {
+          const cached = localStorage.getItem(STORAGE_KEY);
+          if (cached) {
+            dataList = JSON.parse(cached);
+            lastDataCache = cached;
+            updateDbIndicator(false, dataList.length);
+            renderAllComponents();
+          } else {
+            updateDbIndicator(false, 0);
+          }
+        } catch(e) {
+          updateDbIndicator(false, 0);
         }
-      } catch(e) {}
+      } finally {
+        isFetchingData = false;
+      }
 
       // Check 24/7 server keep-alive telemetry
       try {
@@ -1420,10 +1453,10 @@
         initData();
       }
 
-      // Auto-poll PostgreSQL every 3 seconds for instant real-time live sync
+      // Auto-poll PostgreSQL every 10 seconds for real-time live sync
       setInterval(() => {
-        if (isLoggedInAdmin()) initData();
-      }, 3000);
+        if (isLoggedInAdmin() && !document.hidden) initData();
+      }, 10000);
 
       // Auto-refresh when tab gains focus or visibility
       window.addEventListener('focus', () => {
