@@ -1519,8 +1519,8 @@
       const total = activeList.length;
       const inactiveCount = dataList.filter(d => d.status === 'Inactive' || d.isActive === false).length;
       const hackCount = activeList.filter(d => (d.techEvent || '').includes('Hackathon')).length;
-      const hackRemaining = Math.max(0, 65 - hackCount);
-      const isHackFull = hackCount >= 65;
+      const hackRemaining = Math.max(0, 75 - hackCount);
+      const isHackFull = hackCount >= 75;
       const uniqueColleges = new Set(activeList.map(d => d.college)).size;
       const pending = activeList.filter(d => d.status === 'Pending Verification').length;
       const verified = activeList.filter(d => d.status === 'Verified').length;
@@ -1531,12 +1531,12 @@
           <div class="s-num" style="color:var(--cyan);">${total}</div>
           <div class="s-lbl">ACTIVE REGISTRATIONS</div>
         </div>
-        <div class="stat-hud-box hud-panel" style="cursor:pointer;position:relative;" onclick="filterByTechEventCard('Hackathon')" title="Click to filter: Hackathon (${hackCount}/65 Slots)">
+        <div class="stat-hud-box hud-panel" style="cursor:pointer;position:relative;" onclick="filterByTechEventCard('Hackathon')" title="Click to filter: Hackathon (${hackCount}/75 Slots)">
           <div class="s-icon"><i class="fas fa-trophy" style="color:${isHackFull ? 'var(--neon-pink)' : 'var(--neon-orange)'};"></i></div>
-          <div class="s-num" style="color:${isHackFull ? 'var(--neon-pink)' : 'var(--neon-orange)'};">${hackCount} / 65</div>
+          <div class="s-num" style="color:${isHackFull ? 'var(--neon-pink)' : 'var(--neon-orange)'};">${hackCount} / 75</div>
           <div class="s-lbl">${isHackFull ? 'HACKATHON (SLOTS FULL)' : `HACKATHON (${hackRemaining} SLOTS LEFT)`}</div>
           <div style="font-family:var(--font-mono);font-size:0.7rem;margin-top:4px;color:${isHackFull ? '#ff0055' : '#00ff66'};letter-spacing:0.5px;">
-            ${isHackFull ? '🔴 65/65 CAPACITY REACHED' : `🟢 ${hackRemaining} OF 65 SLOTS REMAINING`}
+            ${isHackFull ? '🔴 75/75 CAPACITY REACHED' : `🟢 ${hackRemaining} OF 75 SLOTS REMAINING`}
           </div>
         </div>
         <div class="stat-hud-box hud-panel">

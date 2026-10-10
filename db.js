@@ -145,7 +145,7 @@ async function initDb() {
   }
 }
 
-const HACKATHON_MAX_SLOTS = 65;
+const HACKATHON_MAX_SLOTS = 75;
 
 // Fetch live hackathon count
 async function getHackathonCount() {
@@ -236,7 +236,7 @@ async function createRegistration(data) {
 
       if (!isExisting && currentHackCount >= HACKATHON_MAX_SLOTS) {
         await client.query('ROLLBACK');
-        const err = new Error('Hackathon Slots Are Full! All 65 slots have been filled. Please register for another available event.');
+        const err = new Error('Hackathon Slots Are Full! All 75 hackathon slots have been filled. Please register for another available event.');
         err.code = 'HACKATHON_SLOTS_FULL';
         err.status = 409;
         throw err;

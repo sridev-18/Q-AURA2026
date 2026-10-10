@@ -1784,7 +1784,7 @@
         <div>
           <div class="event-top-row">
             <span class="event-number" style="color:var(--neon-orange);">04</span>
-            <span class="event-badge-tag badge-hack" id="hackathonShowcaseBadge">5 Hours &bull; 3 Per Team &bull; <strong id="hackRemainingHeader">5 Slots Left</strong> 🏆</span>
+            <span class="event-badge-tag badge-hack" id="hackathonShowcaseBadge">5 Hours &bull; 3 Per Team &bull; <strong id="hackRemainingHeader">15 Slots Left</strong> 🏆</span>
           </div>
           <h3 class="event-title">Hackathon (5 Hours)</h3>
           <p class="event-desc">
@@ -1792,7 +1792,7 @@
           </p>
         </div>
         <div class="event-timing-box" id="hackathonShowcaseTiming" style="color:var(--neon-orange);border-color:rgba(255,119,0,0.3);">
-          <i class="fas fa-clock"></i> 10:00 AM – 3:00 PM (5 Hours) &bull; <span id="hackathonSlotTextShowcase"><strong>60/65 Registered</strong> (5 Slots Left)</span>
+          <i class="fas fa-clock"></i> 10:00 AM – 3:00 PM (5 Hours) &bull; <span id="hackathonSlotTextShowcase"><strong>60/75 Registered</strong> (15 Slots Left)</span>
         </div>
       </div>
 
@@ -1947,7 +1947,7 @@
             <div class="ev-meta-text">
               <h4 style="color:var(--neon-orange);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                 <span>04 · Hackathon (5 Hours) 🏆</span>
-                <span id="hackSlotBadge" class="hack-slot-badge"><i class="fas fa-fire"></i> 60/65 FILLED • <span style="color:#00ff66;">5 SLOTS LEFT</span></span>
+                <span id="hackSlotBadge" class="hack-slot-badge"><i class="fas fa-fire"></i> 60/75 FILLED • <span style="color:#00ff66;">15 SLOTS LEFT</span></span>
               </h4>
               <p id="hackCardSubtext">Team Prototype Sprint (Strictly 3 Members) &bull; Top 3 Cash Bounties &bull; ₹300 / Team</p>
             </div>
@@ -2519,7 +2519,7 @@
         Hackathon Slots Are Full!
       </h2>
       <p style="font-family:var(--font-mono);font-size:0.95rem;color:var(--text-bright);line-height:1.6;margin-bottom:20px;">
-        All 65 slots have been filled. Please register for another available event.
+        All 75 hackathon slots have been filled. Please register for another available event.
       </p>
 
       <div style="background:rgba(255,119,0,0.08);border:1px solid rgba(255,119,0,0.3);border-radius:8px;padding:14px 18px;margin-bottom:24px;text-align:left;font-family:var(--font-mono);font-size:0.84rem;color:#cbd5e1;">
@@ -2842,8 +2842,8 @@
     // ─── HACKATHON LIVE CAPACITY & SLOT LIMIT STATE ─────────────────
     let hackathonSlotState = {
       count: 60,
-      max: 65,
-      remaining: 5,
+      max: 75,
+      remaining: 15,
       isFull: false
     };
 
@@ -2891,8 +2891,8 @@
           if (data && data.status === 'ok') {
             hackathonSlotState = {
               count: typeof data.count === 'number' ? data.count : 60,
-              max: typeof data.max === 'number' ? data.max : 65,
-              remaining: typeof data.remaining === 'number' ? data.remaining : 5,
+              max: typeof data.max === 'number' ? data.max : 75,
+              remaining: typeof data.remaining === 'number' ? data.remaining : 15,
               isFull: !!data.isFull
             };
             applyHackathonSlotStateToUI();
@@ -2915,7 +2915,7 @@
       if (badge) {
         if (isFull) {
           badge.className = 'hack-slot-badge full';
-          badge.innerHTML = '<i class="fas fa-ban"></i> SLOTS FULL (65/65)';
+          badge.innerHTML = '<i class="fas fa-ban"></i> SLOTS FULL (75/75)';
         } else {
           badge.className = 'hack-slot-badge';
           badge.innerHTML = `<i class="fas fa-fire"></i> ${count}/${max} FILLED • <span style="color:#00ff66;">${remaining} SLOTS LEFT</span>`;
@@ -2952,7 +2952,7 @@
       const remHeader = document.getElementById('hackRemainingHeader');
       if (showcaseText) {
         showcaseText.innerHTML = isFull
-          ? '<strong style="color:#ff0055;">SLOTS FULL (65/65)</strong>'
+          ? '<strong style="color:#ff0055;">SLOTS FULL (75/75)</strong>'
           : `<strong>${count}/${max} Registered</strong> (${remaining} Slots Left)`;
       }
       if (showcaseBadge) {
@@ -3026,7 +3026,7 @@
           clearHackErrors();
         }
         hackCard.classList.add('slots-full');
-        markDisabled(hackCard, 'Slots Full - 65/65');
+        markDisabled(hackCard, 'Slots Full - 75/75');
       }
 
       // ── RULE 1: HACKATHON ALONE ──
@@ -3367,7 +3367,7 @@
         // If backend reports Hackathon slots full (or HTTP 409)
         if ((res && res.status === 409) || (pgResult && pgResult.status === 'slots_full')) {
           hackathonSlotState.isFull = true;
-          hackathonSlotState.count = 65;
+          hackathonSlotState.count = 75;
           hackathonSlotState.remaining = 0;
           applyHackathonSlotStateToUI();
           showHackathonFullModal();

@@ -308,8 +308,8 @@ app.get('/api/hackathon-status', async (req, res) => {
     res.json({
       status: 'ok',
       count: 60,
-      max: db.HACKATHON_MAX_SLOTS || 65,
-      remaining: 5,
+      max: db.HACKATHON_MAX_SLOTS || 75,
+      remaining: 15,
       isFull: false
     });
   }
@@ -340,8 +340,8 @@ app.post('/api/register', async (req, res) => {
         status: 'slots_full',
         code: 'HACKATHON_SLOTS_FULL',
         title: 'Hackathon Slots Are Full!',
-        message: 'All 65 slots have been filled. Please register for another available event.',
-        max: 65,
+        message: 'All 75 hackathon slots have been filled. Please register for another available event.',
+        max: 75,
         remaining: 0
       });
     }
