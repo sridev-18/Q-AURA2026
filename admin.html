@@ -507,15 +507,259 @@
     }
 
     .table-footer-bar {
-      padding: 12px 18px;
-      background: rgba(14, 20, 32, 0.95);
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 14px 18px;
+      background: rgba(14, 20, 32, 0.96);
+      border-top: 1px solid rgba(0, 240, 255, 0.2);
       font-family: var(--font-mono);
       font-size: 0.78rem;
       color: var(--text-muted);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    /* ─── REGISTERED LIST PARTITIONS & PAGINATION ──────────── */
+    .partition-hud-panel {
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      background: rgba(9, 14, 24, 0.92);
+    }
+    .partition-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .partition-header-title {
+      font-family: var(--font-cyber);
+      font-size: 0.85rem;
+      color: var(--cyan);
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .partition-track-tabs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .partition-tab-btn {
+      background: rgba(6, 10, 18, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: var(--text-main);
+      font-family: var(--font-cyber);
+      font-size: 0.74rem;
+      letter-spacing: 0.8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+    .partition-tab-btn:hover {
+      border-color: var(--cyan);
+      background: rgba(0, 240, 255, 0.08);
+      transform: translateY(-1px);
+    }
+    .partition-tab-btn.active {
+      border-color: var(--cyan);
+      background: rgba(0, 240, 255, 0.16);
+      color: #fff;
+      box-shadow: 0 0 18px rgba(0, 240, 255, 0.25);
+    }
+    .partition-tab-btn.active.tab-hack {
+      border-color: var(--neon-orange);
+      background: rgba(255, 119, 0, 0.18);
+      box-shadow: 0 0 18px rgba(255, 119, 0, 0.28);
+    }
+    .partition-tab-btn.active.tab-workshop {
+      border-color: var(--neon-purple);
+      background: rgba(157, 78, 221, 0.2);
+      box-shadow: 0 0 18px rgba(157, 78, 221, 0.28);
+    }
+    .partition-tab-btn.active.tab-comp {
+      border-color: var(--neon-green);
+      background: rgba(0, 255, 102, 0.16);
+      box-shadow: 0 0 18px rgba(0, 255, 102, 0.25);
+    }
+    .pt-count-badge {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      white-space: nowrap;
+    }
+    .partition-event-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      padding-top: 6px;
+    }
+    .partition-chip-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-right: 4px;
+    }
+    .partition-chip {
+      background: rgba(12, 18, 28, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-family: var(--font-mono);
+      font-size: 0.73rem;
+      color: var(--text-main);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.18s ease;
+    }
+    .partition-chip:hover {
+      border-color: var(--cyan);
+      color: #fff;
+      background: rgba(0, 240, 255, 0.1);
+    }
+    .partition-chip.active {
+      border-color: var(--neon-gold);
+      background: rgba(255, 215, 0, 0.16);
+      color: var(--neon-gold);
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.25);
+      font-weight: 700;
+    }
+    .chip-num {
+      background: rgba(255, 255, 255, 0.12);
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-size: 0.68rem;
+      color: #fff;
+    }
+    .active-partition-banner {
+      padding: 12px 18px;
+      background: linear-gradient(90deg, rgba(0, 240, 255, 0.12), rgba(14, 20, 32, 0.95));
+      border-bottom: 1px solid rgba(0, 240, 255, 0.28);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .apb-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .apb-title {
+      font-family: var(--font-cyber);
+      font-size: 0.82rem;
+      color: #fff;
+      letter-spacing: 0.8px;
+    }
+    .apb-stats {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+    }
+    .apb-pill {
+      padding: 3px 9px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    tr.partition-divider-row td {
+      background: linear-gradient(90deg, rgba(0, 240, 255, 0.14), rgba(8, 12, 22, 0.96));
+      border-top: 1.5px solid rgba(0, 240, 255, 0.4);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+      padding: 10px 16px;
+      font-family: var(--font-cyber);
+      font-size: 0.76rem;
+      letter-spacing: 1px;
+      color: #fff;
+    }
+    tr.partition-divider-row.part-hack td {
+      background: linear-gradient(90deg, rgba(255, 119, 0, 0.2), rgba(12, 14, 22, 0.96));
+      border-top-color: rgba(255, 119, 0, 0.55);
+      border-bottom-color: rgba(255, 119, 0, 0.35);
+      color: var(--neon-orange);
+    }
+    tr.partition-divider-row.part-workshop td {
+      background: linear-gradient(90deg, rgba(157, 78, 221, 0.22), rgba(12, 14, 22, 0.96));
+      border-top-color: rgba(157, 78, 221, 0.55);
+      border-bottom-color: rgba(157, 78, 221, 0.35);
+      color: #d8b4fe;
+    }
+    tr.partition-divider-row.part-comp td {
+      background: linear-gradient(90deg, rgba(0, 255, 102, 0.16), rgba(12, 14, 22, 0.96));
+      border-top-color: rgba(0, 255, 102, 0.45);
+      border-bottom-color: rgba(0, 255, 102, 0.3);
+      color: var(--neon-green);
+    }
+    .pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .page-btn {
+      background: rgba(8, 12, 20, 0.9);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      min-width: 32px;
+      text-align: center;
+    }
+    .page-btn:hover:not(:disabled) {
+      border-color: var(--cyan);
+      color: #fff;
+      background: rgba(0, 240, 255, 0.14);
+    }
+    .page-btn.active {
+      background: var(--cyan);
+      color: #050811;
+      border-color: var(--cyan);
+      font-weight: 700;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+    }
+    .page-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .page-size-select {
+      background: rgba(8, 12, 20, 0.9);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: var(--cyan);
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      padding: 4px 8px;
+      border-radius: 5px;
+      outline: none;
+      cursor: pointer;
     }
 
     /* ─── MODAL ────────────────────────────────────────────── */
@@ -796,19 +1040,45 @@
       <div class="sc-icon"><i class="fas fa-file-download" style="color:var(--neon-green);"></i></div>
       <div class="sc-info">
         <h3 style="color:#fff;">DOWNLOAD REGISTRATION ROSTER</h3>
-        <p>Export all participant details, event allocations, hackathon strike teams, and payment fees directly into an Excel-ready CSV sheet or JSON format.</p>
-        <div style="display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;">
-          <button class="cyber-btn cb-green" onclick="exportDataCSV()"><i class="fas fa-file-excel"></i> DOWNLOAD ALL (EXCEL / CSV)</button>
-          <button class="cyber-btn cb-gold" onclick="exportVerifiedOnly()"><i class="fas fa-check-circle"></i> DOWNLOAD VERIFIED ONLY</button>
-          <button class="cyber-btn cb-outline" onclick="exportDataJSON()"><i class="fas fa-file-code"></i> DOWNLOAD JSON BACKUP</button>
+        <p>Export all participant details, event allocations, hackathon strike teams, and payment fees directly into an Excel-ready CSV sheet or partitioned track rosters.</p>
+        <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+          <button class="cyber-btn cb-green" onclick="exportDataCSV()"><i class="fas fa-file-excel"></i> DOWNLOAD ALL (CSV)</button>
+          <button class="cyber-btn cb-outline" style="border-color:var(--neon-orange);color:var(--neon-orange);background:rgba(255,119,0,0.08);" onclick="exportSpecificPartitionCSV('track_hackathon')"><i class="fas fa-trophy"></i> HACKATHON LIST</button>
+          <button class="cyber-btn cb-outline" style="border-color:var(--neon-purple);color:#d8b4fe;background:rgba(157,78,221,0.1);" onclick="exportSpecificPartitionCSV('track_workshops')"><i class="fas fa-laptop-code"></i> WORKSHOPS LIST</button>
+          <button class="cyber-btn cb-outline" style="border-color:var(--cyan);color:var(--cyan);background:rgba(0,240,255,0.08);" onclick="exportSpecificPartitionCSV('track_competitions')"><i class="fas fa-bolt"></i> COMPETITIONS LIST</button>
+          <button class="cyber-btn cb-gold" onclick="exportVerifiedOnly()"><i class="fas fa-check-circle"></i> VERIFIED ONLY</button>
+          <button class="cyber-btn cb-outline" onclick="exportDataJSON()"><i class="fas fa-file-code"></i> JSON BACKUP</button>
         </div>
       </div>
     </div>
 
+    <!-- REGISTERED LIST PARTITION & SEGMENTATION PANEL -->
+    <div class="partition-hud-panel hud-panel" id="partitionControlPanel">
+      <div class="partition-header-bar">
+        <div class="partition-header-title">
+          <i class="fas fa-layer-group"></i> REGISTERED LIST PARTITIONS <span style="color:var(--text-muted);font-family:var(--font-mono);font-size:0.74rem;font-weight:400;">// SELECT TRACK OR EVENT ROSTER</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <button type="button" class="cyber-btn cb-outline" id="btnToggleGroupPartitions" onclick="toggleGroupPartitionsMode()" style="padding:6px 12px;font-size:0.74rem;border-color:var(--cyan);color:var(--cyan);background:rgba(0,240,255,0.12);" title="Toggle visual partition section headers inside the table">
+            <i class="fas fa-object-group"></i> <span id="txtGroupPartitions">GROUP DIVIDERS: ON</span>
+          </button>
+          <button type="button" class="cyber-btn cb-green" onclick="exportActivePartitionCSV()" style="padding:6px 12px;font-size:0.74rem;" title="Download CSV for the currently selected partition">
+            <i class="fas fa-download"></i> EXPORT ACTIVE PARTITION
+          </button>
+        </div>
+      </div>
+
+      <!-- PRIMARY TRACK TABS -->
+      <div class="partition-track-tabs" id="partitionTrackTabs"></div>
+
+      <!-- INDIVIDUAL EVENT CHIPS -->
+      <div class="partition-event-chips" id="partitionEventChips"></div>
+    </div>
+
     <!-- TOOLBAR FILTERS -->
     <div class="filter-toolbar hud-panel">
-      <input type="text" id="adminSearch" class="search-input" placeholder="🔍 Search operative name, email, college, call-sign, or Reg ID..." oninput="displayTable()"/>
-      <select id="selTech" class="filter-select" onchange="displayTable()">
+      <input type="text" id="adminSearch" class="search-input" placeholder="🔍 Search operative name, email, college, call-sign, or Reg ID..." oninput="onFilterInputChanged()"/>
+      <select id="selTech" class="filter-select" onchange="onDropdownFilterChanged()">
         <option value="">ALL TECHNICAL ARENAS</option>
         <option>Cyber Forge (Workshop)</option>
         <option>Cloud Craft (Workshop)</option>
@@ -816,14 +1086,14 @@
         <option>Hackathon</option>
         <option>None</option>
       </select>
-      <select id="selNonTech" class="filter-select" onchange="displayTable()">
+      <select id="selNonTech" class="filter-select" onchange="onDropdownFilterChanged()">
         <option value="">ALL NON-TECHNICAL ARENAS</option>
         <option>Prompt Generating</option>
         <option>Click N Chill (Photography)</option>
         <option>Quiz Competition</option>
         <option>None</option>
       </select>
-      <select id="selStatus" class="filter-select" onchange="displayTable()">
+      <select id="selStatus" class="filter-select" onchange="onFilterInputChanged()">
         <option value="">ALL ACTIVE OPERATIVES</option>
         <option value="Pending Verification">Pending Verification</option>
         <option value="Verified">Verified</option>
@@ -831,12 +1101,19 @@
         <option value="Inactive">Inactive / Deactivated</option>
         <option value="ALL">All (Including Inactive)</option>
       </select>
+      <select id="selPageSize" class="filter-select" onchange="changePageSize(this.value)" title="Rows per page">
+        <option value="15">15 / PAGE</option>
+        <option value="25">25 / PAGE</option>
+        <option value="50">50 / PAGE</option>
+        <option value="100">100 / PAGE</option>
+        <option value="ALL">SHOW ALL</option>
+      </select>
       <button class="cyber-btn cb-outline" onclick="reloadRegistrations()"><i class="fas fa-sync-alt"></i> REFRESH</button>
-      <button class="cyber-btn cb-gold" onclick="exportVerifiedOnly()"><i class="fas fa-check-double"></i> VERIFIED ONLY</button>
     </div>
 
     <!-- MAIN DATA TABLE -->
-    <div class="table-container hud-panel">
+    <div class="table-container hud-panel" id="operativeTable">
+      <div class="active-partition-banner" id="activePartitionBanner"></div>
       <div class="table-responsive">
         <table>
           <thead>
@@ -858,7 +1135,10 @@
           <tbody id="tableBody"></tbody>
         </table>
       </div>
-      <div class="table-footer-bar" id="tableCounter"></div>
+      <div class="table-footer-bar">
+        <div id="tableCounter"></div>
+        <div class="pagination-controls" id="tablePaginationControls"></div>
+      </div>
     </div>
   </div>
 
@@ -1562,22 +1842,260 @@
       `;
     }
 
+    // ─── REGISTERED LIST PARTITION & PAGINATION STATE ───────────────
+    let activePartition = 'all';
+    let groupPartitionsMode = true;
+    let currentPage = 1;
+    let pageSize = 15;
+
+    const PARTITION_META = {
+      'all': {
+        label: 'ALL REGISTERED OPERATIVES',
+        shortLabel: 'ALL REGISTRATIONS',
+        icon: 'fa-globe',
+        color: 'var(--cyan)',
+        desc: 'Complete roster partitioned across Track 1 (Hackathon), Track 2 (Workshops), and Track 3 (Competitions)'
+      },
+      'track_hackathon': {
+        label: 'PARTITION 01 // TRACK 1: HACKATHON STRIKE TEAMS (5 HOURS)',
+        shortLabel: 'TRACK 1: HACKATHON',
+        icon: 'fa-trophy',
+        color: 'var(--neon-orange)',
+        desc: 'Standalone 5-Hour Prototype Sprint • Strictly 3 Members / Team • ₹300 / Team (Max Capacity: 75)'
+      },
+      'track_workshops': {
+        label: 'PARTITION 02 // TRACK 2: TECHNICAL WORKSHOPS + EVENT',
+        shortLabel: 'TRACK 2: WORKSHOPS',
+        icon: 'fa-laptop-code',
+        color: '#d8b4fe',
+        desc: 'Cyber Forge (Ethical Hacking) & Cloud Craft (AWS/Cloud) Workshops + Optional Competition • ₹250'
+      },
+      'track_competitions': {
+        label: 'PARTITION 03 // TRACK 3: TECHNICAL & NON-TECHNICAL COMPETITIONS',
+        shortLabel: 'TRACK 3: COMPETITIONS',
+        icon: 'fa-bolt',
+        color: 'var(--neon-green)',
+        desc: 'CTF Challenge, Prompt Generating, Click N Chill (Photography) & Quiz Competition • ₹250'
+      },
+      'ev_Hackathon': {
+        label: 'EVENT PARTITION // 04 · HACKATHON (5 HOURS)',
+        shortLabel: 'Hackathon',
+        icon: 'fa-trophy',
+        color: 'var(--neon-orange)',
+        desc: '5-Hour Rapid Prototyping Marathon (10:00 AM – 3:00 PM)'
+      },
+      'ev_Cyber Forge (Workshop)': {
+        label: 'EVENT PARTITION // 01 · CYBER FORGE (WORKSHOP)',
+        shortLabel: 'Cyber Forge',
+        icon: 'fa-user-secret',
+        color: 'var(--cyan)',
+        desc: 'Hands-on Cybersecurity & Ethical Hacking Workshop'
+      },
+      'ev_Cloud Craft (Workshop)': {
+        label: 'EVENT PARTITION // 02 · CLOUD CRAFT (WORKSHOP)',
+        shortLabel: 'Cloud Craft',
+        icon: 'fa-cloud',
+        color: '#d8b4fe',
+        desc: 'Cloud Architecture & Modern DevOps Workshop'
+      },
+      'ev_CTF Challenge': {
+        label: 'EVENT PARTITION // 03 · CTF CHALLENGE',
+        shortLabel: 'CTF Challenge',
+        icon: 'fa-flag',
+        color: 'var(--cyan)',
+        desc: 'Capture The Flag Cybersecurity Arena'
+      },
+      'ev_Prompt Generating': {
+        label: 'EVENT PARTITION // 05 · PROMPT GENERATING',
+        shortLabel: 'Prompt Generating',
+        icon: 'fa-robot',
+        color: 'var(--neon-green)',
+        desc: 'AI Creativity & Prompt Engineering Arena'
+      },
+      'ev_Click N Chill (Photography)': {
+        label: 'EVENT PARTITION // 06 · CLICK N CHILL (PHOTOGRAPHY)',
+        shortLabel: 'Click N Chill',
+        icon: 'fa-camera-retro',
+        color: 'var(--neon-gold)',
+        desc: 'Visual Storytelling & Campus Photography Contest'
+      },
+      'ev_Quiz Competition': {
+        label: 'EVENT PARTITION // 07 · QUIZ COMPETITION',
+        shortLabel: 'Quiz Competition',
+        icon: 'fa-brain',
+        color: 'var(--neon-pink)',
+        desc: 'High-Speed Tech & General Trivia Battle'
+      }
+    };
+
+    function getRowTrackPartition(row) {
+      const t = (row.techEvent || '').toLowerCase();
+      if (t.includes('hackathon')) return 'track_hackathon';
+      if (t.includes('workshop') || t.includes('cyber forge') || t.includes('cloud craft')) return 'track_workshops';
+      return 'track_competitions';
+    }
+
+    function doesRowMatchPartition(row, partKey) {
+      if (!partKey || partKey === 'all') return true;
+      if (partKey === 'track_hackathon' || partKey === 'track_workshops' || partKey === 'track_competitions') {
+        return getRowTrackPartition(row) === partKey;
+      }
+      if (partKey.startsWith('ev_')) {
+        const target = partKey.slice(3).toLowerCase();
+        const t = (row.techEvent || '').toLowerCase();
+        const nt = (row.nonTechEvent || '').toLowerCase();
+        return t === target || nt === target || t.includes(target) || nt.includes(target);
+      }
+      return true;
+    }
+
+    function renderPartitionControls() {
+      const activeList = dataList.filter(d => d.status !== 'Inactive' && d.isActive !== false);
+      const countAll = activeList.length;
+      const countHack = activeList.filter(r => doesRowMatchPartition(r, 'track_hackathon')).length;
+      const countWorkshops = activeList.filter(r => doesRowMatchPartition(r, 'track_workshops')).length;
+      const countComps = activeList.filter(r => doesRowMatchPartition(r, 'track_competitions')).length;
+
+      const trackTabsEl = document.getElementById('partitionTrackTabs');
+      if (trackTabsEl) {
+        trackTabsEl.innerHTML = `
+          <button type="button" class="partition-tab-btn ${activePartition === 'all' ? 'active' : ''}" onclick="selectPartition('all')">
+            <span><i class="fas fa-globe" style="color:var(--cyan);margin-right:6px;"></i> ALL REGISTRATIONS</span>
+            <span class="pt-count-badge">${countAll}</span>
+          </button>
+          <button type="button" class="partition-tab-btn tab-hack ${activePartition === 'track_hackathon' || activePartition === 'ev_Hackathon' ? 'active' : ''}" onclick="selectPartition('track_hackathon')">
+            <span><i class="fas fa-trophy" style="color:var(--neon-orange);margin-right:6px;"></i> TRACK 1: HACKATHON</span>
+            <span class="pt-count-badge" style="color:var(--neon-orange);border:1px solid rgba(255,119,0,0.4);">${countHack} / 75</span>
+          </button>
+          <button type="button" class="partition-tab-btn tab-workshop ${activePartition === 'track_workshops' ? 'active' : ''}" onclick="selectPartition('track_workshops')">
+            <span><i class="fas fa-laptop-code" style="color:#d8b4fe;margin-right:6px;"></i> TRACK 2: WORKSHOPS</span>
+            <span class="pt-count-badge" style="color:#d8b4fe;">${countWorkshops}</span>
+          </button>
+          <button type="button" class="partition-tab-btn tab-comp ${activePartition === 'track_competitions' ? 'active' : ''}" onclick="selectPartition('track_competitions')">
+            <span><i class="fas fa-bolt" style="color:var(--neon-green);margin-right:6px;"></i> TRACK 3: COMPETITIONS</span>
+            <span class="pt-count-badge" style="color:var(--neon-green);">${countComps}</span>
+          </button>
+        `;
+      }
+
+      const eventChipsEl = document.getElementById('partitionEventChips');
+      if (eventChipsEl) {
+        const eventsList = [
+          { key: 'ev_Hackathon', label: 'Hackathon', icon: 'fa-trophy', color: 'var(--neon-orange)' },
+          { key: 'ev_Cyber Forge (Workshop)', label: 'Cyber Forge (Workshop)', icon: 'fa-user-secret', color: 'var(--cyan)' },
+          { key: 'ev_Cloud Craft (Workshop)', label: 'Cloud Craft (Workshop)', icon: 'fa-cloud', color: '#d8b4fe' },
+          { key: 'ev_CTF Challenge', label: 'CTF Challenge', icon: 'fa-flag', color: 'var(--cyan)' },
+          { key: 'ev_Prompt Generating', label: 'Prompt Generating', icon: 'fa-robot', color: 'var(--neon-green)' },
+          { key: 'ev_Click N Chill (Photography)', label: 'Click N Chill', icon: 'fa-camera-retro', color: 'var(--neon-gold)' },
+          { key: 'ev_Quiz Competition', label: 'Quiz Competition', icon: 'fa-brain', color: 'var(--neon-pink)' }
+        ];
+
+        eventChipsEl.innerHTML = `<span class="partition-chip-label"><i class="fas fa-filter"></i> Event Roster:</span>` +
+          eventsList.map(ev => {
+            const c = activeList.filter(r => doesRowMatchPartition(r, ev.key)).length;
+            const isAct = activePartition === ev.key;
+            return `
+              <button type="button" class="partition-chip ${isAct ? 'active' : ''}" onclick="selectPartition('${ev.key}')">
+                <i class="fas ${ev.icon}" style="color:${ev.color};"></i>
+                <span>${ev.label}</span>
+                <span class="chip-num">${c}</span>
+              </button>
+            `;
+          }).join('');
+      }
+    }
+
+    function selectPartition(partKey) {
+      activePartition = partKey;
+      currentPage = 1;
+
+      // Reset conflicting dropdown filters when switching partition tabs
+      const selTech = document.getElementById('selTech');
+      const selNonTech = document.getElementById('selNonTech');
+      if (selTech) selTech.value = '';
+      if (selNonTech) selNonTech.value = '';
+
+      renderPartitionControls();
+      displayTable();
+    }
+
+    function toggleGroupPartitionsMode() {
+      groupPartitionsMode = !groupPartitionsMode;
+      const btn = document.getElementById('btnToggleGroupPartitions');
+      const txt = document.getElementById('txtGroupPartitions');
+      if (txt) txt.textContent = `GROUP DIVIDERS: ${groupPartitionsMode ? 'ON' : 'OFF'}`;
+      if (btn) {
+        btn.style.borderColor = groupPartitionsMode ? 'var(--cyan)' : 'rgba(255,255,255,0.2)';
+        btn.style.color = groupPartitionsMode ? 'var(--cyan)' : 'var(--text-muted)';
+        btn.style.background = groupPartitionsMode ? 'rgba(0,240,255,0.12)' : 'transparent';
+      }
+      displayTable();
+    }
+
+    function onFilterInputChanged() {
+      currentPage = 1;
+      displayTable();
+    }
+
+    function onDropdownFilterChanged() {
+      currentPage = 1;
+      displayTable();
+    }
+
+    function changePageSize(val) {
+      pageSize = val === 'ALL' ? 'ALL' : parseInt(val, 10) || 15;
+      currentPage = 1;
+      const sel = document.getElementById('selPageSize');
+      if (sel && sel.value !== String(val)) sel.value = String(val);
+      displayTable();
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      displayTable();
+      const tableSec = document.getElementById('operativeTable');
+      if (tableSec) tableSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function resetAllTableFilters() {
+      activePartition = 'all';
+      currentPage = 1;
+      const s = document.getElementById('adminSearch');
+      const st = document.getElementById('selTech');
+      const snt = document.getElementById('selNonTech');
+      const ss = document.getElementById('selStatus');
+      if (s) s.value = '';
+      if (st) st.value = '';
+      if (snt) snt.value = '';
+      if (ss) ss.value = '';
+      renderPartitionControls();
+      displayTable();
+    }
+
     function filterByCardStatus(statusVal) {
       const sel = document.getElementById('selStatus');
       if (sel) {
         sel.value = statusVal;
-        displayTable();
-      }
-    }
-
-    function filterByTechEventCard(techName) {
-      const selTech = document.getElementById('selTech');
-      if (selTech) {
-        selTech.value = techName;
+        activePartition = 'all';
+        currentPage = 1;
+        renderPartitionControls();
         displayTable();
         const tableSec = document.getElementById('operativeTable');
         if (tableSec) tableSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
+    }
+
+    function filterByTechEventCard(techName) {
+      if (techName === 'Hackathon') {
+        selectPartition('track_hackathon');
+      } else {
+        const selTech = document.getElementById('selTech');
+        if (selTech) selTech.value = techName;
+        currentPage = 1;
+        displayTable();
+      }
+      const tableSec = document.getElementById('operativeTable');
+      if (tableSec) tableSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     // Charts Rendering
@@ -1614,44 +2132,168 @@
 
     // Table Filter and Render
     function retrieveFiltered() {
-      const q = document.getElementById('adminSearch').value.toLowerCase();
-      const ft = document.getElementById('selTech').value;
-      const fnt = document.getElementById('selNonTech').value;
-      const fs = document.getElementById('selStatus').value;
+      const q = (document.getElementById('adminSearch')?.value || '').toLowerCase();
+      const ft = document.getElementById('selTech')?.value || '';
+      const fnt = document.getElementById('selNonTech')?.value || '';
+      const fs = document.getElementById('selStatus')?.value || '';
 
       return dataList.filter(row => {
         const isRowInactive = row.status === 'Inactive' || row.isActive === false;
         if (fs === '') {
-          // Default: show only active operatives
           if (isRowInactive) return false;
         } else if (fs === 'Inactive') {
-          // Show only inactive operatives
           if (!isRowInactive) return false;
         } else if (fs === 'ALL') {
           // Show all including inactive
         } else {
-          // Specific status (Pending Verification, Verified, Rejected)
           if (row.status !== fs || isRowInactive) return false;
         }
 
-        const str = [row.firstName, row.lastName, row.email, row.mobile, row.college, row.regId, row.teamName, row.leaderName].join(' ').toLowerCase();
+        if (!doesRowMatchPartition(row, activePartition)) return false;
+
+        const str = [row.firstName, row.lastName, row.email, row.mobile, row.college, row.regId, row.teamName, row.leaderName, row.tm2, row.tm3].join(' ').toLowerCase();
         return (!q || str.includes(q))
-          && (!ft || row.techEvent === ft)
-          && (!fnt || row.nonTechEvent === fnt);
+          && (!ft || row.techEvent === ft || row.nonTechEvent === ft)
+          && (!fnt || row.nonTechEvent === fnt || row.techEvent === fnt);
       });
     }
 
+    function getRowSubGroupKey(row) {
+      if (activePartition === 'track_workshops') {
+        const t = (row.techEvent || '');
+        if (t.includes('Cyber Forge')) return 'ev_Cyber Forge (Workshop)';
+        if (t.includes('Cloud Craft')) return 'ev_Cloud Craft (Workshop)';
+        return 'track_workshops';
+      }
+      if (activePartition === 'track_competitions') {
+        const t = (row.techEvent || '');
+        const nt = (row.nonTechEvent || '');
+        const primary = (t && t !== 'None') ? t : nt;
+        return `ev_${primary}`;
+      }
+      return getRowTrackPartition(row);
+    }
+
     function displayTable() {
-      const filtered = retrieveFiltered();
+      const rawFiltered = retrieveFiltered();
       const tbody = document.getElementById('tableBody');
-      if (!filtered.length) {
-        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:40px;color:var(--text-muted);font-family:var(--font-mono);">NO MATCHING RECORDS LOCATED IN SYSTEM.</td></tr>`;
-        document.getElementById('tableCounter').textContent = '';
+      const bannerEl = document.getElementById('activePartitionBanner');
+      const pagEl = document.getElementById('tablePaginationControls');
+
+      // Sort by partition group when Group Dividers mode is enabled
+      const trackOrder = { 'track_hackathon': 1, 'track_workshops': 2, 'track_competitions': 3 };
+      const filtered = [...rawFiltered];
+      if (groupPartitionsMode) {
+        filtered.sort((a, b) => {
+          const ga = getRowSubGroupKey(a);
+          const gb = getRowSubGroupKey(b);
+          if (activePartition === 'all') {
+            return (trackOrder[ga] || 9) - (trackOrder[gb] || 9);
+          }
+          return ga.localeCompare(gb);
+        });
+      }
+
+      const totalFiltered = filtered.length;
+      const verifiedInPart = filtered.filter(r => r.status === 'Verified').length;
+      const pendingInPart = filtered.filter(r => r.status === 'Pending Verification').length;
+
+      const effectivePageSize = pageSize === 'ALL' ? Math.max(1, totalFiltered) : parseInt(pageSize, 10) || 15;
+      const totalPages = Math.max(1, Math.ceil(totalFiltered / effectivePageSize));
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const startIdx = (currentPage - 1) * effectivePageSize;
+      const endIdx = Math.min(startIdx + effectivePageSize, totalFiltered);
+      const pageRows = filtered.slice(startIdx, endIdx);
+
+      // Update Active Partition Banner
+      if (bannerEl) {
+        const meta = PARTITION_META[activePartition] || PARTITION_META['all'];
+        const hasFilters = activePartition !== 'all'
+          || (document.getElementById('adminSearch')?.value || '') !== ''
+          || (document.getElementById('selTech')?.value || '') !== ''
+          || (document.getElementById('selNonTech')?.value || '') !== ''
+          || (document.getElementById('selStatus')?.value || '') !== '';
+
+        bannerEl.innerHTML = `
+          <div class="apb-left">
+            <span class="apb-title" style="color:${meta.color};">
+              <i class="fas ${meta.icon}" style="margin-right:6px;"></i> ${meta.label}
+            </span>
+            <span style="font-family:var(--font-mono);font-size:0.73rem;color:var(--text-muted);">${meta.desc}</span>
+          </div>
+          <div class="apb-stats">
+            <span class="apb-pill" style="color:var(--cyan);border-color:rgba(0,240,255,0.3);">TOTAL: <strong>${totalFiltered}</strong></span>
+            <span class="apb-pill" style="color:var(--neon-green);border-color:rgba(0,255,102,0.3);">VERIFIED: <strong>${verifiedInPart}</strong></span>
+            <span class="apb-pill" style="color:var(--neon-orange);border-color:rgba(255,140,0,0.3);">PENDING: <strong>${pendingInPart}</strong></span>
+            <span class="apb-pill" style="color:#fff;">PAGE: <strong>${currentPage} / ${totalPages}</strong></span>
+            ${hasFilters ? `<button type="button" class="cyber-btn cb-outline" style="padding:3px 9px;font-size:0.7rem;" onclick="resetAllTableFilters()"><i class="fas fa-undo"></i> RESET VIEW</button>` : ''}
+          </div>
+        `;
+      }
+
+      if (!totalFiltered) {
+        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:40px;color:var(--text-muted);font-family:var(--font-mono);">NO MATCHING RECORDS LOCATED IN THIS PARTITION.</td></tr>`;
+        document.getElementById('tableCounter').textContent = '0 RECORDS DISPLAYED';
+        if (pagEl) pagEl.innerHTML = '';
         return;
       }
 
-      tbody.innerHTML = filtered.map((row, i) => {
-        const isHack = row.techEvent === 'Hackathon';
+      // Compute group counts across the filtered set for partition headers
+      const groupTotals = {};
+      const groupVerified = {};
+      filtered.forEach(r => {
+        const gk = getRowSubGroupKey(r);
+        groupTotals[gk] = (groupTotals[gk] || 0) + 1;
+        if (r.status === 'Verified') groupVerified[gk] = (groupVerified[gk] || 0) + 1;
+      });
+
+      let lastGroupKey = null;
+      const htmlChunks = [];
+
+      pageRows.forEach((row, idxOnPage) => {
+        const globalSerial = startIdx + idxOnPage + 1;
+        const gk = getRowSubGroupKey(row);
+
+        if (groupPartitionsMode && gk !== lastGroupKey) {
+          lastGroupKey = gk;
+          const gMeta = PARTITION_META[gk] || {
+            label: `EVENT PARTITION // ${gk.replace('ev_', '').toUpperCase()}`,
+            icon: 'fa-folder-open',
+            color: 'var(--cyan)'
+          };
+          const rowClass = gk === 'track_hackathon' || gk === 'ev_Hackathon'
+            ? 'part-hack'
+            : (gk === 'track_workshops' || gk.includes('Workshop'))
+              ? 'part-workshop'
+              : 'part-comp';
+          const gCount = groupTotals[gk] || 0;
+          const gVer = groupVerified[gk] || 0;
+
+          htmlChunks.push(`
+            <tr class="partition-divider-row ${rowClass}">
+              <td colspan="12">
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                  <div>
+                    <i class="fas ${gMeta.icon}" style="margin-right:8px;"></i>
+                    <strong>${gMeta.label}</strong>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;font-family:var(--font-mono);font-size:0.72rem;">
+                    <span style="background:rgba(0,0,0,0.45);padding:3px 9px;border-radius:4px;color:#fff;">
+                      <strong>${gCount}</strong> REGISTERED &bull; <span style="color:var(--neon-green);">${gVer} VERIFIED</span>
+                    </span>
+                    <button type="button" class="cyber-btn cb-outline" style="padding:3px 9px;font-size:0.68rem;border-color:currentColor;color:inherit;" onclick="exportSpecificPartitionCSV('${gk}')">
+                      <i class="fas fa-file-csv"></i> EXPORT SECTION
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          `);
+        }
+
+        const isHack = (row.techEvent || '').includes('Hackathon');
         const realIdx = dataList.indexOf(row);
         const isRowInactive = row.status === 'Inactive' || row.isActive === false;
         const statusClass = isRowInactive
@@ -1665,12 +2307,21 @@
           ? `<img src="${row.paymentScreenshot}" class="proof-thumbnail" onclick="triggerLightbox(${realIdx})" title="Click to inspect"/>`
           : '<span style="color:var(--text-muted);font-family:var(--font-mono);">N/A</span>';
 
-        return `
+        const hackTeamSub = isHack && (row.teamName || row.leaderName)
+          ? `<div style="font-family:var(--font-mono);font-size:0.69rem;color:var(--neon-orange);margin-top:3px;">
+               <i class="fas fa-users"></i> <strong>${row.teamName || 'Team'}</strong>: ${[row.leaderName, row.tm2, row.tm3].filter(Boolean).join(', ')}
+             </div>`
+          : '';
+
+        htmlChunks.push(`
           <tr class="${isHack ? 'hack-row' : ''} ${isRowInactive ? 'inactive-row' : ''}">
-            <td style="font-family:var(--font-mono);color:var(--text-muted);">${i + 1}</td>
+            <td style="font-family:var(--font-mono);color:var(--text-muted);font-weight:700;">${globalSerial}</td>
             <td><span class="badge-reg">${row.regId || '—'}</span></td>
             <td style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">${row.timestamp || '—'}</td>
-            <td><strong style="${isRowInactive ? 'text-decoration:line-through;color:var(--text-muted);' : ''}">${row.firstName} ${row.lastName}</strong></td>
+            <td>
+              <strong style="${isRowInactive ? 'text-decoration:line-through;color:var(--text-muted);' : ''}">${row.firstName} ${row.lastName}</strong>
+              ${hackTeamSub}
+            </td>
             <td style="font-family:var(--font-mono);">${row.mobile}</td>
             <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${row.college}">${row.college}</td>
             <td><span class="badge-event-t ${isHack ? 'hack' : ''}">${row.techEvent}</span></td>
@@ -1684,11 +2335,44 @@
               <button class="cyber-btn cb-outline" style="padding:4px 9px;font-size:0.75rem;color:var(--neon-pink);border-color:var(--neon-pink);" onclick="deleteRegistrationPermanently(${realIdx})" title="Permanently Delete Registration"><i class="fas fa-trash-alt"></i></button>
             </td>
           </tr>
-        `;
-      }).join('');
+        `);
+      });
+
+      tbody.innerHTML = htmlChunks.join('');
 
       const activeTotal = dataList.filter(d => d.status !== 'Inactive' && d.isActive !== false).length;
-      document.getElementById('tableCounter').innerHTML = `DISPATCHING <strong>${filtered.length}</strong> OF <strong>${activeTotal}</strong> ACTIVE OPERATIVES${dataList.length > activeTotal ? ` (${dataList.length - activeTotal} Inactive)` : ''}`;
+      const meta = PARTITION_META[activePartition] || PARTITION_META['all'];
+      document.getElementById('tableCounter').innerHTML = `SHOWING <strong>${startIdx + 1}–${endIdx}</strong> OF <strong>${totalFiltered}</strong> IN <span style="color:${meta.color};font-weight:700;">[${meta.shortLabel}]</span> &bull; (${activeTotal} TOTAL ACTIVE${dataList.length > activeTotal ? `, ${dataList.length - activeTotal} INACTIVE` : ''})`;
+
+      // Render Pagination Buttons
+      if (pagEl) {
+        let pageButtonsHtml = `
+          <span style="margin-right:6px;color:var(--text-muted);">ROWS:</span>
+          <select class="page-size-select" onchange="changePageSize(this.value)" style="margin-right:10px;">
+            <option value="15" ${pageSize === 15 ? 'selected' : ''}>15</option>
+            <option value="25" ${pageSize === 25 ? 'selected' : ''}>25</option>
+            <option value="50" ${pageSize === 50 ? 'selected' : ''}>50</option>
+            <option value="100" ${pageSize === 100 ? 'selected' : ''}>100</option>
+            <option value="ALL" ${pageSize === 'ALL' ? 'selected' : ''}>ALL</option>
+          </select>
+          <button type="button" class="page-btn" onclick="goToPage(1)" ${currentPage === 1 ? 'disabled' : ''} title="First Page">&laquo;</button>
+          <button type="button" class="page-btn" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} title="Previous Page">&lsaquo; PREV</button>
+        `;
+
+        for (let p = 1; p <= totalPages; p++) {
+          if (totalPages <= 7 || p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1) {
+            pageButtonsHtml += `<button type="button" class="page-btn ${p === currentPage ? 'active' : ''}" onclick="goToPage(${p})">${p}</button>`;
+          } else if (Math.abs(p - currentPage) === 2) {
+            pageButtonsHtml += `<span style="color:var(--text-muted);padding:0 4px;">&hellip;</span>`;
+          }
+        }
+
+        pageButtonsHtml += `
+          <button type="button" class="page-btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} title="Next Page">NEXT &rsaquo;</button>
+          <button type="button" class="page-btn" onclick="goToPage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''} title="Last Page">&raquo;</button>
+        `;
+        pagEl.innerHTML = pageButtonsHtml;
+      }
     }
 
     // Status Cycler
@@ -2007,6 +2691,33 @@
       adminNotify(`✓ CSV Roster (${listToExport.length} entries) Exported.`, 'success');
     }
 
+    function exportSpecificPartitionCSV(partKey) {
+      const activeList = dataList.filter(d => d.status !== 'Inactive' && d.isActive !== false);
+      const rows = activeList.filter(r => doesRowMatchPartition(r, partKey));
+      if (!rows.length) {
+        adminNotify('No active records in this partition to export.', 'error');
+        return;
+      }
+      const meta = PARTITION_META[partKey] || { shortLabel: partKey.replace('ev_', '') };
+      const safeName = (meta.shortLabel || 'Partition').replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '');
+      const dateStr = new Date().toISOString().slice(0, 10);
+      triggerFileDownload(buildCSV(rows), `QAURA2026_${safeName}_${dateStr}.csv`);
+      adminNotify(`✓ Exported ${rows.length} entries from [${meta.shortLabel}].`, 'success');
+    }
+
+    function exportActivePartitionCSV() {
+      const filtered = retrieveFiltered();
+      if (!filtered.length) {
+        adminNotify('No matching records in current partition view to export.', 'error');
+        return;
+      }
+      const meta = PARTITION_META[activePartition] || PARTITION_META['all'];
+      const safeName = (meta.shortLabel || 'Filtered').replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '');
+      const dateStr = new Date().toISOString().slice(0, 10);
+      triggerFileDownload(buildCSV(filtered), `QAURA2026_${safeName}_${dateStr}.csv`);
+      adminNotify(`✓ Exported ${filtered.length} entries from [${meta.shortLabel}].`, 'success');
+    }
+
     function exportVerifiedOnly() {
       const verified = dataList.filter(d => d.status === 'Verified');
       if (!verified.length) {
@@ -2049,6 +2760,7 @@
     function renderAllComponents() {
       displayMetrics();
       displayCharts();
+      renderPartitionControls();
       displayTable();
     }
 
