@@ -310,7 +310,9 @@ app.get('/api/hackathon-status', async (req, res) => {
       count: 60,
       max: db.HACKATHON_MAX_SLOTS || 75,
       remaining: 15,
-      isFull: false
+      isFull: false,
+      registrationClosed: typeof db.isRegistrationClosed === 'function' ? db.isRegistrationClosed() : (Date.now() >= new Date('2026-10-12T18:00:00+05:30').getTime()),
+      deadline: db.REGISTRATION_DEADLINE_ISO || '2026-10-12T18:00:00+05:30'
     });
   }
 });
@@ -318,6 +320,15 @@ app.get('/api/hackathon-status', async (req, res) => {
 // ── API: REGISTER STUDENT INTO POSTGRESQL ──────────────────────────
 app.post('/api/register', async (req, res) => {
   try {
+    if (typeof db.isRegistrationClosed === 'function' && db.isRegistrationClosed()) {
+      return res.status(403).json({
+        status: 'registration_closed',
+        code: 'REGISTRATION_CLOSED',
+        title: 'Registrations Are Closed!',
+        message: 'The official registration window closed on 12th October 2026 at 6:00 PM IST. New registrations are no longer accepted.'
+      });
+    }
+
     const data = req.body;
     if (!data.regId) {
       return res.status(400).json({ status: 'error', message: 'Missing Registration ID' });
@@ -335,6 +346,14 @@ app.post('/api/register', async (req, res) => {
       hackathonStatus: hackStatus
     });
   } catch (err) {
+    if (err.code === 'REGISTRATION_CLOSED') {
+      return res.status(403).json({
+        status: 'registration_closed',
+        code: 'REGISTRATION_CLOSED',
+        title: 'Registrations Are Closed!',
+        message: 'The official registration window closed on 12th October 2026 at 6:00 PM IST. New registrations are no longer accepted.'
+      });
+    }
     if (err.code === 'HACKATHON_SLOTS_FULL') {
       return res.status(409).json({
         status: 'slots_full',

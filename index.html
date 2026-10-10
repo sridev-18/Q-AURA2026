@@ -365,7 +365,7 @@
     .meta-chip.gold i { color: var(--neon-gold); }
     .meta-chip.green i { color: var(--neon-green); }
 
-    /* ─── LIVE COUNTDOWN (11TH OCT 2026, 6:00 PM) ──────────────────── */
+    /* ─── LIVE COUNTDOWN (12TH OCT 2026, 6:00 PM) ──────────────────── */
     .countdown-section {
       max-width: 1080px;
       margin: 0 auto 40px;
@@ -1582,11 +1582,11 @@
     <div class="news-marquee-content">
       <span class="ticker-item"><i class="fas fa-fire" style="color:var(--neon-orange);"></i> <span class="ticker-highlight">Q-AURA 2026 REGISTRATION IS LIVE</span> • 14 OCTOBER 2026</span>
       <span class="ticker-item"><i class="fas fa-trophy" style="color:var(--neon-gold);"></i> <span class="ticker-highlight">WIN BIG. INNOVATE BIGGER.</span> • CASH PRIZES FOR TOP 3 HACKATHON WINNERS!</span>
-      <span class="ticker-item"><i class="fas fa-hourglass-half" style="color:var(--cyan);"></i> ENLISTMENT CLOSES: 11 OCTOBER 2026 @ 06:00 PM IST</span>
+      <span class="ticker-item"><i class="fas fa-hourglass-half" style="color:var(--cyan);"></i> ENLISTMENT CLOSES: 12 OCTOBER 2026 @ 06:00 PM IST</span>
       <span class="ticker-item"><i class="fas fa-map-marker-alt" style="color:var(--cyan);"></i> TOWER-C THINK TANK THEATER, RATHINAM GLOBAL UNIVERSITY</span>
       <span class="ticker-item"><i class="fas fa-fire" style="color:var(--neon-orange);"></i> <span class="ticker-highlight">Q-AURA 2026 REGISTRATION IS LIVE</span> • 14 OCTOBER 2026</span>
       <span class="ticker-item"><i class="fas fa-trophy" style="color:var(--neon-gold);"></i> <span class="ticker-highlight">WIN BIG. INNOVATE BIGGER.</span> • CASH PRIZES FOR TOP 3 HACKATHON WINNERS!</span>
-      <span class="ticker-item"><i class="fas fa-hourglass-half" style="color:var(--cyan);"></i> ENLISTMENT CLOSES: 11 OCTOBER 2026 @ 06:00 PM IST</span>
+      <span class="ticker-item"><i class="fas fa-hourglass-half" style="color:var(--cyan);"></i> ENLISTMENT CLOSES: 12 OCTOBER 2026 @ 06:00 PM IST</span>
       <span class="ticker-item"><i class="fas fa-map-marker-alt" style="color:var(--cyan);"></i> TOWER-C THINK TANK THEATER, RATHINAM GLOBAL UNIVERSITY</span>
     </div>
   </div>
@@ -1648,14 +1648,14 @@
     </div>
   </section>
 
-  <!-- COUNTDOWN TIMER: TODAY TILL 11TH OCTOBER 2026 6:00 PM (REQUESTED) -->
+  <!-- COUNTDOWN TIMER: TODAY TILL 12TH OCTOBER 2026 6:00 PM (REQUESTED) -->
   <section class="countdown-section">
-    <div class="countdown-wrapper hud-panel">
-      <div class="countdown-heading">
-        <i class="fas fa-satellite-dish"></i> <span>ENLISTMENT WINDOW CLOSES IN</span>
+    <div class="countdown-wrapper hud-panel" id="countdownWrapperPanel">
+      <div class="countdown-heading" id="countdownHeading">
+        <i class="fas fa-satellite-dish"></i> <span id="countdownHeadingText">ENLISTMENT WINDOW CLOSES IN</span>
       </div>
-      <div class="countdown-subtext">
-        TARGET DEADLINE: 11 OCTOBER 2026 • 06:00 PM IST
+      <div class="countdown-subtext" id="countdownSubtext">
+        TARGET DEADLINE: 12 OCTOBER 2026 • 06:00 PM IST
       </div>
       <div class="countdown-grid">
         <div class="countdown-box">
@@ -1865,6 +1865,18 @@
         &bull; <strong>Food &amp; Accommodation:</strong> Will <strong>NOT</strong> be provided.<br/>
         &bull; Upload payment confirmation screenshot to validate submission.<br/>
         &bull; <strong>Instant Registration Pass:</strong> You will be able to download and print your official event pass immediately upon submission.
+      </div>
+
+      <!-- REGISTRATION CLOSED BANNER (DISPLAYED AUTOMATICALLY AFTER 12 OCT 2026 6:00 PM IST) -->
+      <div id="registrationClosedBanner" style="display:none;margin-bottom:24px;padding:22px;background:rgba(255,0,85,0.12);border:2px solid var(--neon-pink);border-radius:10px;text-align:center;box-shadow:0 0 30px rgba(255,0,85,0.25);">
+        <div style="font-size:2rem;color:var(--neon-pink);margin-bottom:8px;"><i class="fas fa-lock"></i></div>
+        <h3 style="font-family:var(--font-orbitron);font-size:1.25rem;color:var(--neon-pink);letter-spacing:1.5px;margin-bottom:8px;">
+          REGISTRATIONS ARE CLOSED!
+        </h3>
+        <p style="font-family:var(--font-mono);font-size:0.9rem;color:#fff;line-height:1.6;">
+          The official registration deadline (<strong>12th October 2026, 6:00 PM IST</strong>) has passed.<br/>
+          New registrations are no longer accepted for Q-AURA 2026.
+        </p>
       </div>
 
       <form id="cyberRegForm" novalidate autocomplete="off">
@@ -2204,7 +2216,7 @@
           </div>
         </div>
 
-        <button type="submit" class="btn-cyber-primary">
+        <button type="submit" id="btnSubmitRegistration" class="btn-cyber-primary">
           [ SUBMIT REGISTRATION FOR Q-AURA 2026 ]
         </button>
       </form>
@@ -2543,6 +2555,26 @@
     </div>
   </div>
 
+  <!-- REGISTRATION CLOSED POPUP MODAL (AFTER 12 OCT 2026 6:00 PM IST) -->
+  <div id="registration-closed-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(4,7,14,0.92);backdrop-filter:blur(12px);z-index:999999;align-items:center;justify-content:center;padding:20px;">
+    <div class="hackathon-full-hud-card" style="border-color:var(--neon-pink);box-shadow:0 0 50px rgba(255,0,85,0.3);">
+      <div class="hackathon-full-icon" style="color:var(--neon-pink);border-color:rgba(255,0,85,0.4);background:rgba(255,0,85,0.12);">
+        <i class="fas fa-lock"></i>
+      </div>
+      <h2 style="font-family:var(--font-orbitron);color:var(--neon-pink);font-size:1.45rem;letter-spacing:1px;margin-bottom:10px;">
+        Registrations Are Closed!
+      </h2>
+      <p style="font-family:var(--font-mono);font-size:0.95rem;color:var(--text-bright);line-height:1.6;margin-bottom:22px;">
+        The official registration window for <strong>Q-AURA 2026</strong> closed on <strong>12th October 2026 at 6:00 PM IST</strong>. New registrations are no longer accepted.
+      </p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <button type="button" class="cyber-btn cb-outline" style="justify-content:center;padding:12px 26px;font-size:0.88rem;border-color:var(--neon-pink);color:var(--neon-pink);" onclick="closeRegistrationClosedModal()">
+          CLOSE
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- SPINNER -->
   <div id="cyber-spinner">
     <div class="spinner-hud-ring"></div>
@@ -2604,20 +2636,115 @@
   </footer>
 
   <script>
-    // ─── LIVE COUNTDOWN TIMER (TILL 11TH OCTOBER 2026 6:00 PM IST) ──
+    // ─── LIVE COUNTDOWN TIMER & DEADLINE LOCKOUT (12TH OCT 2026 6:00 PM IST) ──
+    const REGISTRATION_DEADLINE_ISO = '2026-10-12T18:00:00+05:30';
+    const REGISTRATION_DEADLINE_MS = new Date(REGISTRATION_DEADLINE_ISO).getTime();
+    let isPortalRegistrationClosed = Date.now() >= REGISTRATION_DEADLINE_MS;
+
+    function showRegistrationClosedModal() {
+      const modal = document.getElementById('registration-closed-modal-overlay');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeRegistrationClosedModal() {
+      const modal = document.getElementById('registration-closed-modal-overlay');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function enforceRegistrationDeadlineLock() {
+      isPortalRegistrationClosed = true;
+
+      // 1. Update Countdown Banner to Closed State
+      const headTxt = document.getElementById('countdownHeadingText');
+      const subTxt = document.getElementById('countdownSubtext');
+      const wrapPanel = document.getElementById('countdownWrapperPanel');
+      if (headTxt) {
+        headTxt.innerHTML = '🚫 ENLISTMENT WINDOW CLOSED';
+        headTxt.style.color = 'var(--neon-pink)';
+      }
+      if (subTxt) {
+        subTxt.innerHTML = 'DEADLINE PASSED: 12 OCTOBER 2026 • 06:00 PM IST (REGISTRATIONS LOCKED)';
+        subTxt.style.color = 'var(--neon-pink)';
+      }
+      if (wrapPanel) {
+        wrapPanel.style.borderColor = 'rgba(255, 0, 85, 0.5)';
+      }
+
+      // 2. Show Registration Closed Banner above form
+      const closedBanner = document.getElementById('registrationClosedBanner');
+      if (closedBanner) closedBanner.style.display = 'block';
+
+      // 3. Disable all inputs inside the registration form
+      const form = document.getElementById('cyberRegForm');
+      if (form) {
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(inp => {
+          inp.disabled = true;
+          inp.style.opacity = '0.5';
+          inp.style.cursor = 'not-allowed';
+        });
+      }
+
+      // 4. Disable all Event Selection Cards
+      const allCards = document.querySelectorAll('.cyber-event-option[data-event-type]');
+      allCards.forEach(card => {
+        card.classList.remove('selected');
+        card.classList.add('disabled');
+        card.style.pointerEvents = 'auto';
+        card.style.opacity = '0.5';
+        let badge = card.querySelector('.disabled-reason');
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'disabled-reason';
+          card.appendChild(badge);
+        }
+        badge.textContent = 'Registration Closed';
+      });
+
+      const hackPanel = document.getElementById('hackathon-team-panel');
+      if (hackPanel) hackPanel.classList.remove('show');
+
+      const pill = document.getElementById('selectionStatusPill');
+      if (pill) {
+        pill.style.borderColor = 'var(--neon-pink)';
+        pill.style.color = 'var(--neon-pink)';
+        pill.style.background = 'rgba(255,0,85,0.12)';
+        pill.innerHTML = '🚫 <strong>REGISTRATIONS CLOSED:</strong> Official deadline (12 Oct 2026, 6:00 PM IST) has passed.';
+      }
+
+      // 5. Disable Dropzone and Submit Button
+      const dropzone = document.getElementById('cyberDropzone');
+      if (dropzone) {
+        dropzone.style.opacity = '0.5';
+        dropzone.style.pointerEvents = 'none';
+      }
+
+      const submitBtn = document.getElementById('btnSubmitRegistration');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.6';
+        submitBtn.style.cursor = 'not-allowed';
+        submitBtn.style.background = 'rgba(255, 0, 85, 0.2)';
+        submitBtn.style.borderColor = 'var(--neon-pink)';
+        submitBtn.style.color = 'var(--neon-pink)';
+        submitBtn.textContent = '[ 🚫 REGISTRATIONS CLOSED — DEADLINE PASSED (12 OCT, 6:00 PM) ]';
+      }
+    }
+
     (function initCountdownTimer() {
-      // 11th October 2026 at 18:00:00 (6:00 PM IST)
-      const targetTime = new Date('2026-10-11T18:00:00+05:30').getTime();
+      // 12th October 2026 at 18:00:00 (6:00 PM IST)
+      const targetTime = REGISTRATION_DEADLINE_MS;
 
       function updateCountdown() {
-        const now = new Date().getTime();
+        const now = Date.now();
         const difference = targetTime - now;
 
-        if (difference <= 0) {
+        if (difference <= 0 || isPortalRegistrationClosed) {
           document.getElementById('cd-days').textContent = '00';
           document.getElementById('cd-hours').textContent = '00';
           document.getElementById('cd-minutes').textContent = '00';
           document.getElementById('cd-seconds').textContent = '00';
+          enforceRegistrationDeadlineLock();
           return;
         }
 
@@ -2895,6 +3022,9 @@
               remaining: typeof data.remaining === 'number' ? data.remaining : 15,
               isFull: !!data.isFull
             };
+            if (data.registrationClosed || Date.now() >= REGISTRATION_DEADLINE_MS) {
+              enforceRegistrationDeadlineLock();
+            }
             applyHackathonSlotStateToUI();
           }
         }
@@ -2969,6 +3099,11 @@
 
     // ─── EVENT SELECTOR LOGIC (3-TRACK SYSTEM) ──────────────────────
     function toggleEventSelection(element) {
+      if (isPortalRegistrationClosed || Date.now() >= REGISTRATION_DEADLINE_MS) {
+        enforceRegistrationDeadlineLock();
+        showRegistrationClosedModal();
+        return;
+      }
       if (element.dataset.eventType === 'hackathon' && hackathonSlotState.isFull) {
         showHackathonFullModal();
         return;
@@ -2980,6 +3115,10 @@
     }
 
     function evaluateEventSelections() {
+      if (isPortalRegistrationClosed || Date.now() >= REGISTRATION_DEADLINE_MS) {
+        enforceRegistrationDeadlineLock();
+        return;
+      }
       const allCards = Array.from(document.querySelectorAll('.cyber-event-option[data-event-type]'));
       const hackCard = document.querySelector('.cyber-event-option[data-event-type="hackathon"]');
       const workshopCards = Array.from(document.querySelectorAll('.cyber-event-option[data-event-type="workshop"]'));
@@ -3256,6 +3395,12 @@
     document.getElementById('cyberRegForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
+      if (isPortalRegistrationClosed || Date.now() >= REGISTRATION_DEADLINE_MS) {
+        enforceRegistrationDeadlineLock();
+        showRegistrationClosedModal();
+        return;
+      }
+
       try {
         let isValid = true;
 
@@ -3363,6 +3508,13 @@
         }
 
         if (spinner) spinner.style.display = 'none';
+
+        // If backend reports Registration Deadline Passed (HTTP 403)
+        if ((res && res.status === 403) || (pgResult && pgResult.status === 'registration_closed')) {
+          enforceRegistrationDeadlineLock();
+          showRegistrationClosedModal();
+          return;
+        }
 
         // If backend reports Hackathon slots full (or HTTP 409)
         if ((res && res.status === 409) || (pgResult && pgResult.status === 'slots_full')) {

@@ -146,6 +146,12 @@ async function initDb() {
 }
 
 const HACKATHON_MAX_SLOTS = 75;
+const REGISTRATION_DEADLINE_ISO = '2026-10-12T18:00:00+05:30';
+const REGISTRATION_DEADLINE_MS = new Date(REGISTRATION_DEADLINE_ISO).getTime();
+
+function isRegistrationClosed() {
+  return Date.now() >= REGISTRATION_DEADLINE_MS;
+}
 
 // Fetch live hackathon count
 async function getHackathonCount() {
@@ -163,12 +169,21 @@ async function getHackathonSlotStatus() {
     count,
     max,
     remaining,
-    isFull
+    isFull,
+    registrationClosed: isRegistrationClosed(),
+    deadline: REGISTRATION_DEADLINE_ISO
   };
 }
 
 // Create a new registration
 async function createRegistration(data) {
+  if (isRegistrationClosed()) {
+    const err = new Error('Registrations Are Closed! The official registration window closed on 12th October 2026 at 6:00 PM IST. New registrations are no longer accepted.');
+    err.code = 'REGISTRATION_CLOSED';
+    err.status = 403;
+    throw err;
+  }
+
   const query = `
     INSERT INTO registrations (
       reg_id, first_name, last_name, mobile, email, college,
@@ -415,6 +430,9 @@ module.exports = {
   pool,
   initDb,
   HACKATHON_MAX_SLOTS,
+  REGISTRATION_DEADLINE_ISO,
+  REGISTRATION_DEADLINE_MS,
+  isRegistrationClosed,
   getHackathonCount,
   getHackathonSlotStatus,
   createRegistration,
