@@ -1799,8 +1799,8 @@
       const total = activeList.length;
       const inactiveCount = dataList.filter(d => d.status === 'Inactive' || d.isActive === false).length;
       const hackCount = activeList.filter(d => (d.techEvent || '').includes('Hackathon')).length;
-      const hackRemaining = Math.max(0, 75 - hackCount);
-      const isHackFull = hackCount >= 75;
+      const hackRemaining = Math.max(0, 80 - hackCount);
+      const isHackFull = hackCount >= 80;
       const uniqueColleges = new Set(activeList.map(d => d.college)).size;
       const pending = activeList.filter(d => d.status === 'Pending Verification').length;
       const verified = activeList.filter(d => d.status === 'Verified').length;
@@ -1811,12 +1811,12 @@
           <div class="s-num" style="color:var(--cyan);">${total}</div>
           <div class="s-lbl">ACTIVE REGISTRATIONS</div>
         </div>
-        <div class="stat-hud-box hud-panel" style="cursor:pointer;position:relative;" onclick="filterByTechEventCard('Hackathon')" title="Click to filter: Hackathon (${hackCount}/75 Slots)">
+        <div class="stat-hud-box hud-panel" style="cursor:pointer;position:relative;" onclick="filterByTechEventCard('Hackathon')" title="Click to filter: Hackathon (${hackCount}/80 Slots)">
           <div class="s-icon"><i class="fas fa-trophy" style="color:${isHackFull ? 'var(--neon-pink)' : 'var(--neon-orange)'};"></i></div>
-          <div class="s-num" style="color:${isHackFull ? 'var(--neon-pink)' : 'var(--neon-orange)'};">${hackCount} / 75</div>
+          <div class="s-num" style="color:${isHackFull ? 'var(--neon-pink)' : 'var(--neon-orange)'};">${hackCount} / 80</div>
           <div class="s-lbl">${isHackFull ? 'HACKATHON (SLOTS FULL)' : `HACKATHON (${hackRemaining} SLOTS LEFT)`}</div>
           <div style="font-family:var(--font-mono);font-size:0.7rem;margin-top:4px;color:${isHackFull ? '#ff0055' : '#00ff66'};letter-spacing:0.5px;">
-            ${isHackFull ? '🔴 75/75 CAPACITY REACHED' : `🟢 ${hackRemaining} OF 75 SLOTS REMAINING`}
+            ${isHackFull ? '🔴 80/80 CAPACITY REACHED' : `🟢 ${hackRemaining} OF 80 SLOTS REMAINING`}
           </div>
         </div>
         <div class="stat-hud-box hud-panel">
@@ -1861,7 +1861,7 @@
         shortLabel: 'TRACK 1: HACKATHON',
         icon: 'fa-trophy',
         color: 'var(--neon-orange)',
-        desc: 'Standalone 5-Hour Prototype Sprint • Strictly 3 Members / Team • ₹300 / Team (Max Capacity: 75)'
+        desc: 'Standalone 5-Hour Prototype Sprint • Strictly 3 Members / Team • ₹300 / Team (Max Capacity: 80)'
       },
       'track_workshops': {
         label: 'PARTITION 02 // TRACK 2: TECHNICAL WORKSHOPS + EVENT',
@@ -1965,7 +1965,7 @@
           </button>
           <button type="button" class="partition-tab-btn tab-hack ${activePartition === 'track_hackathon' || activePartition === 'ev_Hackathon' ? 'active' : ''}" onclick="selectPartition('track_hackathon')">
             <span><i class="fas fa-trophy" style="color:var(--neon-orange);margin-right:6px;"></i> TRACK 1: HACKATHON</span>
-            <span class="pt-count-badge" style="color:var(--neon-orange);border:1px solid rgba(255,119,0,0.4);">${countHack} / 75</span>
+            <span class="pt-count-badge" style="color:var(--neon-orange);border:1px solid rgba(255,119,0,0.4);">${countHack} / 80</span>
           </button>
           <button type="button" class="partition-tab-btn tab-workshop ${activePartition === 'track_workshops' ? 'active' : ''}" onclick="selectPartition('track_workshops')">
             <span><i class="fas fa-laptop-code" style="color:#d8b4fe;margin-right:6px;"></i> TRACK 2: WORKSHOPS</span>

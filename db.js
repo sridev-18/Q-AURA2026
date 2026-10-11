@@ -145,7 +145,7 @@ async function initDb() {
   }
 }
 
-const HACKATHON_MAX_SLOTS = 75;
+const HACKATHON_MAX_SLOTS = 80;
 const REGISTRATION_DEADLINE_ISO = '2026-10-12T18:00:00+05:30';
 const REGISTRATION_DEADLINE_MS = new Date(REGISTRATION_DEADLINE_ISO).getTime();
 
@@ -251,7 +251,7 @@ async function createRegistration(data) {
 
       if (!isExisting && currentHackCount >= HACKATHON_MAX_SLOTS) {
         await client.query('ROLLBACK');
-        const err = new Error('Hackathon Slots Are Full! All 75 hackathon slots have been filled. Please register for another available event.');
+        const err = new Error('Hackathon Slots Are Full! All 80 hackathon slots have been filled. Please register for another available event.');
         err.code = 'HACKATHON_SLOTS_FULL';
         err.status = 409;
         throw err;

@@ -308,8 +308,8 @@ app.get('/api/hackathon-status', async (req, res) => {
     res.json({
       status: 'ok',
       count: 60,
-      max: db.HACKATHON_MAX_SLOTS || 75,
-      remaining: 15,
+      max: db.HACKATHON_MAX_SLOTS || 80,
+      remaining: 20,
       isFull: false,
       registrationClosed: typeof db.isRegistrationClosed === 'function' ? db.isRegistrationClosed() : (Date.now() >= new Date('2026-10-12T18:00:00+05:30').getTime()),
       deadline: db.REGISTRATION_DEADLINE_ISO || '2026-10-12T18:00:00+05:30'
@@ -359,8 +359,8 @@ app.post('/api/register', async (req, res) => {
         status: 'slots_full',
         code: 'HACKATHON_SLOTS_FULL',
         title: 'Hackathon Slots Are Full!',
-        message: 'All 75 hackathon slots have been filled. Please register for another available event.',
-        max: 75,
+        message: 'All 80 hackathon slots have been filled. Please register for another available event.',
+        max: 80,
         remaining: 0
       });
     }
