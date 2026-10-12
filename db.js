@@ -146,7 +146,7 @@ async function initDb() {
 }
 
 const HACKATHON_MAX_SLOTS = 80;
-const REGISTRATION_DEADLINE_ISO = '2026-10-12T18:00:00+05:30';
+const REGISTRATION_DEADLINE_ISO = '2026-10-13T14:30:00+05:30';
 const REGISTRATION_DEADLINE_MS = new Date(REGISTRATION_DEADLINE_ISO).getTime();
 
 function isRegistrationClosed() {
@@ -178,7 +178,7 @@ async function getHackathonSlotStatus() {
 // Create a new registration
 async function createRegistration(data) {
   if (isRegistrationClosed()) {
-    const err = new Error('Registrations Are Closed! The official registration window closed on 12th October 2026 at 6:00 PM IST. New registrations are no longer accepted.');
+    const err = new Error('Online Registration Closed! Spot Registration is available at the venue.');
     err.code = 'REGISTRATION_CLOSED';
     err.status = 403;
     throw err;

@@ -311,8 +311,8 @@ app.get('/api/hackathon-status', async (req, res) => {
       max: db.HACKATHON_MAX_SLOTS || 80,
       remaining: 20,
       isFull: false,
-      registrationClosed: typeof db.isRegistrationClosed === 'function' ? db.isRegistrationClosed() : (Date.now() >= new Date('2026-10-12T18:00:00+05:30').getTime()),
-      deadline: db.REGISTRATION_DEADLINE_ISO || '2026-10-12T18:00:00+05:30'
+      registrationClosed: typeof db.isRegistrationClosed === 'function' ? db.isRegistrationClosed() : (Date.now() >= new Date('2026-10-13T14:30:00+05:30').getTime()),
+      deadline: db.REGISTRATION_DEADLINE_ISO || '2026-10-13T14:30:00+05:30'
     });
   }
 });
@@ -324,8 +324,8 @@ app.post('/api/register', async (req, res) => {
       return res.status(403).json({
         status: 'registration_closed',
         code: 'REGISTRATION_CLOSED',
-        title: 'Registrations Are Closed!',
-        message: 'The official registration window closed on 12th October 2026 at 6:00 PM IST. New registrations are no longer accepted.'
+        title: 'Spot Registration Is Available!',
+        message: 'Online registration closed on 13th October 2026 at 2:30 PM IST. Spot Registration is available at the venue!'
       });
     }
 
@@ -350,8 +350,8 @@ app.post('/api/register', async (req, res) => {
       return res.status(403).json({
         status: 'registration_closed',
         code: 'REGISTRATION_CLOSED',
-        title: 'Registrations Are Closed!',
-        message: 'The official registration window closed on 12th October 2026 at 6:00 PM IST. New registrations are no longer accepted.'
+        title: 'Spot Registration Is Available!',
+        message: 'Online registration closed on 13th October 2026 at 2:30 PM IST. Spot Registration is available at the venue!'
       });
     }
     if (err.code === 'HACKATHON_SLOTS_FULL') {
