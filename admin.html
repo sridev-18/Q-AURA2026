@@ -1036,19 +1036,35 @@
     </div>
 
     <!-- ADMIN ROSTER DOWNLOAD CENTER -->
-    <div class="sheets-sync-panel hud-panel" style="border-color:rgba(0, 240, 255, 0.4);background:rgba(10, 18, 30, 0.9);">
-      <div class="sc-icon"><i class="fas fa-file-download" style="color:var(--neon-green);"></i></div>
-      <div class="sc-info">
-        <h3 style="color:#fff;">DOWNLOAD REGISTRATION ROSTER</h3>
-        <p>Export all participant details, event allocations, hackathon strike teams, and payment fees directly into an Excel-ready CSV sheet or partitioned track rosters.</p>
-        <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
-          <button class="cyber-btn cb-green" onclick="exportDataCSV()"><i class="fas fa-file-excel"></i> DOWNLOAD ALL (CSV)</button>
-          <button class="cyber-btn cb-outline" style="border-color:var(--neon-orange);color:var(--neon-orange);background:rgba(255,119,0,0.08);" onclick="exportSpecificPartitionCSV('track_hackathon')"><i class="fas fa-trophy"></i> HACKATHON LIST</button>
-          <button class="cyber-btn cb-outline" style="border-color:var(--neon-purple);color:#d8b4fe;background:rgba(157,78,221,0.1);" onclick="exportSpecificPartitionCSV('track_workshops')"><i class="fas fa-laptop-code"></i> WORKSHOPS LIST</button>
-          <button class="cyber-btn cb-outline" style="border-color:var(--cyan);color:var(--cyan);background:rgba(0,240,255,0.08);" onclick="exportSpecificPartitionCSV('track_competitions')"><i class="fas fa-bolt"></i> COMPETITIONS LIST</button>
-          <button class="cyber-btn cb-gold" onclick="exportVerifiedOnly()"><i class="fas fa-check-circle"></i> VERIFIED ONLY</button>
-          <button class="cyber-btn cb-outline" onclick="exportDataJSON()"><i class="fas fa-file-code"></i> JSON BACKUP</button>
+    <div class="sheets-sync-panel hud-panel" style="border-color:rgba(0, 240, 255, 0.4);background:rgba(10, 18, 30, 0.9);flex-direction:column;align-items:stretch;gap:16px;">
+      <div style="display:flex;align-items:flex-start;gap:18px;flex-wrap:wrap;">
+        <div class="sc-icon"><i class="fas fa-file-download" style="color:var(--neon-green);"></i></div>
+        <div class="sc-info" style="flex:1;min-width:260px;">
+          <h3 style="color:#fff;">DOWNLOAD REGISTRATION ROSTER &amp; SEPARATE EVENT CSV LISTS</h3>
+          <p>Export the master registration roster, track-wise lists, or download separate participant lists for each individual event in Excel-ready CSV format.</p>
+          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+            <button class="cyber-btn cb-green" onclick="exportDataCSV()"><i class="fas fa-file-excel"></i> DOWNLOAD ALL (CSV)</button>
+            <button class="cyber-btn cb-outline" style="border-color:var(--neon-orange);color:var(--neon-orange);background:rgba(255,119,0,0.08);" onclick="exportSpecificPartitionCSV('track_hackathon')"><i class="fas fa-trophy"></i> HACKATHON TRACK CSV</button>
+            <button class="cyber-btn cb-outline" style="border-color:var(--neon-purple);color:#d8b4fe;background:rgba(157,78,221,0.1);" onclick="exportSpecificPartitionCSV('track_workshops')"><i class="fas fa-laptop-code"></i> WORKSHOPS TRACK CSV</button>
+            <button class="cyber-btn cb-outline" style="border-color:var(--cyan);color:var(--cyan);background:rgba(0,240,255,0.08);" onclick="exportSpecificPartitionCSV('track_competitions')"><i class="fas fa-bolt"></i> COMPETITIONS TRACK CSV</button>
+            <button class="cyber-btn cb-gold" onclick="exportVerifiedOnly()"><i class="fas fa-check-circle"></i> VERIFIED ONLY CSV</button>
+            <button class="cyber-btn cb-outline" onclick="exportDataJSON()"><i class="fas fa-file-code"></i> JSON BACKUP</button>
+          </div>
         </div>
+      </div>
+
+      <!-- SEPARATE EVENT-WISE CSV PARTICIPANT LIST DOWNLOADS -->
+      <div style="border-top:1px dashed rgba(0,240,255,0.25);padding-top:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
+          <div style="font-family:var(--font-cyber);font-size:0.78rem;color:var(--cyan);letter-spacing:1.2px;display:flex;align-items:center;gap:8px;">
+            <i class="fas fa-file-csv" style="color:var(--neon-green);font-size:1rem;"></i>
+            <span>DOWNLOAD SEPARATE EVENT PARTICIPANT LIST (CSV FORMAT)</span>
+          </div>
+          <button type="button" class="cyber-btn cb-green" style="padding:6px 14px;font-size:0.74rem;" onclick="exportAllSeparateEventsCSV()" title="Download separate CSV files for all events with participants">
+            <i class="fas fa-layer-group"></i> DOWNLOAD ALL EVENTS (SEPARATE CSVs)
+          </button>
+        </div>
+        <div id="separateEventCsvGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(215px, 1fr));gap:10px;"></div>
       </div>
     </div>
 
@@ -1978,18 +1994,18 @@
         `;
       }
 
+      const eventsList = [
+        { key: 'ev_Cyber Forge (Workshop)', code: '01', label: 'Cyber Forge (Workshop)', short: 'Cyber Forge', icon: 'fa-user-secret', color: 'var(--cyan)' },
+        { key: 'ev_Cloud Craft (Workshop)', code: '02', label: 'Cloud Craft (Workshop)', short: 'Cloud Craft', icon: 'fa-cloud', color: '#d8b4fe' },
+        { key: 'ev_CTF Challenge', code: '03', label: 'CTF Challenge', short: 'CTF Challenge', icon: 'fa-flag', color: 'var(--cyan)' },
+        { key: 'ev_Hackathon', code: '04', label: 'Hackathon', short: 'Hackathon', icon: 'fa-trophy', color: 'var(--neon-orange)' },
+        { key: 'ev_Prompt Generating', code: '05', label: 'Prompt Generating', short: 'Prompt Generating', icon: 'fa-robot', color: 'var(--neon-green)' },
+        { key: 'ev_Click N Chill (Photography)', code: '06', label: 'Click N Chill (Photography)', short: 'Click N Chill', icon: 'fa-camera-retro', color: 'var(--neon-gold)' },
+        { key: 'ev_Quiz Competition', code: '07', label: 'Quiz Competition', short: 'Quiz Competition', icon: 'fa-brain', color: 'var(--neon-pink)' }
+      ];
+
       const eventChipsEl = document.getElementById('partitionEventChips');
       if (eventChipsEl) {
-        const eventsList = [
-          { key: 'ev_Hackathon', label: 'Hackathon', icon: 'fa-trophy', color: 'var(--neon-orange)' },
-          { key: 'ev_Cyber Forge (Workshop)', label: 'Cyber Forge (Workshop)', icon: 'fa-user-secret', color: 'var(--cyan)' },
-          { key: 'ev_Cloud Craft (Workshop)', label: 'Cloud Craft (Workshop)', icon: 'fa-cloud', color: '#d8b4fe' },
-          { key: 'ev_CTF Challenge', label: 'CTF Challenge', icon: 'fa-flag', color: 'var(--cyan)' },
-          { key: 'ev_Prompt Generating', label: 'Prompt Generating', icon: 'fa-robot', color: 'var(--neon-green)' },
-          { key: 'ev_Click N Chill (Photography)', label: 'Click N Chill', icon: 'fa-camera-retro', color: 'var(--neon-gold)' },
-          { key: 'ev_Quiz Competition', label: 'Quiz Competition', icon: 'fa-brain', color: 'var(--neon-pink)' }
-        ];
-
         eventChipsEl.innerHTML = `<span class="partition-chip-label"><i class="fas fa-filter"></i> Event Roster:</span>` +
           eventsList.map(ev => {
             const c = activeList.filter(r => doesRowMatchPartition(r, ev.key)).length;
@@ -1997,11 +2013,35 @@
             return `
               <button type="button" class="partition-chip ${isAct ? 'active' : ''}" onclick="selectPartition('${ev.key}')">
                 <i class="fas ${ev.icon}" style="color:${ev.color};"></i>
-                <span>${ev.label}</span>
+                <span>${ev.short}</span>
                 <span class="chip-num">${c}</span>
+                <span onclick="event.stopPropagation(); exportSpecificPartitionCSV('${ev.key}')" style="margin-left:4px;padding:2px 6px;border-radius:4px;background:rgba(0,255,102,0.14);border:1px solid rgba(0,255,102,0.4);color:var(--neon-green);font-size:0.65rem;" title="Download ${ev.label} Participant List (CSV)">
+                  <i class="fas fa-download"></i> CSV
+                </span>
               </button>
             `;
           }).join('');
+      }
+
+      const separateCsvGridEl = document.getElementById('separateEventCsvGrid');
+      if (separateCsvGridEl) {
+        separateCsvGridEl.innerHTML = eventsList.map(ev => {
+          const c = activeList.filter(r => doesRowMatchPartition(r, ev.key)).length;
+          return `
+            <button type="button" onclick="exportSpecificPartitionCSV('${ev.key}')" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 13px;background:rgba(6,12,22,0.88);border:1px solid rgba(0,240,255,0.28);border-left:3px solid ${ev.color};border-radius:6px;cursor:pointer;text-align:left;transition:0.2s;" onmouseover="this.style.borderColor='${ev.color}';this.style.background='rgba(0,240,255,0.08)';" onmouseout="this.style.borderColor='rgba(0,240,255,0.28)';this.style.borderLeftColor='${ev.color}';this.style.background='rgba(6,12,22,0.88)';" title="Click to download ${ev.label} participant list in CSV format (${c} participants)">
+              <div style="display:flex;align-items:center;gap:9px;min-width:0;">
+                <i class="fas ${ev.icon}" style="color:${ev.color};font-size:0.95rem;flex-shrink:0;"></i>
+                <div style="min-width:0;">
+                  <div style="font-family:var(--font-cyber);font-size:0.7rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${ev.code} · ${ev.short}</div>
+                  <div style="font-family:var(--font-mono);font-size:0.68rem;color:var(--text-muted);margin-top:2px;">${c} Participant${c === 1 ? '' : 's'}</div>
+                </div>
+              </div>
+              <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:4px;background:rgba(0,255,102,0.14);border:1px solid rgba(0,255,102,0.45);color:var(--neon-green);font-family:var(--font-cyber);font-size:0.65rem;flex-shrink:0;">
+                <i class="fas fa-file-csv"></i> CSV
+              </span>
+            </button>
+          `;
+        }).join('');
       }
     }
 
@@ -2118,7 +2158,10 @@
         container.innerHTML = '<p style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);padding:10px 0;">NO REGISTRATION DATA RECORDED.</p>';
         return;
       }
-      container.innerHTML = items.map(([lbl, val], idx) => `
+      container.innerHTML = items.map(([lbl, val], idx) => {
+        const isRealEvent = lbl && lbl.toLowerCase() !== 'none';
+        const safeEventKey = isRealEvent ? `ev_${lbl.replace(/'/g, "\\'")}` : '';
+        return `
         <div class="bar-row">
           <div class="bar-label" title="${lbl}">${lbl}</div>
           <div class="bar-track">
@@ -2126,8 +2169,10 @@
               <span>${val}</span>
             </div>
           </div>
+          ${isRealEvent ? `<button type="button" onclick="exportSpecificPartitionCSV('${safeEventKey}')" style="padding:3px 8px;border-radius:4px;background:rgba(0,255,102,0.12);border:1px solid rgba(0,255,102,0.4);color:var(--neon-green);font-family:var(--font-mono);font-size:0.66rem;cursor:pointer;flex-shrink:0;" title="Download ${lbl} CSV"><i class="fas fa-download"></i> CSV</button>` : ''}
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     // Table Filter and Render
@@ -2648,19 +2693,48 @@
     }
 
     // CSV Builders
-    function buildCSV(rows) {
-      const headers = ['Reg ID','Timestamp','Status','First Name','Last Name','Mobile','Email','College',
-        'Technical Arena','Non-Technical Arena','Fee Assessed','Team Call-Sign','Leader Name','Leader Phone',
-        'Leader Email','Teammate 2','Teammate 3','Teammate 4','Synced to Sheet'];
+    function buildCSV(rows, targetEventName = '') {
+      const headers = [
+        'S.No',
+        ...(targetEventName ? ['Event Name'] : []),
+        'Reg ID', 'Timestamp', 'Status',
+        'Participant Name', 'First Name', 'Last Name',
+        'Mobile', 'Email', 'College',
+        'Technical Arena', 'Non-Technical Arena',
+        ...(targetEventName ? ['Paired / Other Event'] : []),
+        'Fee Assessed', 'Team Call-Sign', 'Leader Name', 'Leader Phone',
+        'Leader Email', 'Teammate 2', 'Teammate 3', 'Teammate 4', 'Synced to Sheet'
+      ];
 
-      const content = rows.map(r => [
-        r.regId||'', r.timestamp||'', r.status||'',
-        r.firstName, r.lastName, r.mobile, r.email, r.college,
-        r.techEvent, r.nonTechEvent, r.fee||'₹250',
-        r.teamName||'', r.leaderName||'', r.leaderPhone||'', r.leaderEmail||'',
-        r.tm2||'', r.tm3||'', r.tm4||'',
-        r.syncedToSheet ? 'Yes' : 'No'
-      ].map(f => `"${String(f).replace(/"/g, '""')}"`));
+      const content = rows.map((r, idx) => {
+        const fullName = `${r.firstName || ''} ${r.lastName || ''}`.trim();
+        let pairedEvent = 'None';
+        if (targetEventName) {
+          const targetLower = targetEventName.toLowerCase();
+          const t = (r.techEvent || '').trim();
+          const nt = (r.nonTechEvent || '').trim();
+          if (t.toLowerCase().includes(targetLower)) {
+            pairedEvent = (nt && nt !== 'None') ? nt : 'None';
+          } else if (nt.toLowerCase().includes(targetLower)) {
+            pairedEvent = (t && t !== 'None') ? t : 'None';
+          }
+        }
+
+        const rowCells = [
+          idx + 1,
+          ...(targetEventName ? [targetEventName] : []),
+          r.regId || '', r.timestamp || '', r.status || '',
+          fullName, r.firstName || '', r.lastName || '',
+          r.mobile || '', r.email || '', r.college || '',
+          r.techEvent || 'None', r.nonTechEvent || 'None',
+          ...(targetEventName ? [pairedEvent] : []),
+          r.fee || '₹250',
+          r.teamName || '', r.leaderName || '', r.leaderPhone || '', r.leaderEmail || '',
+          r.tm2 || '', r.tm3 || '', r.tm4 || '',
+          r.syncedToSheet ? 'Yes' : 'No'
+        ];
+        return rowCells.map(f => `"${String(f).replace(/"/g, '""')}"`);
+      });
 
       return [headers.map(h => `"${h}"`).join(','), ...content.map(c => c.join(','))].join('\r\n');
     }
@@ -2694,15 +2768,52 @@
     function exportSpecificPartitionCSV(partKey) {
       const activeList = dataList.filter(d => d.status !== 'Inactive' && d.isActive !== false);
       const rows = activeList.filter(r => doesRowMatchPartition(r, partKey));
+      const meta = PARTITION_META[partKey] || { shortLabel: partKey.replace('ev_', '') };
       if (!rows.length) {
-        adminNotify('No active records in this partition to export.', 'error');
+        adminNotify(`No active participants found for [${meta.shortLabel || partKey}].`, 'error');
         return;
       }
-      const meta = PARTITION_META[partKey] || { shortLabel: partKey.replace('ev_', '') };
-      const safeName = (meta.shortLabel || 'Partition').replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '');
+      const isSpecificEvent = partKey.startsWith('ev_');
+      const targetEventName = isSpecificEvent ? partKey.slice(3) : '';
+      const safeName = (meta.shortLabel || 'Event').replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '');
       const dateStr = new Date().toISOString().slice(0, 10);
-      triggerFileDownload(buildCSV(rows), `QAURA2026_${safeName}_${dateStr}.csv`);
-      adminNotify(`✓ Exported ${rows.length} entries from [${meta.shortLabel}].`, 'success');
+      triggerFileDownload(buildCSV(rows, targetEventName), `QAURA2026_${safeName}_Participants_${dateStr}.csv`);
+      adminNotify(`✓ Exported ${rows.length} participants for [${meta.shortLabel}].`, 'success');
+    }
+
+    function exportAllSeparateEventsCSV() {
+      const eventKeys = [
+        'ev_Cyber Forge (Workshop)',
+        'ev_Cloud Craft (Workshop)',
+        'ev_CTF Challenge',
+        'ev_Hackathon',
+        'ev_Prompt Generating',
+        'ev_Click N Chill (Photography)',
+        'ev_Quiz Competition'
+      ];
+      const activeList = dataList.filter(d => d.status !== 'Inactive' && d.isActive !== false);
+      const dateStr = new Date().toISOString().slice(0, 10);
+      let exportedFiles = 0;
+
+      eventKeys.forEach((partKey) => {
+        const rows = activeList.filter(r => doesRowMatchPartition(r, partKey));
+        if (rows.length > 0) {
+          const meta = PARTITION_META[partKey] || { shortLabel: partKey.replace('ev_', '') };
+          const targetEventName = partKey.slice(3);
+          const safeName = (meta.shortLabel || 'Event').replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '');
+          const delay = exportedFiles * 280;
+          exportedFiles++;
+          setTimeout(() => {
+            triggerFileDownload(buildCSV(rows, targetEventName), `QAURA2026_${safeName}_Participants_${dateStr}.csv`);
+          }, delay);
+        }
+      });
+
+      if (exportedFiles === 0) {
+        adminNotify('No active event participants available to export.', 'error');
+      } else {
+        adminNotify(`✓ Downloading ${exportedFiles} separate event participant CSV files...`, 'success');
+      }
     }
 
     function exportActivePartitionCSV() {
@@ -2712,9 +2823,11 @@
         return;
       }
       const meta = PARTITION_META[activePartition] || PARTITION_META['all'];
+      const isSpecificEvent = activePartition.startsWith('ev_');
+      const targetEventName = isSpecificEvent ? activePartition.slice(3) : '';
       const safeName = (meta.shortLabel || 'Filtered').replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '');
       const dateStr = new Date().toISOString().slice(0, 10);
-      triggerFileDownload(buildCSV(filtered), `QAURA2026_${safeName}_${dateStr}.csv`);
+      triggerFileDownload(buildCSV(filtered, targetEventName), `QAURA2026_${safeName}_Participants_${dateStr}.csv`);
       adminNotify(`✓ Exported ${filtered.length} entries from [${meta.shortLabel}].`, 'success');
     }
 
