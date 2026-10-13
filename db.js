@@ -146,11 +146,11 @@ async function initDb() {
 }
 
 const HACKATHON_MAX_SLOTS = 80;
-const REGISTRATION_DEADLINE_ISO = '2026-10-13T14:30:00+05:30';
+const REGISTRATION_DEADLINE_ISO = '2026-10-13T09:30:00+05:30';
 const REGISTRATION_DEADLINE_MS = new Date(REGISTRATION_DEADLINE_ISO).getTime();
 
 function isRegistrationClosed() {
-  return Date.now() >= REGISTRATION_DEADLINE_MS;
+  return true;
 }
 
 // Fetch live hackathon count
@@ -178,7 +178,7 @@ async function getHackathonSlotStatus() {
 // Create a new registration
 async function createRegistration(data) {
   if (isRegistrationClosed()) {
-    const err = new Error('Online Registration Closed! Spot Registration is available at the venue.');
+    const err = new Error('Registration is Closed! New registrations are no longer accepted.');
     err.code = 'REGISTRATION_CLOSED';
     err.status = 403;
     throw err;
